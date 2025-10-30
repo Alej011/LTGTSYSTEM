@@ -1,3 +1,12 @@
 /vscode
 .vscode/*
 !.vscode/settings.json
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+
+
+            
