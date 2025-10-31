@@ -1,4 +1,6 @@
-.node_modules
+node_modules
+/.pnpm-store
+.pnpm-store
 /.next/
 /out/
 .claude
@@ -8,7 +10,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+.pnpm-debug.log*
+dist
 
 
             

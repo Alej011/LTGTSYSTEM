@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: ltgt_db
+    restart: always
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: ltgt
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ltgt_net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: ltgt_backend
+    restart: always
+    env_file:
+      - ./backend/.env.production
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    command: >
+      sh -c "pnpm prisma:deploy &&
+             pnpm db:seed &&
+             node dist/main.js"
+    networks:
+      - ltgt_net
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ltgt_frontend
+    restart: always
+    env_file:
+      - ./frontend/.env.production
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - ltgt_net
+
+networks:
+  ltgt_net:
+
+volumes:
+  pgdata:
