@@ -2,7 +2,8 @@
 
 import type React from "react"
 import { createContext, useContext, useReducer, useEffect } from "react"
-import { type User, type AuthState, authenticate } from "@/lib/auth"
+import { type User, type AuthState, authenticate, getCurrentUser, logout as authLogout } from "@/lib/auth"
+import { STORAGE_KEYS } from "@/lib/api-config"
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>
@@ -43,19 +44,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   })
 
   useEffect(() => {
-    // Restore session from localStorage
-    const savedUser = localStorage.getItem("ltgt_user")
-    if (savedUser) {
+    // Validar sesión con el backend usando el token JWT
+    const validateSession = async () => {
+      const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+
+      if (!token) {
+        dispatch({ type: "LOGIN_FAILURE" })
+        return
+      }
+
       try {
-        const user = JSON.parse(savedUser)
-        dispatch({ type: "RESTORE_SESSION", payload: user })
+        // Validar el token obteniendo el usuario actual del backend
+        const user = await getCurrentUser()
+        if (user) {
+          dispatch({ type: "RESTORE_SESSION", payload: user })
+        } else {
+          dispatch({ type: "LOGIN_FAILURE" })
+        }
       } catch {
-        localStorage.removeItem("ltgt_user")
+        // Si el token es inválido o expiró, limpiar sesión
         dispatch({ type: "LOGIN_FAILURE" })
       }
-    } else {
-      dispatch({ type: "LOGIN_FAILURE" })
     }
+
+    validateSession()
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -64,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const user = await authenticate(email, password)
       if (user) {
-        localStorage.setItem("ltgt_user", JSON.stringify(user))
+        // El token ya fue guardado en authenticate()
         dispatch({ type: "LOGIN_SUCCESS", payload: user })
         return true
       } else {
@@ -78,7 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
-    localStorage.removeItem("ltgt_user")
+    // Usar la función de logout del servicio de auth para limpiar el token
+    authLogout()
     dispatch({ type: "LOGOUT" })
   }
 

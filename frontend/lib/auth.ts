@@ -1,5 +1,21 @@
+import { apiClient, saveToken, removeToken, ApiClientError } from "./api-client"
+import { API_ENDPOINTS } from "./api-config"
+
+/**
+ * Roles del frontend
+ * - admin: Acceso completo (incluye gestión de usuarios)
+ * - empleado: Acceso limitado (sin gestión de usuarios)
+ */
 export type UserRole = "admin" | "empleado"
 
+/**
+ * Roles del backend (API)
+ */
+export type BackendRole = "ADMIN" | "SUPPORT"
+
+/**
+ * Usuario autenticado en el frontend
+ */
 export interface User {
   id: string
   email: string
@@ -10,62 +26,115 @@ export interface User {
   lastLogin?: Date
 }
 
+/**
+ * Estado de autenticación
+ */
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
 }
 
-// Mock user database - In production, this would be a real database
-const mockUsers: User[] = [
-  {
-    id: "1",
-    email: "admin@ltgt.com",
-    name: "Administrador Sistema",
-    role: "admin",
-    department: "Administración",
-    createdAt: new Date("2024-01-01"),
-    lastLogin: new Date(),
-  },
-  {
-    id: "2",
-    email: "empleado1@ltgt.com",
-    name: "Juan Pérez",
-    role: "empleado",
-    department: "Soporte Técnico",
-    createdAt: new Date("2024-01-15"),
-    lastLogin: new Date(),
-  },
-  {
-    id: "3",
-    email: "empleado2@ltgt.com",
-    name: "María González",
-    role: "empleado",
-    department: "Soporte Técnico",
-    createdAt: new Date("2024-02-01"),
-    lastLogin: new Date(),
-  },
-  {
-    id: "4",
-    email: "empleado3@ltgt.com",
-    name: "Carlos Rodríguez",
-    role: "empleado",
-    department: "Soporte Técnico",
-    createdAt: new Date("2024-02-10"),
-    lastLogin: new Date(),
-  },
-]
-
-export const authenticate = async (email: string, password: string): Promise<User | null> => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  // Simple authentication - In production, use proper password hashing
-  const user = mockUsers.find((u) => u.email === email)
-  if (user && password === "password123") {
-    return { ...user, lastLogin: new Date() }
+/**
+ * Respuesta del backend al hacer login
+ */
+interface LoginResponse {
+  accessToken: string
+  user: {
+    id: string
+    email: string
+    name: string
+    role: BackendRole
+    createdAt: string
   }
-  return null
+}
+
+/**
+ * Respuesta del backend al obtener el usuario actual
+ */
+interface MeResponse {
+  id: string
+  email: string
+  name: string
+  role: BackendRole
+  createdAt: string
+}
+
+/**
+ * Mapea los roles del backend a roles del frontend
+ * ADMIN → admin (acceso completo)
+ * SUPPORT → empleado (acceso limitado)
+ */
+export function mapBackendRoleToFrontend(backendRole: BackendRole): UserRole {
+  return backendRole === "ADMIN" ? "admin" : "empleado"
+}
+
+/**
+ * Mapea la respuesta del backend a un objeto User del frontend
+ */
+function mapBackendUserToFrontend(backendUser: LoginResponse["user"] | MeResponse): User {
+  return {
+    id: backendUser.id,
+    email: backendUser.email,
+    name: backendUser.name,
+    role: mapBackendRoleToFrontend(backendUser.role),
+    department: backendUser.role === "ADMIN" ? "Administración" : "Soporte Técnico",
+    createdAt: new Date(backendUser.createdAt),
+    lastLogin: new Date(),
+  }
+}
+
+/**
+ * Autentica un usuario con email y password
+ * Guarda el token JWT en localStorage si tiene éxito
+ */
+export const authenticate = async (email: string, password: string): Promise<User | null> => {
+  try {
+    const response = await apiClient.post<LoginResponse>(
+      API_ENDPOINTS.auth.login,
+      { email, password },
+      { requiresAuth: false }
+    )
+
+    // Guardar token JWT en localStorage
+    saveToken(response.accessToken)
+
+    // Mapear y retornar usuario del frontend
+    return mapBackendUserToFrontend(response.user)
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      console.error("Login failed:", error.message)
+    }
+    return null
+  }
+}
+
+/**
+ * Obtiene el usuario actual desde el backend
+ * Usa el token JWT guardado en localStorage
+ */
+export const getCurrentUser = async (): Promise<User | null> => {
+  try {
+    const response = await apiClient.get<MeResponse>(API_ENDPOINTS.auth.me)
+    return mapBackendUserToFrontend(response)
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      // Si el token es inválido o expiró, limpiar localStorage
+      if (error.statusCode === 401) {
+        removeToken()
+      }
+      console.error("Get current user failed:", error.message)
+    }
+    return null
+  }
+}
+
+/**
+ * Cierra la sesión del usuario
+ * Elimina el token del localStorage
+ */
+export const logout = (): void => {
+  removeToken()
 }
 
 export const getUserPermissions = (role: UserRole) => {
