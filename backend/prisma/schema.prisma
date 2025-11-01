@@ -50,15 +50,65 @@ enum TicketPriority {
   HIGH
 }
 
+enum ProductStatus {
+  active
+  inactive
+  discontinued
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?   @db.Text
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("marcas")
+}
+
+model Category {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  description String?           @db.Text
+  products    ProductCategory[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("categorias")
+}
+
 model Product {
-  id        String   @id @default(cuid())
-  name      String
-  brand     String
-  sku       String   @unique
-  price     Decimal  @db.Decimal(10, 2)
-  stock     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String            @id @default(cuid())
+  name        String
+  description String            @db.Text
+  sku         String            @unique
+  price       Decimal           @db.Decimal(10, 2)
+  stock       Int               @default(0)
+  status      ProductStatus     @default(active)
+
+  brand       Brand             @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  brandId     String
+
+  categories  ProductCategory[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([sku])
+  @@index([brandId])
+  @@index([status])
+  @@index([name])
+  @@map("productos")
+}
+
+model ProductCategory {
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+
+  @@id([productId, categoryId])
+  @@map("producto_categoria")
 }
 
 model Knowledge {
