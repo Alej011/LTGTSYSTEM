@@ -79,20 +79,20 @@ model Category {
 }
 
 model Product {
-  id          String            @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
-  description String            @db.Text
-  sku         String            @unique
-  price       Decimal           @db.Decimal(10, 2)
-  stock       Int               @default(0)
-  status      ProductStatus     @default(active)
+  description String        @db.Text
+  sku         String        @unique
+  price       Decimal       @db.Decimal(10, 2)
+  stock       Int           @default(0)
+  status      ProductStatus @default(active)
 
-  brand       Brand             @relation(fields: [brandId], references: [id], onDelete: Restrict)
-  brandId     String
+  brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  brandId String
 
-  categories  ProductCategory[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  categories ProductCategory[]
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 
   @@index([sku])
   @@index([brandId])

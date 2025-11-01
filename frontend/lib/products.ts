@@ -3,6 +3,7 @@ export interface Brand {
   name: string
   description?: string
   createdAt: Date
+
 }
 
 export interface Product {
