@@ -19,7 +19,7 @@ export interface Category {
   description?: string
 }
 
-// Respuesta del backend para productos
+// Respuesta del backend para productos (después de transformación en service)
 export interface ProductResponse {
   id: string
   name: string
@@ -33,11 +33,10 @@ export interface ProductResponse {
     id: string
     name: string
   }
+  // Categorías ya transformadas (aplanadas) desde el backend
   categories: Array<{
-    category: {
-      id: string
-      name: string
-    }
+    id: string
+    name: string
   }>
   createdAt: string
   updatedAt: string
@@ -83,14 +82,40 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
       createdAt: new Date(),
       updatedAt: new Date(),
     },
-    // Transformar estructura de categorías many-to-many
-    categories: backendProduct.categories.map(pc => ({
-      id: pc.category.id,
-      name: pc.category.name,
-    })),
+    // Las categorías ya vienen aplanadas desde el backend
+    categories: backendProduct.categories || [],
     createdAt: new Date(backendProduct.createdAt),
     updatedAt: new Date(backendProduct.updatedAt),
   }
+}
+
+// ====================================
+// TIPOS PARA PAGINACIÓN
+// ====================================
+
+export interface PaginationMetadata {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasPrevPage: boolean
+  hasNextPage: boolean
+}
+
+export interface PaginatedProducts {
+  data: Product[]
+  meta: PaginationMetadata
+}
+
+export interface ProductFilters {
+  search?: string
+  category?: string
+  status?: "active" | "inactive" | "discontinued"
+  brandId?: string
+  page?: number
+  limit?: number
+  sortBy?: "name" | "price" | "stock" | "createdAt"
+  sortOrder?: "asc" | "desc"
 }
 
 // ====================================
@@ -98,16 +123,38 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
 // ====================================
 
 /**
- * Obtiene todos los productos del backend
+ * Obtiene productos con paginación y filtros del backend
  */
-export const getProducts = async (): Promise<Product[]> => {
+export const getProducts = async (filters?: ProductFilters): Promise<PaginatedProducts> => {
   try {
-    const response = await apiClient.get<ProductResponse[]>(
-      API_ENDPOINTS.products.list
-    )
+    // Construir query params
+    const params = new URLSearchParams()
+    if (filters?.search) params.append("search", filters.search)
+    if (filters?.category) params.append("category", filters.category)
+    if (filters?.status) params.append("status", filters.status)
+    if (filters?.brandId) params.append("brandId", filters.brandId)
+    if (filters?.page) params.append("page", filters.page.toString())
+    if (filters?.limit) params.append("limit", filters.limit.toString())
+    if (filters?.sortBy) params.append("sortBy", filters.sortBy)
+    if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder)
 
-    // Transformar array de productos del backend
-    return response.map(mapBackendProductToFrontend)
+    const queryString = params.toString()
+    const endpoint = queryString
+      ? `${API_ENDPOINTS.products.list}?${queryString}`
+      : API_ENDPOINTS.products.list
+
+    const response = await apiClient.get<{
+      data: ProductResponse[]
+      meta: PaginationMetadata
+    }>(endpoint)
+
+    // Transformar productos del backend
+    const transformedData = response.data.map(mapBackendProductToFrontend)
+
+    return {
+      data: transformedData,
+      meta: response.meta,
+    }
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error("Error al obtener productos:", error.message)

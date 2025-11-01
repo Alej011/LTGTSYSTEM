@@ -24,7 +24,10 @@ export interface RecentActivity {
 }
 
 export const getDashboardStats = async (userId: string, userRole: UserRole, userDepartment: string): Promise<DashboardStats> => {
-  const products = await getProducts()
+  // Obtener todos los productos (límite alto para dashboard)
+  const productsResponse = await getProducts({ limit: 1000 })
+  const products = productsResponse.data
+
   const tickets = getTickets()
   const articles = getArticles("published")
   const unreadComms = getUnreadCount(userId, userRole, userDepartment)
@@ -34,7 +37,7 @@ export const getDashboardStats = async (userId: string, userRole: UserRole, user
   const myTickets = tickets.filter((t) => t.createdBy === userId || t.assignedTo === userId).length
 
   return {
-    totalProducts: products.length,
+    totalProducts: productsResponse.meta.total, // Usar total de metadata
     lowStockProducts,
     openTickets,
     myTickets,
