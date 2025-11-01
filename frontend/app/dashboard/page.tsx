@@ -1,22 +1,54 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { Badge } from "@/components/ui/badge"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { RecentActivityComponent } from "@/components/dashboard/recent-activity"
 import { QuickActions } from "@/components/dashboard/quick-actions"
-import { getDashboardStats, getRecentActivity } from "@/lib/dashboard"
+import { getDashboardStats, getRecentActivity, type DashboardStats, type RecentActivity } from "@/lib/dashboard"
 import { Building2, Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!user) return
+
+      try {
+        setIsLoading(true)
+        const dashboardStats = await getDashboardStats(user.id, user.role, user.department || "")
+        const activity = getRecentActivity(user.id, user.role, user.department || "")
+
+        setStats(dashboardStats)
+        setRecentActivity(activity)
+      } catch (error) {
+        console.error("Error cargando datos del dashboard:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadDashboardData()
+  }, [user])
 
   if (!user) return null
-
-  const stats = getDashboardStats(user.id, user.role, user.department || "")
-  const recentActivity = getRecentActivity(user.id, user.role, user.department || "")
+  if (isLoading || !stats) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   const getRoleBadgeColor = (role: string) => {
     const colors = {

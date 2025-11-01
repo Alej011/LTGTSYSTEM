@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Product, getProductsWithBrands, deleteProduct } from "@/lib/products"
+import { type Product, getProducts, deleteProduct } from "@/lib/products"
 import { Search, Plus, Edit, Trash2, Package } from "lucide-react"
 import {
   AlertDialog,
@@ -42,9 +42,14 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
     filterProducts()
   }, [products, searchTerm, categoryFilter, statusFilter])
 
-  const loadProducts = () => {
-    const productsData = getProductsWithBrands()
-    setProducts(productsData)
+  const loadProducts = async () => {
+    try {
+      const productsData = await getProducts()
+      setProducts(productsData)
+    } catch (error) {
+      console.error("Error cargando productos:", error)
+      // TODO: Mostrar mensaje de error al usuario
+    }
   }
 
   const filterProducts = () => {
@@ -60,7 +65,9 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
     }
 
     if (categoryFilter !== "all") {
-      filtered = filtered.filter((product) => product.category === categoryFilter)
+      filtered = filtered.filter((product) =>
+        product.categories.some((cat) => cat.name === categoryFilter)
+      )
     }
 
     if (statusFilter !== "all") {
@@ -112,7 +119,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
     return <Badge variant="outline">{stock} unidades</Badge>
   }
 
-  const categories = [...new Set(products.map((p) => p.category))]
+  // Obtener todas las categorías únicas de todos los productos
+  const categories = [...new Set(products.flatMap((p) => p.categories.map((c) => c.name)))]
 
   return (
     <div className="space-y-6">
@@ -203,7 +211,15 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                       </TableCell>
                       <TableCell>{product.brand?.name}</TableCell>
                       <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                      <TableCell>{product.category}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1 flex-wrap">
+                          {product.categories.map((cat) => (
+                            <Badge key={cat.id} variant="outline" className="text-xs">
+                              {cat.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
                       <TableCell>${product.price.toFixed(2)}</TableCell>
                       <TableCell>{getStockBadge(product.stock)}</TableCell>
                       <TableCell>{getStatusBadge(product.status)}</TableCell>

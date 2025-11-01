@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type Product, type Brand, getBrands, createProduct, updateProduct } from "@/lib/products"
+import { type Product, type Brand, type Category, getBrands, getCategories, createProduct, updateProduct } from "@/lib/products"
 import { Loader2 } from "lucide-react"
 
 interface ProductFormProps {
@@ -27,15 +27,30 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     sku: product?.sku || "",
     stock: product?.stock || 0,
     price: product?.price || 0,
-    category: product?.category || "",
+    // Por ahora el form solo maneja una categoría (la primera del array)
+    category: product?.categories?.[0]?.name || "",
     status: product?.status || ("active" as const),
   })
   const [brands, setBrands] = useState<Brand[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
-    setBrands(getBrands())
+    const loadData = async () => {
+      try {
+        const [brandsData, categoriesData] = await Promise.all([
+          getBrands(),
+          getCategories(),
+        ])
+        setBrands(brandsData)
+        setCategories(categoriesData)
+      } catch (error) {
+        console.error("Error cargando datos:", error)
+        setError("Error al cargar marcas y categorías")
+      }
+    }
+    loadData()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,12 +144,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Laptops">Laptops</SelectItem>
-                  <SelectItem value="Monitores">Monitores</SelectItem>
-                  <SelectItem value="Impresoras">Impresoras</SelectItem>
-                  <SelectItem value="Software">Software</SelectItem>
-                  <SelectItem value="Accesorios">Accesorios</SelectItem>
-                  <SelectItem value="Servidores">Servidores</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

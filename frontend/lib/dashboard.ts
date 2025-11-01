@@ -1,4 +1,4 @@
-import { getProductsWithBrands } from "./products"
+import { getProducts } from "./products"
 import { getTickets } from "./tickets"
 import { getArticles } from "./knowledge"
 import { getCommunications, getUnreadCount } from "./communications"
@@ -23,8 +23,8 @@ export interface RecentActivity {
   priority?: string
 }
 
-export const getDashboardStats = (userId: string, userRole: UserRole, userDepartment: string): DashboardStats => {
-  const products = getProductsWithBrands()
+export const getDashboardStats = async (userId: string, userRole: UserRole, userDepartment: string): Promise<DashboardStats> => {
+  const products = await getProducts()
   const tickets = getTickets()
   const articles = getArticles("published")
   const unreadComms = getUnreadCount(userId, userRole, userDepartment)
