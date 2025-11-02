@@ -1,11 +1,13 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { ProductsService } from "./products.service";
+import { CreateProductDto } from "./dto/create-product.dto";
 import { PaginatedProductsDto } from "./dto/paginated-products.dto";
 import { QueryProductsDto } from "./dto/query-products.dto";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../common/guards/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
+import { ProductResponseDto } from "./dto/product-response.dto";
 
 @ApiTags("products")
 @Controller("products")
@@ -14,7 +16,7 @@ import { Roles } from "../common/decorators/roles.decorator";
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  @Get()
+  @Get('list')
   @Roles('ADMIN')
   @ApiOperation({
     summary: 'Listar productos con paginación y filtros',
@@ -37,5 +39,20 @@ export class ProductsController {
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   async findAll(@Query() query: QueryProductsDto): Promise<PaginatedProductsDto> {
     return this.productsService.findAll(query);
+  }
+
+  @Post('create')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Crear un nuevo producto' })
+  @ApiResponse ({
+    status: 201,
+    description: 'Producto creado exitosamente',
+    type: ProductResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
+  async create(@Body() createProductDto: CreateProductDto): Promise<ProductResponseDto> {
+    return this.productsService.create(createProductDto);
   }
 }

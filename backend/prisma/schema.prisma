@@ -81,7 +81,7 @@ model Category {
 model Product {
   id          String        @id @default(cuid())
   name        String
-  description String        @db.Text
+  description String?       @db.Text
   sku         String        @unique
   price       Decimal       @db.Decimal(10, 2)
   stock       Int           @default(0)

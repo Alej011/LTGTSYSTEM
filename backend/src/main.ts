@@ -13,6 +13,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
 
+  // Prefijo global para todas las rutas
+  app.setGlobalPrefix('api');
+
   // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('LTGT System API')

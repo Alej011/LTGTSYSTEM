@@ -27,8 +27,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     sku: product?.sku || "",
     stock: product?.stock || 0,
     price: product?.price || 0,
-    // Por ahora el form solo maneja una categoría (la primera del array)
-    category: product?.categories?.[0]?.name || "",
+    // Guardamos el ID de la categoría, no el nombre
+    categoryId: product?.categories?.[0]?.id || "",
     status: product?.status || ("active" as const),
   })
   const [brands, setBrands] = useState<Brand[]>([])
@@ -62,7 +62,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       if (product) {
         await updateProduct(product.id, formData)
       } else {
-        await createProduct(formData)
+        // Preparar datos para crear: convertir categoryId a categoryIds (array)
+        const { categoryId, ...restData } = formData
+        await createProduct({
+          ...restData,
+          categoryIds: [categoryId], // El backend espera un array de IDs
+        })
       }
       onSuccess()
     } catch (err) {
@@ -139,13 +144,13 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Categoría</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+              <Select value={formData.categoryId} onValueChange={(value) => handleInputChange("categoryId", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.name}>
+                    <SelectItem key={category.id} value={category.id}>
                       {category.name}
                     </SelectItem>
                   ))}

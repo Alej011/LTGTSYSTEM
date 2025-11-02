@@ -7,44 +7,45 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 // Endpoints de la API organizados por módulo
+// IMPORTANTE: Todas las rutas ahora tienen el prefijo /api desde el backend
 export const API_ENDPOINTS = {
   auth: {
-    login: "/auth/login",
-    register: "/auth/register",
-    me: "/auth/me",
+    login: "/api/auth/login",
+    register: "/api/auth/register",
+    me: "/api/auth/me",
   },
   users: {
-    list: "/users",
-    detail: (id: string) => `/users/${id}`,
-    update: (id: string) => `/users/${id}`,
+    list: "/api/users",
+    detail: (id: string) => `/api/users/${id}`,
+    update: (id: string) => `/api/users/${id}`,
   },
   // Endpoints futuros (cuando conectes los otros módulos)
   tickets: {
-    list: "/tickets",
-    detail: (id: string) => `/tickets/${id}`,
-    create: "/tickets",
-    update: (id: string) => `/tickets/${id}`,
+    list: "/api/tickets",
+    detail: (id: string) => `/api/tickets/${id}`,
+    create: "/api/tickets",
+    update: (id: string) => `/api/tickets/${id}`,
   },
   products: {
-    list: "/products",
-    detail: (id: string) => `/products/${id}`,
-    create: "/products",
-    update: (id: string) => `/products/${id}`,
-    delete: (id: string) => `/products/${id}`,
+    list: "/api/products/list",
+    detail: (id: string) => `/api/products/${id}`,
+    create: "/api/products/create",
+    update: (id: string) => `/api/products/${id}`,
+    delete: (id: string) => `/api/products/${id}`,
   },
   brands: {
-    list: "/brands",
-    detail: (id: string) => `/brands/${id}`,
+    list: "/api/brands",
+    detail: (id: string) => `/api/brands/${id}`,
   },
   categories: {
-    list: "/categories",
-    detail: (id: string) => `/categories/${id}`,
+    list: "/api/categories",
+    detail: (id: string) => `/api/categories/${id}`,
   },
   knowledge: {
-    list: "/knowledge",
-    detail: (id: string) => `/knowledge/${id}`,
-    create: "/knowledge",
-    update: (id: string) => `/knowledge/${id}`,
+    list: "/api/knowledge",
+    detail: (id: string) => `/api/knowledge/${id}`,
+    create: "/api/knowledge",
+    update: (id: string) => `/api/knowledge/${id}`,
   },
 } as const
 

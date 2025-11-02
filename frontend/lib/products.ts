@@ -184,7 +184,9 @@ export const getProductById = async (id: string): Promise<Product | null> => {
  * Crea un nuevo producto
  */
 export const createProduct = async (
-  productData: Omit<Product, "id" | "createdAt" | "updatedAt" | "categories" | "brand">
+  productData: Omit<Product, "id" | "createdAt" | "updatedAt" | "categories" | "brand"> & {
+    categoryIds: string[] // Agregar categoryIds requerido por el backend
+  }
 ): Promise<Product | null> => {
   try {
     const response = await apiClient.post<ProductResponse>(
