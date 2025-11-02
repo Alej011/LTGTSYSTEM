@@ -23,6 +23,9 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('auth', 'Endpoints de autenticación')
     .addTag('users', 'Endpoints de gestión de usuarios')
+    .addTag('products', 'Endpoints de gestión de productos')
+    .addTag('brands', 'Endpoints de gestión de marcas')
+    .addTag('categories', 'Endpoints de gestión de categorías')
     .addBearerAuth(
       {
         type: 'http',

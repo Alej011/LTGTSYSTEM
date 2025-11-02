@@ -8,6 +8,7 @@ import {
 import { Prisma } from "@prisma/client";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { ProductResponseDto } from "./dto/product-response.dto";
+import { UpdateProductDto } from "./dto/update-product.dto";
 
 @Injectable()
 export class ProductsService {
@@ -124,7 +125,7 @@ export class ProductsService {
     // Transformar datos de Prisma a DTO
     const transformedProducts = products.map((product) => ({
       ...product,
-      description: product.description || '', // null → string vacío
+      description: product.description || "", // null → string vacío
       price: product.price.toNumber(), // Decimal → number
       categories: product.categories.map((pc) => pc.category), // Aplanar relación many-to-many
     }));
@@ -191,7 +192,7 @@ export class ProductsService {
     return {
       id: product.id,
       name: product.name,
-      description: product.description || '',
+      description: product.description || "",
       sku: product.sku,
       price: product.price.toNumber(),
       stock: product.stock,
@@ -201,5 +202,73 @@ export class ProductsService {
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
+  }
+
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto
+  ): Promise<ProductResponseDto> {
+    const { categoryIds, ...productData } = updateProductDto;
+
+    // Preparar datos para actualizar
+    const updateData: any = { ...productData };
+
+    if (categoryIds && categoryIds.length > 0) {
+      await this.prisma.productCategory.deleteMany({
+        where: { productId: id },
+      });
+    }
+
+    updateData.categories = {
+      create: categoryIds?.map((categoryId) => ({
+        category: {
+          connect: { id: categoryId },
+        },
+      })),
+    }
+
+    const product = await this.prisma.product.update({
+      where: { id },
+      data: updateData,
+      include: {
+        brand: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        categories: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    
+    // Transformar respuesta a DTO  
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description || "",
+      sku: product.sku,
+      price: product.price.toNumber(),
+      stock: product.stock,
+      status: product.status,
+      brand: (product as any).brand,
+      categories: (product as any).categories.map((pc: any) => pc.category),
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    };
+  }
+
+  async remove(id: string): Promise<void>{
+    await this.prisma.product.delete({
+      where: {id}
+    });
   }
 }
