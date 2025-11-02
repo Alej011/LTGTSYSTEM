@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Patch, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -13,14 +14,25 @@ import { Roles } from '../common/decorators/roles.decorator';
 export class UsersController {
   constructor(private users: UsersService) {}
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Listar todos los usuarios (solo ADMIN)' })
   @ApiResponse({ status: 200, description: 'Lista de usuarios' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   findAll() { return this.users.findAll(); }
 
-  @Get(':id')
+  @Post('create')
+  @ApiOperation({ summary: 'Crear un nuevo usuario (solo ADMIN)' })
+  @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
+  @ApiResponse({ status: 409, description: 'El email ya está registrado' })
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.users.create(createUserDto);
+  }
+
+  @Get('getById/:id')
   @ApiOperation({ summary: 'Obtener un usuario por ID (solo ADMIN)' })
   @ApiParam({ name: 'id', description: 'ID del usuario', example: 'clxyz123abc' })
   @ApiResponse({ status: 200, description: 'Usuario encontrado' })
@@ -29,7 +41,7 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   findOne(@Param('id') id: string) { return this.users.findOne(id); }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @ApiOperation({ summary: 'Actualizar usuario (solo ADMIN)' })
   @ApiParam({ name: 'id', description: 'ID del usuario', example: 'clxyz123abc' })
   @ApiBody({
