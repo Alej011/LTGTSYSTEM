@@ -10,9 +10,10 @@ export const API_ENDPOINTS = {
     me: "/api/auth/me",
   },
   users: {
-    list: "/api/users",
-    detail: (id: string) => `/api/users/${id}`,
-    update: (id: string) => `/api/users/${id}`,
+    list: "/api/users/list",
+    create: "/api/users/create",
+    detail: (id: string) => `/api/users/getById/${id}`,
+    update: (id: string) => `/api/users/update/${id}`,
   },
   // Endpoints futuros (cuando conectes los otros módulos)
   tickets: {

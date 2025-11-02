@@ -62,3 +62,48 @@ export function useProductPermissions(role: UserRole | undefined) {
     canDelete: productPermissions.canDelete(role),
   }
 }
+
+/**
+ * Permisos para el módulo de usuarios
+ */
+export const userPermissions = {
+  /**
+   * Puede ver la lista de usuarios
+   */
+  canView: (role: UserRole): boolean => {
+    return role === "admin"
+  },
+
+  /**
+   * Puede crear usuarios
+   */
+  canCreate: (role: UserRole): boolean => {
+    return role === "admin"
+  },
+
+  /**
+   * Puede editar usuarios
+   */
+  canEdit: (role: UserRole): boolean => {
+    return role === "admin"
+  },
+}
+
+/**
+ * Hook helper para verificar permisos de usuarios
+ */
+export function useUserPermissions(role: UserRole | undefined) {
+  if (!role) {
+    return {
+      canView: false,
+      canCreate: false,
+      canEdit: false,
+    }
+  }
+
+  return {
+    canView: userPermissions.canView(role),
+    canCreate: userPermissions.canCreate(role),
+    canEdit: userPermissions.canEdit(role),
+  }
+}
