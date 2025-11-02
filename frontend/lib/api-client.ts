@@ -85,9 +85,9 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
   const url = `${API_BASE_URL}${endpoint}`
 
   // Headers por defecto
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...customHeaders,
+    ...(customHeaders as Record<string, string>),
   }
 
   // Agregar token si es necesario

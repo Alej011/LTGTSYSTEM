@@ -30,8 +30,8 @@ export const API_ENDPOINTS = {
     list: "/api/products/list",
     detail: (id: string) => `/api/products/${id}`,
     create: "/api/products/create",
-    update: (id: string) => `/api/products/${id}`,
-    delete: (id: string) => `/api/products/${id}`,
+    update: (id: string) => `/api/products/update/${id}`,
+    delete: (id: string) => `/api/products/delete/${id}`,
   },
   brands: {
     list: "/api/brands",

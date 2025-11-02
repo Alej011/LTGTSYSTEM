@@ -57,7 +57,7 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Actualizar un producto existente' })
   @ApiResponse ({
@@ -76,7 +76,7 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Eliminar un producto'})
   @ApiResponse ({

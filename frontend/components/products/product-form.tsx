@@ -60,9 +60,14 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
     try {
       if (product) {
-        await updateProduct(product.id, formData)
+        // EDITAR: Convertir categoryId a categoryIds (array)
+        const { categoryId, ...restData } = formData
+        await updateProduct(product.id, {
+          ...restData,
+          categoryIds: [categoryId], // El backend espera un array de IDs
+        })
       } else {
-        // Preparar datos para crear: convertir categoryId a categoryIds (array)
+        // CREAR: Convertir categoryId a categoryIds (array)
         const { categoryId, ...restData } = formData
         await createProduct({
           ...restData,
