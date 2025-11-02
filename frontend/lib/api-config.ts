@@ -1,13 +1,8 @@
-/**
- * Configuración centralizada de la API
- * Todas las URLs y endpoints se manejan desde aquí
- */
 
 // URL base de la API desde variables de entorno
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 // Endpoints de la API organizados por módulo
-// IMPORTANTE: Todas las rutas ahora tienen el prefijo /api desde el backend
 export const API_ENDPOINTS = {
   auth: {
     login: "/api/auth/login",
@@ -28,7 +23,7 @@ export const API_ENDPOINTS = {
   },
   products: {
     list: "/api/products/list",
-    detail: (id: string) => `/api/products/${id}`,
+    detail: (id: string) => `/api/products/detail/${id}`,
     create: "/api/products/create",
     update: (id: string) => `/api/products/update/${id}`,
     delete: (id: string) => `/api/products/delete/${id}`,

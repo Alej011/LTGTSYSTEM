@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { QueryProductsDto } from "./dto/query-products.dto";
 import {
@@ -251,6 +251,49 @@ export class ProductsService {
     });
     
     // Transformar respuesta a DTO  
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description || "",
+      sku: product.sku,
+      price: product.price.toNumber(),
+      stock: product.stock,
+      status: product.status,
+      brand: (product as any).brand,
+      categories: (product as any).categories.map((pc: any) => pc.category),
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    };
+  }
+
+  async findOne(id: string): Promise<ProductResponseDto> {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        brand: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        categories: {
+          include: {
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+    }
+
+    // Transformar respuesta a DTO
     return {
       id: product.id,
       name: product.name,

@@ -13,7 +13,7 @@ export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({ summary: 'Listar todas las categorías' })
   @ApiResponse({ status: 200, description: 'Lista de categorías ordenadas alfabéticamente' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
@@ -23,7 +23,7 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({ summary: 'Obtener una categoría por ID' })
   @ApiResponse({ status: 200, description: 'Categoría encontrada' })
   @ApiResponse({ status: 404, description: 'Categoría no encontrada' })

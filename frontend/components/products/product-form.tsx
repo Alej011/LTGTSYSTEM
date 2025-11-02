@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { type Product, type Brand, type Category, getBrands, getCategories, createProduct, updateProduct } from "@/lib/products"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft } from "lucide-react"
 
 interface ProductFormProps {
   product?: Product
@@ -166,7 +166,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Precio ($)</Label>
+              <Label htmlFor="price">Precio (Q)</Label>
               <Input
                 id="price"
                 type="number"
@@ -211,7 +211,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancelar
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver a la Lista
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (

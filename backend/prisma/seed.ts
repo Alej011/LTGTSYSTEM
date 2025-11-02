@@ -308,6 +308,306 @@ async function main() {
     },
   });
 
+  // Producto 11
+  const product11 = await prisma.product.upsert({
+    where: { sku: "LOGI-C920-HD" },
+    update: {},
+    create: {
+      name: "Cámara Web Logitech C920",
+      description: "Cámara web Full HD 1080p con micrófono estéreo",
+      sku: "LOGI-C920-HD",
+      price: 79.99,
+      stock: 50,
+      status: ProductStatus.active,
+      brandId: logitech.id,
+    },
+  });
+
+  // Producto 12
+  const product12 = await prisma.product.upsert({
+    where: { sku: "DELL-LAT-5420" },
+    update: {},
+    create: {
+      name: "Dell Latitude 5420",
+      description: "Laptop empresarial con Intel i5, 16GB RAM, 256GB SSD",
+      sku: "DELL-LAT-5420",
+      price: 1099.99,
+      stock: 18,
+      status: ProductStatus.active,
+      brandId: dell.id,
+    },
+  });
+
+  // Producto 13
+  const product13 = await prisma.product.upsert({
+    where: { sku: "HP-DESK-600" },
+    update: {},
+    create: {
+      name: "HP ProDesk 600 G6",
+      description: "PC de escritorio compacta para oficina, Intel i7, 32GB RAM",
+      sku: "HP-DESK-600",
+      price: 899.99,
+      stock: 10,
+      status: ProductStatus.active,
+      brandId: hp.id,
+    },
+  });
+
+  // Producto 14
+  const product14 = await prisma.product.upsert({
+    where: { sku: "LEN-YOGA-9I" },
+    update: {},
+    create: {
+      name: "Lenovo Yoga 9i",
+      description: "Laptop convertible 2-en-1 con pantalla táctil 4K",
+      sku: "LEN-YOGA-9I",
+      price: 1899.99,
+      stock: 6,
+      status: ProductStatus.active,
+      brandId: lenovo.id,
+    },
+  });
+
+  // Producto 15
+  const product15 = await prisma.product.upsert({
+    where: { sku: "MS-SURF-PRO" },
+    update: {},
+    create: {
+      name: "Microsoft Surface Pro 9",
+      description: "Tablet profesional con teclado desmontable y stylus",
+      sku: "MS-SURF-PRO",
+      price: 1299.99,
+      stock: 12,
+      status: ProductStatus.active,
+      brandId: microsoft.id,
+    },
+  });
+
+  // Producto 16
+  const product16 = await prisma.product.upsert({
+    where: { sku: "CAN-EOS-R6" },
+    update: {},
+    create: {
+      name: "Canon EOS R6",
+      description: "Cámara mirrorless profesional de fotograma completo",
+      sku: "CAN-EOS-R6",
+      price: 2499.99,
+      stock: 4,
+      status: ProductStatus.active,
+      brandId: canon.id,
+    },
+  });
+
+  // Producto 17
+  const product17 = await prisma.product.upsert({
+    where: { sku: "LOGI-G502-HERO" },
+    update: {},
+    create: {
+      name: "Logitech G502 HERO",
+      description: "Mouse gaming con sensor de 25K DPI y 11 botones programables",
+      sku: "LOGI-G502-HERO",
+      price: 59.99,
+      stock: 35,
+      status: ProductStatus.active,
+      brandId: logitech.id,
+    },
+  });
+
+  // Producto 18
+  const product18 = await prisma.product.upsert({
+    where: { sku: "DELL-P2422H" },
+    update: {},
+    create: {
+      name: "Monitor Dell P2422H",
+      description: "Monitor Full HD de 24 pulgadas para productividad",
+      sku: "DELL-P2422H",
+      price: 249.99,
+      stock: 28,
+      status: ProductStatus.active,
+      brandId: dell.id,
+    },
+  });
+
+  // Producto 19
+  const product19 = await prisma.product.upsert({
+    where: { sku: "HP-ZBOOK-G8" },
+    update: {},
+    create: {
+      name: "HP ZBook Studio G8",
+      description: "Workstation móvil para diseño 3D y edición de video",
+      sku: "HP-ZBOOK-G8",
+      price: 2299.99,
+      stock: 3,
+      status: ProductStatus.inactive,
+      brandId: hp.id,
+    },
+  });
+
+  // Producto 20
+  const product20 = await prisma.product.upsert({
+    where: { sku: "LEN-IDEAPAD-5" },
+    update: {},
+    create: {
+      name: "Lenovo IdeaPad 5",
+      description: "Laptop económica para estudiantes, AMD Ryzen 5, 8GB RAM",
+      sku: "LEN-IDEAPAD-5",
+      price: 649.99,
+      stock: 42,
+      status: ProductStatus.active,
+      brandId: lenovo.id,
+    },
+  });
+
+  // Producto 21
+  const product21 = await prisma.product.upsert({
+    where: { sku: "MS-XBOX-CTRL" },
+    update: {},
+    create: {
+      name: "Control Xbox Wireless",
+      description: "Control inalámbrico compatible con PC y Xbox",
+      sku: "MS-XBOX-CTRL",
+      price: 59.99,
+      stock: 75,
+      status: ProductStatus.active,
+      brandId: microsoft.id,
+    },
+  });
+
+  // Producto 22
+  const product22 = await prisma.product.upsert({
+    where: { sku: "CAN-SELPHY-1500" },
+    update: {},
+    create: {
+      name: "Canon SELPHY CP1500",
+      description: "Impresora fotográfica portátil compacta",
+      sku: "CAN-SELPHY-1500",
+      price: 129.99,
+      stock: 0,
+      status: ProductStatus.active,
+      brandId: canon.id,
+    },
+  });
+
+  // Producto 23
+  const product23 = await prisma.product.upsert({
+    where: { sku: "LOGI-MK850-COMBO" },
+    update: {},
+    create: {
+      name: "Logitech MK850 Performance",
+      description: "Combo de teclado y mouse inalámbrico",
+      sku: "LOGI-MK850-COMBO",
+      price: 99.99,
+      stock: 22,
+      status: ProductStatus.active,
+      brandId: logitech.id,
+    },
+  });
+
+  // Producto 24
+  const product24 = await prisma.product.upsert({
+    where: { sku: "DELL-OPTIPLEX-7090" },
+    update: {},
+    create: {
+      name: "Dell OptiPlex 7090",
+      description: "Desktop empresarial ultra compacto",
+      sku: "DELL-OPTIPLEX-7090",
+      price: 1199.99,
+      stock: 14,
+      status: ProductStatus.active,
+      brandId: dell.id,
+    },
+  });
+
+  // Producto 25
+  const product25 = await prisma.product.upsert({
+    where: { sku: "HP-LASERJET-M455" },
+    update: {},
+    create: {
+      name: "HP LaserJet Pro M455dn",
+      description: "Impresora láser color con impresión dúplex automática",
+      sku: "HP-LASERJET-M455",
+      price: 529.99,
+      stock: 8,
+      status: ProductStatus.active,
+      brandId: hp.id,
+    },
+  });
+
+  // Producto 26
+  const product26 = await prisma.product.upsert({
+    where: { sku: "LEN-LEGION-5" },
+    update: {},
+    create: {
+      name: "Lenovo Legion 5 Gaming",
+      description: "Laptop gaming con RTX 3060, AMD Ryzen 7, 16GB RAM",
+      sku: "LEN-LEGION-5",
+      price: 1499.99,
+      stock: 9,
+      status: ProductStatus.active,
+      brandId: lenovo.id,
+    },
+  });
+
+  // Producto 27
+  const product27 = await prisma.product.upsert({
+    where: { sku: "MS-TEAMS-ROOMS" },
+    update: {},
+    create: {
+      name: "Microsoft Teams Rooms License",
+      description: "Licencia para salas de conferencia con Microsoft Teams",
+      sku: "MS-TEAMS-ROOMS",
+      price: 299.99,
+      stock: 50,
+      status: ProductStatus.active,
+      brandId: microsoft.id,
+    },
+  });
+
+  // Producto 28
+  const product28 = await prisma.product.upsert({
+    where: { sku: "LOGI-BRIO-4K" },
+    update: {},
+    create: {
+      name: "Logitech BRIO 4K",
+      description: "Cámara web Ultra HD 4K con HDR y Windows Hello",
+      sku: "LOGI-BRIO-4K",
+      price: 199.99,
+      stock: 17,
+      status: ProductStatus.active,
+      brandId: logitech.id,
+    },
+  });
+
+  // Producto 29
+  const product29 = await prisma.product.upsert({
+    where: { sku: "DELL-S2722DC" },
+    update: {},
+    create: {
+      name: "Monitor Dell S2722DC",
+      description: "Monitor QHD de 27 pulgadas con USB-C",
+      sku: "DELL-S2722DC",
+      price: 449.99,
+      stock: 11,
+      status: ProductStatus.active,
+      brandId: dell.id,
+    },
+  });
+
+  // Producto 30
+  const product30 = await prisma.product.upsert({
+    where: { sku: "HP-OMEN-17" },
+    update: {},
+    create: {
+      name: "HP OMEN 17",
+      description: "Laptop gaming de alto rendimiento con RTX 4070",
+      sku: "HP-OMEN-17",
+      price: 2199.99,
+      stock: 5,
+      status: ProductStatus.active,
+      brandId: hp.id,
+    },
+  });
+
   // ========================================
   // 5. CREAR RELACIONES PRODUCTO-CATEGORÍA
   // ========================================
@@ -561,11 +861,353 @@ async function main() {
     },
   });
 
+  // Product 11: Cámara Web Logitech C920 → Periféricos
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product11.id,
+        categoryId: perifericos.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product11.id,
+      categoryId: perifericos.id,
+    },
+  });
+
+  // Product 12: Dell Latitude 5420 → Laptops
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product12.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product12.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  // Product 13: HP ProDesk 600 G6 → Electrónica
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product13.id,
+        categoryId: electronica.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product13.id,
+      categoryId: electronica.id,
+    },
+  });
+
+  // Product 14: Lenovo Yoga 9i → Laptops
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product14.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product14.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  // Product 15: Microsoft Surface Pro 9 → Laptops, Electrónica
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product15.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product15.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product15.id,
+        categoryId: electronica.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product15.id,
+      categoryId: electronica.id,
+    },
+  });
+
+  // Product 16: Canon EOS R6 → Electrónica
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product16.id,
+        categoryId: electronica.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product16.id,
+      categoryId: electronica.id,
+    },
+  });
+
+  // Product 17: Logitech G502 HERO → Periféricos
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product17.id,
+        categoryId: perifericos.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product17.id,
+      categoryId: perifericos.id,
+    },
+  });
+
+  // Product 18: Monitor Dell P2422H → Monitores
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product18.id,
+        categoryId: monitores.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product18.id,
+      categoryId: monitores.id,
+    },
+  });
+
+  // Product 19: HP ZBook Studio G8 → Laptops
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product19.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product19.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  // Product 20: Lenovo IdeaPad 5 → Laptops
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product20.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product20.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  // Product 21: Control Xbox Wireless → Periféricos
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product21.id,
+        categoryId: perifericos.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product21.id,
+      categoryId: perifericos.id,
+    },
+  });
+
+  // Product 22: Canon SELPHY CP1500 → Impresoras
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product22.id,
+        categoryId: impresoras.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product22.id,
+      categoryId: impresoras.id,
+    },
+  });
+
+  // Product 23: Logitech MK850 Performance → Periféricos
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product23.id,
+        categoryId: perifericos.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product23.id,
+      categoryId: perifericos.id,
+    },
+  });
+
+  // Product 24: Dell OptiPlex 7090 → Electrónica
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product24.id,
+        categoryId: electronica.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product24.id,
+      categoryId: electronica.id,
+    },
+  });
+
+  // Product 25: HP LaserJet Pro M455dn → Impresoras
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product25.id,
+        categoryId: impresoras.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product25.id,
+      categoryId: impresoras.id,
+    },
+  });
+
+  // Product 26: Lenovo Legion 5 Gaming → Laptops, Electrónica
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product26.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product26.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product26.id,
+        categoryId: electronica.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product26.id,
+      categoryId: electronica.id,
+    },
+  });
+
+  // Product 27: Microsoft Teams Rooms License → Software
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product27.id,
+        categoryId: software.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product27.id,
+      categoryId: software.id,
+    },
+  });
+
+  // Product 28: Logitech BRIO 4K → Periféricos
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product28.id,
+        categoryId: perifericos.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product28.id,
+      categoryId: perifericos.id,
+    },
+  });
+
+  // Product 29: Monitor Dell S2722DC → Monitores
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product29.id,
+        categoryId: monitores.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product29.id,
+      categoryId: monitores.id,
+    },
+  });
+
+  // Product 30: HP OMEN 17 → Laptops, Electrónica
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product30.id,
+        categoryId: laptops.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product30.id,
+      categoryId: laptops.id,
+    },
+  });
+
+  await prisma.productCategory.upsert({
+    where: {
+      productId_categoryId: {
+        productId: product30.id,
+        categoryId: electronica.id,
+      },
+    },
+    update: {},
+    create: {
+      productId: product30.id,
+      categoryId: electronica.id,
+    },
+  });
+
   console.log("Seed completado exitosamente!");
   console.log(`   - 2 usuarios creados`);
   console.log(`   - 6 marcas creadas`);
   console.log(`   - 6 categorías creadas`);
-  console.log(`   - 10 productos creados`);
+  console.log(`   - 30 productos creados`);
   console.log(`   - Relaciones producto-categoría establecidas`);
 }
 

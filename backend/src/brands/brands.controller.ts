@@ -13,7 +13,7 @@ export class BrandsController {
   constructor(private brandsService: BrandsService) {}
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({ summary: 'Listar todas las marcas' })
   @ApiResponse({ status: 200, description: 'Lista de marcas ordenadas alfabéticamente' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
@@ -23,7 +23,7 @@ export class BrandsController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({ summary: 'Obtener una marca por ID' })
   @ApiResponse({ status: 200, description: 'Marca encontrada' })
   @ApiResponse({ status: 404, description: 'Marca no encontrada' })

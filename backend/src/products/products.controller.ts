@@ -18,7 +18,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get('list')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({
     summary: 'Listar productos con paginación y filtros',
     description: `
@@ -40,6 +40,21 @@ export class ProductsController {
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   async findAll(@Query() query: QueryProductsDto): Promise<PaginatedProductsDto> {
     return this.productsService.findAll(query);
+  }
+
+  @Get('detail/:id')
+  @Roles('ADMIN', 'SUPPORT')
+  @ApiOperation({ summary: 'Obtener detalles de un producto por ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Producto encontrado',
+    type: ProductResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({ status: 403, description: 'No tiene permisos' })
+  @ApiResponse({ status: 404, description: 'Producto no encontrado' })
+  async findOne(@Param('id') id: string): Promise<ProductResponseDto> {
+    return this.productsService.findOne(id);
   }
 
   @Post('create')

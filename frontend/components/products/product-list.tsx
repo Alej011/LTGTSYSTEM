@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type Product, type PaginationMetadata, getProducts, deleteProduct } from "@/lib/products"
-import { Search, Plus, Edit, Trash2, Package } from "lucide-react"
+import { Search, Plus, Edit, Trash2, Package, Eye, ArrowLeft } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +20,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useAuth } from "@/contexts/auth-context"
+import { useProductPermissions } from "@/lib/permissions"
+import { ProductDetailModal } from "./product-detail-modal"
 
 interface ProductListProps {
   onEdit: (product: Product) => void
@@ -26,6 +30,9 @@ interface ProductListProps {
 }
 
 export function ProductList({ onEdit, onAdd }: ProductListProps) {
+  const router = useRouter()
+  const { user } = useAuth()
+  const permissions = useProductPermissions(user?.role)
   const [products, setProducts] = useState<Product[]>([])
   const [pagination, setPagination] = useState<PaginationMetadata | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -35,6 +42,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
 
   // Cargar productos cuando cambien filtros o página
   useEffect(() => {
@@ -106,6 +115,12 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   // Obtener todas las categorías únicas de los productos actuales
   const categories = [...new Set(products.flatMap((p) => p.categories.map((c) => c.name)))]
 
+  // Calcular número de columnas dinámicamente (siempre incluye Acciones)
+  const totalColumns = 8
+
+  // Determinar si mostrar columna de acciones
+  const showActions = permissions.canEdit || permissions.canDelete || permissions.canViewDetails
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
@@ -127,6 +142,14 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
 
   return (
     <div className="space-y-6">
+      {/* Botón de retorno al dashboard */}
+      <div>
+        <Button variant="ghost" onClick={() => router.push("/dashboard")} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Volver al Dashboard
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -137,10 +160,12 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
               </CardTitle>
               <CardDescription>Administra el catálogo de productos y sus marcas asociadas</CardDescription>
             </div>
-            <Button onClick={onAdd}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Producto
-            </Button>
+            {permissions.canCreate && (
+              <Button onClick={onAdd}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo Producto
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -189,17 +214,17 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                   <TableHead>Producto</TableHead>
                   <TableHead>Marca</TableHead>
                   <TableHead>SKU</TableHead>
-                  <TableHead>Categoría</TableHead>
+                  <TableHead className="text-center">Categoría</TableHead>
                   <TableHead>Precio</TableHead>
                   <TableHead>Stock</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  <TableHead className="text-center">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={totalColumns} className="text-center py-8">
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
                         <span className="text-muted-foreground">Cargando productos...</span>
@@ -208,7 +233,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                   </TableRow>
                 ) : products.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={totalColumns} className="text-center py-8 text-muted-foreground">
                       No se encontraron productos
                     </TableCell>
                   </TableRow>
@@ -223,8 +248,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                       </TableCell>
                       <TableCell>{product.brand?.name}</TableCell>
                       <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1 flex-wrap">
+                      <TableCell className="text-center">
+                        <div className="flex  justify-center gap-2">
                           {product.categories.map((cat) => (
                             <Badge key={cat.id} variant="outline" className="text-xs">
                               {cat.name}
@@ -232,24 +257,41 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>Q{product.price.toFixed(2)}</TableCell>
                       <TableCell>{getStockBadge(product.stock)}</TableCell>
                       <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setProductToDelete(product)
-                              setDeleteDialogOpen(true)
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-2">
+                          {permissions.canViewDetails && !permissions.canEdit && !permissions.canDelete && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProductId(product.id)
+                                setDetailModalOpen(true)
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Ver Detalles
+                            </Button>
+                          )}
+                          {permissions.canEdit && (
+                            <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {permissions.canDelete && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setProductToDelete(product)
+                                setDeleteDialogOpen(true)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -312,6 +354,12 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ProductDetailModal
+        productId={selectedProductId}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+      />
     </div>
   )
 }
