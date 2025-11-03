@@ -123,7 +123,7 @@ export interface ProductFilters {
 // ====================================
 
 /**
- * Obtiene productos con paginación y filtros del backend
+ * Obtiene productos con paginación y filtros del BFF
  */
 export const getProducts = async (
   filters?: ProductFilters
@@ -142,19 +142,32 @@ export const getProducts = async (
 
     const queryString = params.toString();
     const endpoint = queryString
-      ? `${API_ENDPOINTS.products.list}?${queryString}`
-      : API_ENDPOINTS.products.list;
+      ? `/api/products/list?${queryString}` // BFF endpoint
+      : `/api/products/list`; // BFF endpoint
 
     const response = await apiClient.get<{
       data: ProductResponse[];
       meta: PaginationMetadata;
     }>(endpoint);
 
-    // Transformar productos del backend
-    const transformedData = response.data.map(mapBackendProductToFrontend);
+    // Parse dates from ISO strings
+    const productsWithDates = response.data.map((product) => ({
+      ...product,
+      createdAt: new Date(product.createdAt),
+      updatedAt: new Date(product.updatedAt),
+      brand: {
+        ...product.brand,
+        id: product.brand.id,
+        name: product.brand.name,
+        description: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      categories: product.categories || [],
+    }));
 
     return {
-      data: transformedData,
+      data: productsWithDates,
       meta: response.meta,
     };
   } catch (error) {
@@ -166,14 +179,26 @@ export const getProducts = async (
 };
 
 /**
- * Obtiene un producto por ID
+ * Obtiene un producto por ID desde BFF
  */
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
     const response = await apiClient.get<ProductResponse>(
-      API_ENDPOINTS.products.detail(id)
+      `/api/products/${id}` // BFF endpoint
     );
-    return mapBackendProductToFrontend(response);
+
+    // Parse dates from ISO strings
+    return {
+      ...response,
+      createdAt: new Date(response.createdAt),
+      updatedAt: new Date(response.updatedAt),
+      brand: response.brand ? {
+        ...response.brand,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } : undefined,
+      categories: response.categories || [],
+    };
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error(`Error al obtener producto ${id}:`, error.message);
@@ -183,7 +208,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 };
 
 /**
- * Crea un nuevo producto
+ * Crea un nuevo producto a través del BFF
  */
 export const createProduct = async (
   productData: Omit<
@@ -195,10 +220,22 @@ export const createProduct = async (
 ): Promise<Product | null> => {
   try {
     const response = await apiClient.post<ProductResponse>(
-      API_ENDPOINTS.products.create,
+      `/api/products/create`, // BFF endpoint
       productData
     );
-    return mapBackendProductToFrontend(response);
+
+    // Parse dates from ISO strings
+    return {
+      ...response,
+      createdAt: new Date(response.createdAt),
+      updatedAt: new Date(response.updatedAt),
+      brand: response.brand ? {
+        ...response.brand,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } : undefined,
+      categories: response.categories || [],
+    };
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error("Error al crear producto:", error.message);
@@ -208,7 +245,7 @@ export const createProduct = async (
 };
 
 /**
- * Actualiza un producto existente
+ * Actualiza un producto existente a través del BFF
  */
 export const updateProduct = async (
   id: string,
@@ -219,10 +256,22 @@ export const updateProduct = async (
 ): Promise<Product | null> => {
   try {
     const response = await apiClient.patch<ProductResponse>(
-      API_ENDPOINTS.products.update(id),
+      `/api/products/${id}`, // BFF endpoint
       productData
     );
-    return mapBackendProductToFrontend(response);
+
+    // Parse dates from ISO strings
+    return {
+      ...response,
+      createdAt: new Date(response.createdAt),
+      updatedAt: new Date(response.updatedAt),
+      brand: response.brand ? {
+        ...response.brand,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } : undefined,
+      categories: response.categories || [],
+    };
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error(`Error al actualizar producto ${id}:`, error.message);
@@ -232,11 +281,11 @@ export const updateProduct = async (
 };
 
 /**
- * Elimina un producto
+ * Elimina un producto a través del BFF
  */
 export const deleteProduct = async (id: string): Promise<boolean> => {
   try {
-    await apiClient.delete(API_ENDPOINTS.products.delete(id));
+    await apiClient.delete(`/api/products/${id}`); // BFF endpoint
     return true;
   } catch (error) {
     if (error instanceof ApiClientError) {
@@ -247,12 +296,18 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
 };
 
 /**
- * Obtiene todas las marcas
+ * Obtiene todas las marcas desde el BFF
  */
 export const getBrands = async (): Promise<Brand[]> => {
   try {
-    const response = await apiClient.get<Brand[]>(API_ENDPOINTS.brands.list);
-    return response;
+    const response = await apiClient.get<Brand[]>(`/api/brands`); // BFF endpoint
+
+    // Parse dates from ISO strings
+    return response.map((brand) => ({
+      ...brand,
+      createdAt: new Date(brand.createdAt),
+      updatedAt: new Date(brand.updatedAt),
+    }));
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error("Error al obtener marcas:", error.message);
@@ -262,13 +317,11 @@ export const getBrands = async (): Promise<Brand[]> => {
 };
 
 /**
- * Obtiene todas las categorías
+ * Obtiene todas las categorías desde el BFF
  */
 export const getCategories = async (): Promise<Category[]> => {
   try {
-    const response = await apiClient.get<Category[]>(
-      API_ENDPOINTS.categories.list
-    );
+    const response = await apiClient.get<Category[]>(`/api/categories`); // BFF endpoint
     return response;
   } catch (error) {
     if (error instanceof ApiClientError) {

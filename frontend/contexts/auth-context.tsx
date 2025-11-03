@@ -1,103 +1,102 @@
 "use client"
 
+/**
+ * Auth Context refactored with React Query
+ * Much simpler - delegates all state management to React Query
+ */
 import type React from "react"
-import { createContext, useContext, useReducer, useEffect } from "react"
-import { type User, type AuthState, authenticate, getCurrentUser, logout as authLogout } from "@/lib/auth"
+import { createContext, useContext, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { type User } from "@/lib/auth"
+import { useCurrentUser, useLogin as useLoginMutation, useLogout as useLogoutMutation } from "@/lib/queries/auth.queries"
 import { STORAGE_KEYS } from "@/lib/api-config"
 
-interface AuthContextType extends AuthState {
+interface AuthContextType {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-type AuthAction =
-  | { type: "LOGIN_START" }
-  | { type: "LOGIN_SUCCESS"; payload: User }
-  | { type: "LOGIN_FAILURE" }
-  | { type: "LOGOUT" }
-  | { type: "RESTORE_SESSION"; payload: User }
-
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  switch (action.type) {
-    case "LOGIN_START":
-      return { ...state, isLoading: true }
-    case "LOGIN_SUCCESS":
-      return { user: action.payload, isAuthenticated: true, isLoading: false }
-    case "LOGIN_FAILURE":
-      return { user: null, isAuthenticated: false, isLoading: false }
-    case "LOGOUT":
-      return { user: null, isAuthenticated: false, isLoading: false }
-    case "RESTORE_SESSION":
-      return { user: action.payload, isAuthenticated: true, isLoading: false }
-    default:
-      return state
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(authReducer, {
-    user: null,
-    isAuthenticated: false,
-    isLoading: true,
-  })
+  const router = useRouter()
 
+  // State to track if token exists (avoid hydration issues)
+  const [hasToken, setHasToken] = useState(false)
+
+  // Check for token only on client side (after hydration)
   useEffect(() => {
-    // Validar sesión con el backend usando el token JWT
-    const validateSession = async () => {
+    if (typeof window !== "undefined") {
       const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
-
-      if (!token) {
-        dispatch({ type: "LOGIN_FAILURE" })
-        return
-      }
-
-      try {
-        // Validar el token obteniendo el usuario actual del backend
-        const user = await getCurrentUser()
-        if (user) {
-          dispatch({ type: "RESTORE_SESSION", payload: user })
-        } else {
-          dispatch({ type: "LOGIN_FAILURE" })
-        }
-      } catch {
-        // Si el token es inválido o expiró, limpiar sesión
-        dispatch({ type: "LOGIN_FAILURE" })
-      }
+      setHasToken(!!token)
     }
-
-    validateSession()
   }, [])
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    dispatch({ type: "LOGIN_START" })
+  // Use React Query hook for current user
+  const { data: user, isLoading, error } = useCurrentUser({
+    enabled: hasToken, // Only fetch if token exists
+  })
 
+  // Login mutation
+  const loginMutation = useLoginMutation()
+
+  // Logout mutation
+  const logoutMutation = useLogoutMutation()
+
+  // Derived state
+  const isAuthenticated = !!user
+
+  // Login function wrapper
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const user = await authenticate(email, password)
-      if (user) {
-        // El token ya fue guardado en authenticate()
-        dispatch({ type: "LOGIN_SUCCESS", payload: user })
-        return true
-      } else {
-        dispatch({ type: "LOGIN_FAILURE" })
-        return false
-      }
+      await loginMutation.mutateAsync({ email, password })
+      setHasToken(true) // Update token state after successful login
+      return true
     } catch (error) {
-      dispatch({ type: "LOGIN_FAILURE" })
+      console.error("Login failed:", error)
       return false
     }
   }
 
+  // Logout function wrapper
   const logout = () => {
-    // Usar la función de logout del servicio de auth para limpiar el token
-    authLogout()
-    dispatch({ type: "LOGOUT" })
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        setHasToken(false) // Clear token state after logout
+        router.push("/") // Redirect to login
+      },
+    })
   }
 
-  return <AuthContext.Provider value={{ ...state, login, logout }}>{children}</AuthContext.Provider>
+  // Handle authentication errors (e.g., invalid token)
+  useEffect(() => {
+    if (error && hasToken) {
+      // Token is invalid, clear it
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+      }
+      setHasToken(false)
+    }
+  }, [error, hasToken])
+
+  const value: AuthContextType = {
+    user: user ?? null,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+/**
+ * Hook to use auth context
+ * Now powered by React Query - no manual state management!
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {

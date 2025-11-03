@@ -1,30 +1,18 @@
 import { apiClient, saveToken, removeToken, ApiClientError } from "./api-client"
-import { API_ENDPOINTS } from "./api-config"
+import { LoginResultSchema, UserSchema } from "./schemas/auth.schema"
 
 /**
- * Roles del frontend
- * - admin: Acceso completo (incluye gestión de usuarios)
- * - empleado: Acceso limitado (sin gestión de usuarios)
+ * Re-export types from schemas for convenience
  */
-export type UserRole = "admin" | "empleado"
+export type {
+  User,
+  FrontendRole as UserRole,
+  BackendRole,
+  LoginRequest,
+  LoginResult,
+} from "./schemas/auth.schema"
 
-/**
- * Roles del backend (API)
- */
-export type BackendRole = "ADMIN" | "SUPPORT"
-
-/**
- * Usuario autenticado en el frontend
- */
-export interface User {
-  id: string
-  email: string
-  name: string
-  role: UserRole
-  department?: string
-  createdAt: Date
-  lastLogin?: Date
-}
+export { mapBackendRoleToFrontend, mapBackendUserToFrontend } from "./schemas/auth.schema"
 
 /**
  * Estado de autenticación
@@ -35,72 +23,58 @@ export interface AuthState {
   isLoading: boolean
 }
 
-/**
- * Respuesta del backend al hacer login
- */
-interface LoginResponse {
-  accessToken: string
-  user: {
-    id: string
-    email: string
-    name: string
-    role: BackendRole
-    createdAt: string
-  }
-}
-
-/**
- * Respuesta del backend al obtener el usuario actual
- */
-interface MeResponse {
-  id: string
-  email: string
-  name: string
-  role: BackendRole
-  createdAt: string
-}
-
-/**
- * Mapea los roles del backend a roles del frontend
- * ADMIN → admin (acceso completo)
- * SUPPORT → empleado (acceso limitado)
- */
-export function mapBackendRoleToFrontend(backendRole: BackendRole): UserRole {
-  return backendRole === "ADMIN" ? "admin" : "empleado"
-}
-
-/**
- * Mapea la respuesta del backend a un objeto User del frontend
- */
-function mapBackendUserToFrontend(backendUser: LoginResponse["user"] | MeResponse): User {
-  return {
-    id: backendUser.id,
-    email: backendUser.email,
-    name: backendUser.name,
-    role: mapBackendRoleToFrontend(backendUser.role),
-    department: backendUser.role === "ADMIN" ? "Administración" : "Soporte Técnico",
-    createdAt: new Date(backendUser.createdAt),
-    lastLogin: new Date(),
-  }
-}
+// Import User type for usage in this file
+import type { User } from "./schemas/auth.schema"
 
 /**
  * Autentica un usuario con email y password
  * Guarda el token JWT en localStorage si tiene éxito
+ * Ahora llama al BFF (/api/auth/login) en lugar del backend directamente
  */
 export const authenticate = async (email: string, password: string): Promise<User | null> => {
   try {
-    const response = await apiClient.post<LoginResponse>(
-      API_ENDPOINTS.auth.login,
+    // Call BFF endpoint - NO schema validation here, BFF already validated
+    const response = await apiClient.post<any>(
+      "/api/auth/login", // BFF endpoint (same domain)
       { email, password },
-      { requiresAuth: false }
+      {
+        requiresAuth: false,
+        // Don't validate here - BFF already validated and transformed
+      }
     )
 
-    // Guardar token JWT en localStorage
+    if (process.env.NODE_ENV === "development") {
+      console.log("[authenticate] FULL BFF Response:", JSON.stringify(response, null, 2))
+      console.log("[authenticate] Response user:", response.user)
+      console.log("[authenticate] Response user role:", response.user.role)
+      console.log("[authenticate] Response user role TYPE:", typeof response.user.role)
+    }
+
+    // Guardar token JWT en localStorage y cookies
     saveToken(response.accessToken)
 
-    // Mapear y retornar usuario del frontend
-    return mapBackendUserToFrontend(response.user)
+    // BFF already transformed role and dates, but double-check role as fallback
+    let role: UserRole = response.user.role as UserRole
+
+    // Fallback: if role is still in backend format, transform it here
+    if (role === "ADMIN" || role === "admin") {
+      role = "admin"
+    } else if (role === "SUPPORT" || role === "support") {
+      role = "empleado"
+    }
+
+    const user: User = {
+      ...response.user,
+      role: role,
+      // Keep dates as ISO strings from BFF
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("[authenticate] Final user:", user)
+      console.log("[authenticate] Final user role:", user.role)
+    }
+
+    return user
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error("Login failed:", error.message)
@@ -110,16 +84,51 @@ export const authenticate = async (email: string, password: string): Promise<Use
 }
 
 /**
- * Obtiene el usuario actual desde el backend
+ * Obtiene el usuario actual desde el BFF
  * Usa el token JWT guardado en localStorage
+ * Ahora llama al BFF (/api/auth/me) en lugar del backend directamente
  */
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const response = await apiClient.get<MeResponse>(API_ENDPOINTS.auth.me)
-    return mapBackendUserToFrontend(response)
+    // Call BFF endpoint - NO schema validation here, BFF already validated
+    const response = await apiClient.get<any>(
+      "/api/auth/me", // BFF endpoint (same domain)
+      {
+        // Don't validate here - BFF already validated and transformed
+      }
+    )
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("[getCurrentUser] FULL BFF Response:", JSON.stringify(response, null, 2))
+      console.log("[getCurrentUser] Response role:", response.role)
+      console.log("[getCurrentUser] Response role TYPE:", typeof response.role)
+    }
+
+    // BFF already transformed role and dates, but double-check role as fallback
+    let role: UserRole = response.role as UserRole
+
+    // Fallback: if role is still in backend format, transform it here
+    if (role === "ADMIN" || role === "admin") {
+      role = "admin"
+    } else if (role === "SUPPORT" || role === "support") {
+      role = "empleado"
+    }
+
+    const user: User = {
+      ...response,
+      role: role,
+      // Keep dates as ISO strings from BFF
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("[getCurrentUser] Final user:", user)
+      console.log("[getCurrentUser] Final user role:", user.role)
+    }
+
+    return user
   } catch (error) {
     if (error instanceof ApiClientError) {
-      // Si el token es inválido o expiró, limpiar localStorage
+      // Si el token es inválido o expiró, limpiar localStorage y cookies
       if (error.statusCode === 401) {
         removeToken()
       }

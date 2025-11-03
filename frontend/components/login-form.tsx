@@ -3,27 +3,64 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
+import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
+import { ApiClientError } from "@/lib/api-client"
 import { Building2, Loader2 } from "lucide-react"
 
 export function LoginForm() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect") || "/dashboard"
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({})
   const { login, isLoading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setValidationErrors({})
 
-    const success = await login(email, password)
-    if (!success) {
-      setError("Credenciales inválidas. Intente nuevamente.")
+    // Client-side validation with Zod
+    const validation = LoginRequestSchema.safeParse({ email, password })
+
+    if (!validation.success) {
+      const errors: { email?: string; password?: string } = {}
+      validation.error.errors.forEach((err) => {
+        if (err.path[0] === "email") {
+          errors.email = err.message
+        } else if (err.path[0] === "password") {
+          errors.password = err.message
+        }
+      })
+      setValidationErrors(errors)
+      return
+    }
+
+    // Attempt login
+    try {
+      const success = await login(email, password)
+      if (success) {
+        // Redirect to dashboard or original destination
+        router.push(redirectTo)
+      } else {
+        setError("Credenciales inválidas. Por favor intente nuevamente.")
+      }
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setError(err.getUserMessage())
+      } else {
+        setError("Error inesperado. Por favor intente nuevamente.")
+      }
     }
   }
 
@@ -49,8 +86,12 @@ export function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="usuario@ltgt.com"
+                className={validationErrors.email ? "border-destructive" : ""}
                 required
               />
+              {validationErrors.email && (
+                <p className="text-sm text-destructive">{validationErrors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
@@ -60,8 +101,12 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                className={validationErrors.password ? "border-destructive" : ""}
                 required
               />
+              {validationErrors.password && (
+                <p className="text-sm text-destructive">{validationErrors.password}</p>
+              )}
             </div>
             {error && (
               <Alert variant="destructive">

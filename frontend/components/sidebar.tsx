@@ -63,7 +63,23 @@ export function Sidebar() {
 
   if (!user) return null
 
-  const filteredNavigation = navigation.filter((item) => !item.permission || hasPermission(user.role, item.permission))
+  // Debug logs
+  if (process.env.NODE_ENV === "development") {
+    console.log("[Sidebar] User:", user)
+    console.log("[Sidebar] User Role:", user.role)
+    console.log("[Sidebar] User Role Type:", typeof user.role)
+  }
+
+  const filteredNavigation = navigation.filter((item) => {
+    if (!item.permission) return true
+    const hasAccess = hasPermission(user.role, item.permission)
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[Sidebar] ${item.name} - permission: ${item.permission}, hasAccess: ${hasAccess}`)
+    }
+
+    return hasAccess
+  })
 
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border">

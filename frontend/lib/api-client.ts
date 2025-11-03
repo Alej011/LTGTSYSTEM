@@ -5,8 +5,10 @@
  * - Timeouts
  * - Manejo de errores
  * - Logs en desarrollo
+ * - Validación de respuestas con Zod (opcional)
  */
 
+import { z } from "zod"
 import { API_BASE_URL, API_TIMEOUT, STORAGE_KEYS } from "./api-config"
 
 // Tipos de respuesta de la API
@@ -24,17 +26,76 @@ export interface ApiError {
 }
 
 /**
- * Clase para errores de API
+ * Clase para errores de API mejorada
  */
 export class ApiClientError extends Error {
   statusCode: number
   error?: string
+  code?: string
+  field?: string // For validation errors
 
-  constructor(message: string, statusCode: number, error?: string) {
+  constructor(
+    message: string,
+    statusCode: number,
+    error?: string,
+    code?: string,
+    field?: string
+  ) {
     super(message)
     this.name = "ApiClientError"
     this.statusCode = statusCode
     this.error = error
+    this.code = code
+    this.field = field
+  }
+
+  /**
+   * Get user-friendly error message
+   */
+  getUserMessage(): string {
+    if (this.statusCode === 401) {
+      return "Sesión expirada. Por favor inicia sesión nuevamente."
+    }
+    if (this.statusCode === 403) {
+      return "No tienes permisos para realizar esta acción."
+    }
+    if (this.statusCode === 404) {
+      return "El recurso solicitado no existe."
+    }
+    if (this.statusCode === 422 || this.statusCode === 400) {
+      return `Error de validación: ${this.message}`
+    }
+    if (this.statusCode >= 500) {
+      return "Error del servidor. Por favor intenta nuevamente."
+    }
+    if (this.statusCode === 408) {
+      return "La petición tardó demasiado. Verifica tu conexión."
+    }
+    if (this.statusCode === 0) {
+      return "No se pudo conectar con el servidor. Verifica tu conexión."
+    }
+    return this.message || "Ocurrió un error inesperado."
+  }
+
+  /**
+   * Check if error is authentication related
+   */
+  isAuthError(): boolean {
+    return this.statusCode === 401 || this.statusCode === 403
+  }
+
+  /**
+   * Check if error is a validation error
+   */
+  isValidationError(): boolean {
+    return this.statusCode === 422 || this.statusCode === 400
+  }
+
+  /**
+   * Check if error is a server error
+   */
+  isServerError(): boolean {
+    return this.statusCode >= 500
   }
 }
 
@@ -47,19 +108,34 @@ function getToken(): string | null {
 }
 
 /**
- * Guarda el token JWT en localStorage
+ * Guarda el token JWT en localStorage y cookies
+ * Cookies are needed for middleware access
  */
 export function saveToken(token: string): void {
   if (typeof window === "undefined") return
+
+  // Save to localStorage
   localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token)
+
+  // Save to cookie (7 days expiration)
+  const expirationDays = 7
+  const expirationDate = new Date()
+  expirationDate.setDate(expirationDate.getDate() + expirationDays)
+
+  document.cookie = `${STORAGE_KEYS.ACCESS_TOKEN}=${token}; path=/; expires=${expirationDate.toUTCString()}; SameSite=Lax`
 }
 
 /**
- * Elimina el token JWT del localStorage
+ * Elimina el token JWT del localStorage y cookies
  */
 export function removeToken(): void {
   if (typeof window === "undefined") return
+
+  // Remove from localStorage
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+
+  // Remove from cookies
+  document.cookie = `${STORAGE_KEYS.ACCESS_TOKEN}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`
 }
 
 /**
@@ -68,6 +144,7 @@ export function removeToken(): void {
 interface RequestConfig extends RequestInit {
   timeout?: number
   requiresAuth?: boolean
+  schema?: z.ZodType<any> // Optional Zod schema for response validation
 }
 
 /**
@@ -78,11 +155,14 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
     timeout = API_TIMEOUT,
     requiresAuth = true,
     headers: customHeaders = {},
+    schema,
     ...restConfig
   } = config
 
   // Construir URL completa
-  const url = `${API_BASE_URL}${endpoint}`
+  // Si el endpoint empieza con /api/, es un endpoint del BFF (Next.js API Routes)
+  // Si no, es un endpoint del backend directo
+  const url = endpoint.startsWith("/api/") ? endpoint : `${API_BASE_URL}${endpoint}`
 
   // Headers por defecto
   const headers: Record<string, string> = {
@@ -132,7 +212,28 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
       throw new ApiClientError(errorMessage, response.status, data?.error)
     }
 
-    // Log en desarrollo
+    // Validar respuesta con Zod si se proporciona schema
+    if (schema) {
+      const result = schema.safeParse(data)
+      if (!result.success) {
+        console.error("[API] Schema validation failed:", result.error)
+        console.error("[API] Received data:", data)
+        throw new ApiClientError(
+          "La respuesta del servidor no tiene el formato esperado",
+          500,
+          "SCHEMA_VALIDATION_ERROR"
+        )
+      }
+
+      // Log en desarrollo
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[API] Response validated:`, result.data)
+      }
+
+      return result.data as T
+    }
+
+    // Log en desarrollo (sin validación)
     if (process.env.NODE_ENV === "development") {
       console.log(`[API] Response:`, data)
     }
@@ -167,6 +268,10 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
 export const apiClient = {
   /**
    * GET request
+   * @param endpoint - API endpoint (e.g., '/api/users')
+   * @param config - Request configuration including optional Zod schema
+   * @example
+   * const users = await apiClient.get('/api/users', { schema: UsersSchema })
    */
   get: <T = any>(endpoint: string, config?: RequestConfig) => {
     return request<T>(endpoint, { ...config, method: "GET" })
@@ -174,6 +279,11 @@ export const apiClient = {
 
   /**
    * POST request
+   * @param endpoint - API endpoint
+   * @param data - Request body
+   * @param config - Request configuration including optional Zod schema
+   * @example
+   * const user = await apiClient.post('/api/users', userData, { schema: UserSchema })
    */
   post: <T = any>(endpoint: string, data?: any, config?: RequestConfig) => {
     return request<T>(endpoint, {
@@ -185,6 +295,9 @@ export const apiClient = {
 
   /**
    * PUT request
+   * @param endpoint - API endpoint
+   * @param data - Request body
+   * @param config - Request configuration including optional Zod schema
    */
   put: <T = any>(endpoint: string, data?: any, config?: RequestConfig) => {
     return request<T>(endpoint, {
@@ -196,6 +309,9 @@ export const apiClient = {
 
   /**
    * PATCH request
+   * @param endpoint - API endpoint
+   * @param data - Request body (partial update)
+   * @param config - Request configuration including optional Zod schema
    */
   patch: <T = any>(endpoint: string, data?: any, config?: RequestConfig) => {
     return request<T>(endpoint, {
@@ -207,6 +323,8 @@ export const apiClient = {
 
   /**
    * DELETE request
+   * @param endpoint - API endpoint
+   * @param config - Request configuration including optional Zod schema
    */
   delete: <T = any>(endpoint: string, config?: RequestConfig) => {
     return request<T>(endpoint, { ...config, method: "DELETE" })
