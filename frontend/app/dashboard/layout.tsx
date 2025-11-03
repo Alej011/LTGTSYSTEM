@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useAuth } from "@/contexts/auth-context"
 import { Sidebar } from "@/components/sidebar"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
 export default function DashboardLayout({
@@ -13,12 +13,13 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
-      redirect("/")
+      router.push("/")
     }
-  }, [isAuthenticated, isLoading])
+  }, [isAuthenticated, isLoading, router])
 
   if (isLoading) {
     return (

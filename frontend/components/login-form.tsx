@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,13 +17,27 @@ export function LoginForm() {
   const [error, setError] = useState("")
   const { login, isLoading } = useAuth()
 
+  // Debug: Log cuando cambia el error
+  useEffect(() => {
+    console.log("Error state changed:", error)
+  }, [error])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
-    const success = await login(email, password)
-    if (!success) {
-      setError("Credenciales inválidas. Intente nuevamente.")
+    try {
+      const success = await login(email, password)
+      console.log("Login result:", success)
+      if (!success) {
+        const errorMsg = "Credenciales inválidas. Intente nuevamente."
+        console.log("Setting error:", errorMsg)
+        setError(errorMsg)
+        console.log("Error set to:", errorMsg)
+      }
+    } catch (err) {
+      console.error("Login error:", err)
+      setError("Error al iniciar sesión. Intente nuevamente.")
     }
   }
 
@@ -64,7 +78,7 @@ export function LoginForm() {
               />
             </div>
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" data-testid="login-error">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
