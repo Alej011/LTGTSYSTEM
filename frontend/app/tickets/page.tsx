@@ -4,7 +4,7 @@ import { useState } from "react"
 import { TicketList } from "@/components/tickets/ticket-list"
 import { TicketForm } from "@/components/tickets/ticket-form"
 import { TicketDetail } from "@/components/tickets/ticket-detail"
-import type { Ticket } from "@/lib/tickets"
+import type { Ticket } from "@/lib/features/tickets/tickets.service"
 
 type View = "list" | "form" | "detail"
 

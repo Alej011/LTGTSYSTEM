@@ -18,7 +18,7 @@ import {
   createCommunication,
   updateCommunication,
   getTypeLabel,
-} from "@/lib/communications"
+} from "@/lib/features/communications/communications.service"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2, MessageSquare, Calendar } from "lucide-react"
 

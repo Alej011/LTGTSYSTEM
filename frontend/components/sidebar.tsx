@@ -1,9 +1,9 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/shared/utils"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/auth"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
   Building2,
   Package,

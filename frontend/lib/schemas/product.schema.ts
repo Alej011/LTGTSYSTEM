@@ -93,6 +93,7 @@ export type Product = z.infer<typeof ProductSchema>
 
 /**
  * Transform backend product to frontend product
+ * Dates are kept as ISO strings (no conversion to Date objects)
  */
 export function mapBackendProductToFrontend(backendProduct: BackendProduct): Product {
   return {
@@ -108,12 +109,12 @@ export function mapBackendProductToFrontend(backendProduct: BackendProduct): Pro
       id: backendProduct.brand.id,
       name: backendProduct.brand.name,
       description: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: backendProduct.createdAt, // Keep as ISO string
+      updatedAt: backendProduct.updatedAt, // Keep as ISO string
     },
     categories: backendProduct.categories || [],
-    createdAt: new Date(backendProduct.createdAt),
-    updatedAt: new Date(backendProduct.updatedAt),
+    createdAt: backendProduct.createdAt, // Keep as ISO string
+    updatedAt: backendProduct.updatedAt, // Keep as ISO string
   }
 }
 

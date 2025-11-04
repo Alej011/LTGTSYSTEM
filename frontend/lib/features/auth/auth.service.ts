@@ -1,5 +1,5 @@
-import { apiClient, saveToken, removeToken, ApiClientError } from "./api-client"
-import { LoginResultSchema, UserSchema } from "./schemas/auth.schema"
+import { apiClient, saveToken, removeToken, ApiClientError } from "@/lib/shared/api-client"
+import { LoginResultSchema, UserSchema } from "@/lib/schemas/auth.schema"
 
 /**
  * Re-export types from schemas for convenience
@@ -10,9 +10,12 @@ export type {
   BackendRole,
   LoginRequest,
   LoginResult,
-} from "./schemas/auth.schema"
+} from "@/lib/schemas/auth.schema"
 
-export { mapBackendRoleToFrontend, mapBackendUserToFrontend } from "./schemas/auth.schema"
+export { mapBackendRoleToFrontend, mapBackendUserToFrontend } from "@/lib/schemas/auth.schema"
+
+// Import types for local use in this file
+import type { User, FrontendRole as UserRole } from "@/lib/schemas/auth.schema"
 
 /**
  * Estado de autenticación
@@ -22,9 +25,6 @@ export interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
 }
-
-// Import User type for usage in this file
-import type { User } from "./schemas/auth.schema"
 
 /**
  * Autentica un usuario con email y password
@@ -53,19 +53,10 @@ export const authenticate = async (email: string, password: string): Promise<Use
     // Guardar token JWT en localStorage y cookies
     saveToken(response.accessToken)
 
-    // BFF already transformed role and dates, but double-check role as fallback
-    let role: UserRole = response.user.role as UserRole
-
-    // Fallback: if role is still in backend format, transform it here
-    if (role === "ADMIN" || role === "admin") {
-      role = "admin"
-    } else if (role === "SUPPORT" || role === "support") {
-      role = "empleado"
-    }
-
+    // BFF already transformed role and dates, so we can trust the response
     const user: User = {
       ...response.user,
-      role: role,
+      role: response.user.role as UserRole,
       // Keep dates as ISO strings from BFF
     }
 
@@ -104,19 +95,10 @@ export const getCurrentUser = async (): Promise<User | null> => {
       console.log("[getCurrentUser] Response role TYPE:", typeof response.role)
     }
 
-    // BFF already transformed role and dates, but double-check role as fallback
-    let role: UserRole = response.role as UserRole
-
-    // Fallback: if role is still in backend format, transform it here
-    if (role === "ADMIN" || role === "admin") {
-      role = "admin"
-    } else if (role === "SUPPORT" || role === "support") {
-      role = "empleado"
-    }
-
+    // BFF already transformed role and dates, so we can trust the response
     const user: User = {
       ...response,
-      role: role,
+      role: response.role as UserRole,
       // Keep dates as ISO strings from BFF
     }
 

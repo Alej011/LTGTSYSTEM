@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from "next/server"
 import { UpdateUserRequestSchema, BackendUserListItemSchema, mapBackendUserListItemToFrontend } from "@/lib/schemas/user.schema"
-import { API_BASE_URL, API_ENDPOINTS } from "@/lib/api-config"
+import { API_BASE_URL, API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function PATCH(
   request: NextRequest,

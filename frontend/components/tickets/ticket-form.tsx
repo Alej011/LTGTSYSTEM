@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type TicketCategory, type TicketPriority, createTicket, getCategoryLabel } from "@/lib/tickets"
+import { type TicketCategory, type TicketPriority, createTicket, getCategoryLabel } from "@/lib/features/tickets/tickets.service"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2, Headphones } from "lucide-react"
 

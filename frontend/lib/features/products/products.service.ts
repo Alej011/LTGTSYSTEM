@@ -1,5 +1,5 @@
-import { apiClient, ApiClientError } from "./api-client";
-import { API_ENDPOINTS } from "./api-config";
+import { apiClient, ApiClientError } from "@/lib/shared/api-client";
+import { API_ENDPOINTS } from "@/lib/shared/api-config";
 
 // ====================================
 // TIPOS Y INTERFACES
@@ -9,8 +9,8 @@ export interface Brand {
   id: string;
   name: string;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string from backend
+  updatedAt: string; // ISO string from backend
 }
 
 export interface Category {
@@ -54,8 +54,8 @@ export interface Product {
   price: number;
   categories: Category[]; // Cambiado de category: string a categories: Category[]
   status: "active" | "inactive" | "discontinued";
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string from backend
+  updatedAt: string; // ISO string from backend
 }
 
 // ====================================
@@ -64,6 +64,7 @@ export interface Product {
 
 /**
  * Convierte la respuesta del backend a la interfaz Product del frontend
+ * Las fechas se mantienen como strings ISO del backend
  */
 function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
   return {
@@ -79,13 +80,13 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
       id: backendProduct.brand.id,
       name: backendProduct.brand.name,
       description: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: backendProduct.createdAt, // Keep as ISO string
+      updatedAt: backendProduct.updatedAt, // Keep as ISO string
     },
     // Las categorías ya vienen aplanadas desde el backend
     categories: backendProduct.categories || [],
-    createdAt: new Date(backendProduct.createdAt),
-    updatedAt: new Date(backendProduct.updatedAt),
+    createdAt: backendProduct.createdAt, // Keep as ISO string
+    updatedAt: backendProduct.updatedAt, // Keep as ISO string
   };
 }
 
@@ -150,24 +151,22 @@ export const getProducts = async (
       meta: PaginationMetadata;
     }>(endpoint);
 
-    // Parse dates from ISO strings
-    const productsWithDates = response.data.map((product) => ({
+    // Transform backend products to frontend format (dates stay as ISO strings)
+    const products = response.data.map((product) => ({
       ...product,
-      createdAt: new Date(product.createdAt),
-      updatedAt: new Date(product.updatedAt),
       brand: {
         ...product.brand,
         id: product.brand.id,
         name: product.brand.name,
         description: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: product.createdAt, // Keep as ISO string
+        updatedAt: product.updatedAt, // Keep as ISO string
       },
       categories: product.categories || [],
     }));
 
     return {
-      data: productsWithDates,
+      data: products,
       meta: response.meta,
     };
   } catch (error) {
@@ -187,15 +186,14 @@ export const getProductById = async (id: string): Promise<Product | null> => {
       `/api/products/${id}` // BFF endpoint
     );
 
-    // Parse dates from ISO strings
+    // Transform backend product (dates stay as ISO strings)
     return {
       ...response,
-      createdAt: new Date(response.createdAt),
-      updatedAt: new Date(response.updatedAt),
       brand: response.brand ? {
         ...response.brand,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        description: "",
+        createdAt: response.createdAt, // Keep as ISO string
+        updatedAt: response.updatedAt, // Keep as ISO string
       } : undefined,
       categories: response.categories || [],
     };
@@ -224,15 +222,14 @@ export const createProduct = async (
       productData
     );
 
-    // Parse dates from ISO strings
+    // Transform backend product (dates stay as ISO strings)
     return {
       ...response,
-      createdAt: new Date(response.createdAt),
-      updatedAt: new Date(response.updatedAt),
       brand: response.brand ? {
         ...response.brand,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        description: "",
+        createdAt: response.createdAt, // Keep as ISO string
+        updatedAt: response.updatedAt, // Keep as ISO string
       } : undefined,
       categories: response.categories || [],
     };
@@ -260,15 +257,14 @@ export const updateProduct = async (
       productData
     );
 
-    // Parse dates from ISO strings
+    // Transform backend product (dates stay as ISO strings)
     return {
       ...response,
-      createdAt: new Date(response.createdAt),
-      updatedAt: new Date(response.updatedAt),
       brand: response.brand ? {
         ...response.brand,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        description: "",
+        createdAt: response.createdAt, // Keep as ISO string
+        updatedAt: response.updatedAt, // Keep as ISO string
       } : undefined,
       categories: response.categories || [],
     };
@@ -302,12 +298,8 @@ export const getBrands = async (): Promise<Brand[]> => {
   try {
     const response = await apiClient.get<Brand[]>(`/api/brands`); // BFF endpoint
 
-    // Parse dates from ISO strings
-    return response.map((brand) => ({
-      ...brand,
-      createdAt: new Date(brand.createdAt),
-      updatedAt: new Date(brand.updatedAt),
-    }));
+    // Dates are already ISO strings from BFF, just return as-is
+    return response;
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error("Error al obtener marcas:", error.message);

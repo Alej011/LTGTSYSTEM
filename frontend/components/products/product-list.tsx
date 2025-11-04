@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Product, type PaginationMetadata, getProducts, deleteProduct } from "@/lib/products"
+import { type Product, type PaginationMetadata, getProducts, deleteProduct } from "@/lib/features/products/products.service"
 import { Search, Plus, Edit, Trash2, Package, Eye, ArrowLeft } from "lucide-react"
 import {
   AlertDialog,
@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useAuth } from "@/contexts/auth-context"
-import { useProductPermissions } from "@/lib/permissions"
+import { useProductPermissions } from "@/lib/shared/permissions"
 import { ProductDetailModal } from "./product-detail-modal"
 
 interface ProductListProps {

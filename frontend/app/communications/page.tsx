@@ -5,9 +5,9 @@ import { CommunicationList } from "@/components/communications/communication-lis
 import { CommunicationForm } from "@/components/communications/communication-form"
 import { CommunicationViewer } from "@/components/communications/communication-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Communication } from "@/lib/communications"
+import type { Communication } from "@/lib/features/communications/communications.service"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/auth"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 
 type View = "browse" | "manage" | "form" | "view"
 

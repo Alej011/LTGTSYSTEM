@@ -18,7 +18,7 @@ import {
   getPriorityColor,
   getStatusColor,
   getCategoryLabel,
-} from "@/lib/tickets"
+} from "@/lib/features/tickets/tickets.service"
 import { useAuth } from "@/contexts/auth-context"
 import { ArrowLeft, Clock, User, MessageSquare, CheckCircle, Loader2 } from "lucide-react"
 import { formatDistanceToNow, format } from "date-fns"

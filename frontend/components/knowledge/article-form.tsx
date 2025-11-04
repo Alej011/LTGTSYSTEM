@@ -18,7 +18,7 @@ import {
   createArticle,
   updateArticle,
   getCategoryLabel,
-} from "@/lib/knowledge"
+} from "@/lib/features/knowledge/knowledge.service"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2, BookOpen, X } from "lucide-react"
 

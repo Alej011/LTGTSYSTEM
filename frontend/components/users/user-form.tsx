@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type User, createUser, updateUser } from "@/lib/users"
+import { type User, createUser, updateUser } from "@/lib/features/users/users.service"
 import { Loader2, ArrowLeft } from "lucide-react"
 
 interface UserFormProps {

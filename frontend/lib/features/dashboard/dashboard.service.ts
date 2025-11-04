@@ -1,8 +1,8 @@
-import { getProducts } from "./products"
-import { getTickets } from "./tickets"
-import { getArticles } from "./knowledge"
-import { getCommunications, getUnreadCount } from "./communications"
-import type { UserRole } from "./auth"
+import { getProducts } from "@/lib/features/products/products.service"
+import { getTickets } from "@/lib/features/tickets/tickets.service"
+import { getArticles } from "@/lib/features/knowledge/knowledge.service"
+import { getCommunications, getUnreadCount } from "@/lib/features/communications/communications.service"
+import type { UserRole } from "@/lib/features/auth/auth.service"
 
 export interface DashboardStats {
   totalProducts: number

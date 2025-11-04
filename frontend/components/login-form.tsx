@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
 import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
-import { ApiClientError } from "@/lib/api-client"
+import { ApiClientError } from "@/lib/shared/api-client"
 import { Building2, Loader2 } from "lucide-react"
 
 export function LoginForm() {

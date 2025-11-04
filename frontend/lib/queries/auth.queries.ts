@@ -2,8 +2,8 @@
  * React Query hooks for authentication
  */
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
-import { authenticate, getCurrentUser, type User } from "@/lib/auth"
-import { removeToken } from "@/lib/api-client"
+import { authenticate, getCurrentUser, type User } from "@/lib/features/auth/auth.service"
+import { removeToken } from "@/lib/shared/api-client"
 
 /**
  * Query keys for auth-related queries

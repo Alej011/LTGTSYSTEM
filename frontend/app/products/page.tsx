@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { ProductList } from "@/components/products/product-list"
 import { ProductForm } from "@/components/products/product-form"
-import type { Product } from "@/lib/products"
+import type { Product } from "@/lib/features/products/products.service"
 
 export default function ProductsPage() {
   const [view, setView] = useState<"list" | "form">("list")

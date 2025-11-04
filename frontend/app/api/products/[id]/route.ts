@@ -6,7 +6,7 @@
  */
 import { NextRequest, NextResponse } from "next/server"
 import { UpdateProductRequestSchema, BackendProductSchema, mapBackendProductToFrontend } from "@/lib/schemas/product.schema"
-import { API_BASE_URL, API_ENDPOINTS } from "@/lib/api-config"
+import { API_BASE_URL, API_ENDPOINTS } from "@/lib/shared/api-config"
 
 /**
  * GET /api/products/[id]

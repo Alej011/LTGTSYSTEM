@@ -1,12 +1,12 @@
-import { apiClient, ApiClientError } from "./api-client";
-import { API_ENDPOINTS } from "./api-config";
+import { apiClient, ApiClientError } from "@/lib/shared/api-client";
+import { API_ENDPOINTS } from "@/lib/shared/api-config";
 
 // Re-export types from schemas
 export type {
   UserListItem,
   CreateUserRequest,
   UpdateUserRequest,
-} from "./schemas/user.schema";
+} from "@/lib/schemas/user.schema";
 
 // ====================================
 // TIPOS Y INTERFACES (for backwards compatibility)

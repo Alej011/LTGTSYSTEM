@@ -2,7 +2,7 @@
  * Enhanced Permission System
  * Centralized, type-safe permissions for role-based access control
  */
-import type { UserRole } from "./auth"
+import type { UserRole } from "@/lib/features/auth/auth.service"
 
 /**
  * Permission actions (CRUD operations)

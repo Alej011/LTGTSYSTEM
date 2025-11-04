@@ -7,10 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { type User, getUsers } from "@/lib/users"
+import { type User, getUsers } from "@/lib/features/users/users.service"
 import { Users, Plus, Edit, ArrowLeft, Search } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
-import { useUserPermissions } from "@/lib/permissions"
+import { useUserPermissions } from "@/lib/shared/permissions"
 
 interface UserListProps {
   onEdit: (user: User) => void

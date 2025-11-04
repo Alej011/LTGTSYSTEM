@@ -7,9 +7,9 @@
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { type User } from "@/lib/auth"
+import { type User } from "@/lib/features/auth/auth.service"
 import { useCurrentUser, useLogin as useLoginMutation, useLogout as useLogoutMutation } from "@/lib/queries/auth.queries"
-import { STORAGE_KEYS } from "@/lib/api-config"
+import { STORAGE_KEYS } from "@/lib/shared/api-config"
 
 interface AuthContextType {
   user: User | null

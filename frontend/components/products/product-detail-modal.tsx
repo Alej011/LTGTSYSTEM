@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { type Product, getProductById } from "@/lib/products"
+import { type Product, getProductById } from "@/lib/features/products/products.service"
 import { Badge } from "@/components/ui/badge"
 import {
   Dialog,

@@ -15,7 +15,7 @@ import {
   type PaginatedProducts,
   type Brand,
   type Category,
-} from "@/lib/products"
+} from "@/lib/features/products/products.service"
 
 /**
  * Query keys for product-related queries

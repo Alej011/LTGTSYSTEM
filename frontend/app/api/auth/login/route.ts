@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from "next/server"
 import { LoginRequestSchema, LoginResponseSchema, mapBackendUserToFrontend } from "@/lib/schemas/auth.schema"
-import { API_BASE_URL, API_ENDPOINTS } from "@/lib/api-config"
+import { API_BASE_URL, API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function POST(request: NextRequest) {
   try {

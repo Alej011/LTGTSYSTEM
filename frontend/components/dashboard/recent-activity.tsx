@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Clock, Headphones, Package, MessageSquare, BookOpen } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
-import type { RecentActivity } from "@/lib/dashboard"
+import type { RecentActivity } from "@/lib/features/dashboard/dashboard.service"
 
 interface RecentActivityProps {
   activities: RecentActivity[]

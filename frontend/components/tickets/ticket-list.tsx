@@ -15,9 +15,9 @@ import {
   getPriorityColor,
   getStatusColor,
   getCategoryLabel,
-} from "@/lib/tickets"
+} from "@/lib/features/tickets/tickets.service"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/auth"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 import { Search, Plus, Eye, Headphones, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"

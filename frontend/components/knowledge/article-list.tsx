@@ -13,9 +13,9 @@ import {
   getArticles,
   getCategoryLabel,
   getStatusLabel,
-} from "@/lib/knowledge"
+} from "@/lib/features/knowledge/knowledge.service"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/auth"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 import { Search, Plus, Eye, Edit, BookOpen, ThumbsUp, ThumbsDown, Users } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
