@@ -1,8 +1,15 @@
 import { apiClient, ApiClientError } from "./api-client";
 import { API_ENDPOINTS } from "./api-config";
 
+// Re-export types from schemas
+export type {
+  UserListItem,
+  CreateUserRequest,
+  UpdateUserRequest,
+} from "./schemas/user.schema";
+
 // ====================================
-// TIPOS Y INTERFACES
+// TIPOS Y INTERFACES (for backwards compatibility)
 // ====================================
 
 export type UserRole = "admin" | "empleado";
@@ -32,10 +39,12 @@ export interface UpdateUserData {
 
 /**
  * Obtiene todos los usuarios
+ * Now calls BFF endpoint which validates with Zod and transforms roles
  */
 export const getUsers = async (): Promise<User[]> => {
   try {
-    const response = await apiClient.get<User[]>(API_ENDPOINTS.users.list);
+    // Call BFF endpoint (same domain) - already validated and transformed
+    const response = await apiClient.get<User[]>("/api/users/list");
     return response;
   } catch (error) {
     if (error instanceof ApiClientError) {
@@ -47,10 +56,12 @@ export const getUsers = async (): Promise<User[]> => {
 
 /**
  * Obtiene un usuario por ID
+ * Now calls BFF endpoint which validates with Zod and transforms roles
  */
 export const getUserById = async (id: string): Promise<User | null> => {
   try {
-    const response = await apiClient.get<User>(API_ENDPOINTS.users.detail(id));
+    // Call BFF endpoint (same domain) - already validated and transformed
+    const response = await apiClient.get<User>(`/api/users/getById/${id}`);
     return response;
   } catch (error) {
     if (error instanceof ApiClientError) {
@@ -62,11 +73,13 @@ export const getUserById = async (id: string): Promise<User | null> => {
 
 /**
  * Crea un nuevo usuario
+ * Now calls BFF endpoint which validates with Zod and transforms roles
  */
 export const createUser = async (userData: CreateUserData): Promise<User | null> => {
   try {
+    // Call BFF endpoint (same domain) - already validated and transformed
     const response = await apiClient.post<User>(
-      API_ENDPOINTS.users.create,
+      "/api/users/create",
       userData
     );
     return response;
@@ -80,14 +93,16 @@ export const createUser = async (userData: CreateUserData): Promise<User | null>
 
 /**
  * Actualiza un usuario existente
+ * Now calls BFF endpoint which validates with Zod and transforms roles
  */
 export const updateUser = async (
   id: string,
   userData: UpdateUserData
 ): Promise<User | null> => {
   try {
+    // Call BFF endpoint (same domain) - already validated and transformed
     const response = await apiClient.patch<User>(
-      API_ENDPOINTS.users.update(id),
+      `/api/users/update/${id}`,
       userData
     );
     return response;

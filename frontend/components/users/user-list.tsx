@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
 import { type User, getUsers } from "@/lib/users"
-import { Users, Plus, Edit, ArrowLeft } from "lucide-react"
+import { Users, Plus, Edit, ArrowLeft, Search } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useUserPermissions } from "@/lib/permissions"
 
@@ -22,6 +23,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
   const permissions = useUserPermissions(currentUser?.role)
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     loadUsers()
@@ -38,6 +40,15 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
       setIsLoading(false)
     }
   }
+
+  // Filter users based on search query
+  const filteredUsers = users.filter((user) => {
+    const query = searchQuery.toLowerCase()
+    return (
+      user.name.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query)
+    )
+  })
 
   const getRoleBadge = (role: string) => {
     const variants = {
@@ -86,6 +97,19 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Search bar */}
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre o email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -106,14 +130,14 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : users.length === 0 ? (
+                ) : filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      No se encontraron usuarios
+                      {searchQuery ? "No se encontraron usuarios que coincidan con la búsqueda" : "No se encontraron usuarios"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  users.map((user) => (
+                  filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="font-medium">{user.name}</div>
