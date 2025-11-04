@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, Headphones, BookOpen, MessageSquare, AlertTriangle, CheckCircle } from "lucide-react"
-import type { DashboardStats } from "@/lib/dashboard"
+import type { DashboardStats } from "@/lib/features/dashboard/dashboard.service"
 
 interface StatsCardsProps {
   stats: DashboardStats

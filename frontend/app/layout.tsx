@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "sonner"
+import { Providers } from "./providers"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Suspense } from "react"
 import "./globals.css"
@@ -22,8 +24,14 @@ export default function RootLayout({
     <html lang="es">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>
-          <AuthProvider>{children}</AuthProvider>
+          {/* React Query Provider wrapper */}
+          <Providers>
+            {/* Auth Provider (now uses React Query internally) */}
+            <AuthProvider>{children}</AuthProvider>
+          </Providers>
         </Suspense>
+        {/* Toast notifications */}
+        <Toaster position="top-right" richColors closeButton />
         <Analytics />
       </body>
     </html>

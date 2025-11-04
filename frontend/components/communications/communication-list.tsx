@@ -15,9 +15,9 @@ import {
   getTypeColor,
   isRead,
   markAsRead,
-} from "@/lib/communications"
+} from "@/lib/features/communications/communications.service"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/auth"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 import { Search, Plus, Eye, Edit, MessageSquare, Pin, Clock, Users } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"

@@ -5,9 +5,9 @@ import { ArticleList } from "@/components/knowledge/article-list"
 import { ArticleForm } from "@/components/knowledge/article-form"
 import { ArticleViewer } from "@/components/knowledge/article-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { KnowledgeArticle } from "@/lib/knowledge"
+import type { KnowledgeArticle } from "@/lib/features/knowledge/knowledge.service"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/auth"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 
 type View = "browse" | "manage" | "form" | "view"
 

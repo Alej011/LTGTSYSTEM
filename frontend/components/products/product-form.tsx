@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type Product, type Brand, type Category, getBrands, getCategories, createProduct, updateProduct } from "@/lib/products"
+import { type Product, type Brand, type Category, getBrands, getCategories, createProduct, updateProduct } from "@/lib/features/products/products.service"
 import { Loader2, ArrowLeft } from "lucide-react"
 
 interface ProductFormProps {

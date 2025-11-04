@@ -14,7 +14,7 @@ import {
   Search,
 } from "lucide-react"
 import Link from "next/link"
-import type { UserRole } from "@/lib/auth"
+import type { UserRole } from "@/lib/features/auth/auth.service"
 
 interface QuickActionsProps {
   userRole: UserRole
