@@ -1,7 +1,5 @@
 "use client"
-
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -12,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
 import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
 import { ApiClientError } from "@/lib/shared/api-client"
-import { Building2, Loader2 } from "lucide-react"
+import { Building2, Loader2, Eye, EyeOff } from "lucide-react"
 
 export function LoginForm() {
   const router = useRouter()
@@ -24,6 +22,8 @@ export function LoginForm() {
   const [error, setError] = useState("")
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({})
   const { login, isLoading } = useAuth()
+
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +78,7 @@ export function LoginForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>
               <Input
@@ -93,26 +94,44 @@ export function LoginForm() {
                 <p className="text-sm text-destructive">{validationErrors.email}</p>
               )}
             </div>
+
+            {/* Password con botón de mostrar/ocultar */}
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className={validationErrors.password ? "border-destructive" : ""}
-                required
-              />
+
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={`${validationErrors.password ? "border-destructive" : ""} pr-10`}
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
               {validationErrors.password && (
                 <p className="text-sm text-destructive">{validationErrors.password}</p>
               )}
             </div>
+
+            {/* Error general */}
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
+            {/* Botón submit */}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
@@ -124,16 +143,6 @@ export function LoginForm() {
               )}
             </Button>
           </form>
-          <div className="mt-6 text-sm text-muted-foreground">
-            <p className="font-medium mb-2">Usuarios de prueba:</p>
-            <div className="space-y-1 text-xs">
-              <p>• admin@ltgt.com (Administrador)</p>
-              <p>• empleado1@ltgt.com (Empleado de Soporte)</p>
-              <p>• empleado2@ltgt.com (Empleado de Soporte)</p>
-              <p>• empleado3@ltgt.com (Empleado de Soporte)</p>
-              <p className="mt-2 font-medium">Contraseña: password123</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
