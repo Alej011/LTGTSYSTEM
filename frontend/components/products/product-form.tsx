@@ -1,40 +1,68 @@
-"use client"
-
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type Product, type Brand, type Category, getBrands, getCategories, createProduct, updateProduct } from "@/lib/features/products/products.service"
-import { Loader2, ArrowLeft } from "lucide-react"
+"use client";
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  type Product,
+  type Brand,
+  type Category,
+  getBrands,
+  getCategories,
+  createProduct,
+  updateProduct,
+} from "@/lib/features/products/products.service";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 interface ProductFormProps {
-  product?: Product
-  onSuccess: () => void
-  onCancel: () => void
+  product?: Product;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
-  const [formData, setFormData] = useState({
-    name: product?.name || "",
-    description: product?.description || "",
-    brandId: product?.brandId || "",
-    sku: product?.sku || "",
-    stock: product?.stock || 0,
-    price: product?.price || 0,
+export function ProductForm({
+  product,
+  onSuccess,
+  onCancel,
+}: ProductFormProps) {
+  const initialFormState = (current?: Product) => ({
+    name: current?.name || "",
+    description: current?.description || "",
+    brandId: current?.brandId || current?.brand?.id || "",
+    sku: current?.sku || "",
+    stock: current?.stock || 0,
+    price: current?.price || 0,
     // Guardamos el ID de la categoría, no el nombre
-    categoryId: product?.categories?.[0]?.id || "",
-    status: product?.status || ("active" as const),
-  })
-  const [brands, setBrands] = useState<Brand[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+    categoryId: current?.categories?.[0]?.id || "",
+    status: current?.status || ("active" as const),
+  });
+
+  const [formData, setFormData] = useState(initialFormState(product));
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setFormData(initialFormState(product));
+  }, [product]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -42,56 +70,57 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         const [brandsData, categoriesData] = await Promise.all([
           getBrands(),
           getCategories(),
-        ])
-        setBrands(brandsData)
-        setCategories(categoriesData)
+        ]);
+        setBrands(brandsData);
+        setCategories(categoriesData);
       } catch (error) {
-        console.error("Error cargando datos:", error)
-        setError("Error al cargar marcas y categorías")
+        console.error("Error cargando datos:", error);
+        setError("Error al cargar marcas y categorías");
       }
-    }
-    loadData()
-  }, [])
+    };
+    loadData();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     try {
       if (product) {
-        // EDITAR: Convertir categoryId a categoryIds (array)
-        const { categoryId, ...restData } = formData
+        // EDITAR:
+        const { categoryId, ...restData } = formData;
         await updateProduct(product.id, {
           ...restData,
-          categoryIds: [categoryId], // El backend espera un array de IDs
-        })
+          categoryIds: [categoryId],
+        });
       } else {
-        // CREAR: Convertir categoryId a categoryIds (array)
-        const { categoryId, ...restData } = formData
+        const { categoryId, ...restData } = formData;
         await createProduct({
           ...restData,
           categoryIds: [categoryId], // El backend espera un array de IDs
-        })
+        });
       }
-      onSuccess()
+      onSuccess();
     } catch (err) {
-      setError("Error al guardar el producto. Intente nuevamente.")
+      setError("Error al guardar el producto. Intente nuevamente.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>{product ? "Editar Producto" : "Nuevo Producto"}</CardTitle>
         <CardDescription>
-          {product ? "Modifica la información del producto" : "Registra un nuevo producto en el sistema"}
+          {product
+            ? "Modifica la información del producto"
+            : "Registra un nuevo producto en el sistema"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -134,7 +163,10 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="brand">Marca</Label>
-              <Select value={formData.brandId} onValueChange={(value) => handleInputChange("brandId", value)}>
+              <Select
+                value={formData.brandId}
+                onValueChange={(value) => handleInputChange("brandId", value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar marca" />
                 </SelectTrigger>
@@ -149,7 +181,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Categoría</Label>
-              <Select value={formData.categoryId} onValueChange={(value) => handleInputChange("categoryId", value)}>
+              <Select
+                value={formData.categoryId}
+                onValueChange={(value) =>
+                  handleInputChange("categoryId", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
@@ -173,7 +210,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 step="0.01"
                 min="0"
                 value={formData.price}
-                onChange={(e) => handleInputChange("price", Number.parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "price",
+                    Number.parseFloat(e.target.value) || 0
+                  )
+                }
                 required
               />
             </div>
@@ -184,13 +226,21 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 type="number"
                 min="0"
                 value={formData.stock}
-                onChange={(e) => handleInputChange("stock", Number.parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "stock",
+                    Number.parseInt(e.target.value) || 0
+                  )
+                }
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Estado</Label>
-              <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleInputChange("status", value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -230,5 +280,5 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
