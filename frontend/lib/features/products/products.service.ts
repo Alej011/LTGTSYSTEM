@@ -1,9 +1,6 @@
 import { apiClient, ApiClientError } from "@/lib/shared/api-client";
+import { handleApiError } from "@/lib/shared/error-handler";
 import { API_ENDPOINTS } from "@/lib/shared/api-config";
-
-// ====================================
-// TIPOS Y INTERFACES
-// ====================================
 
 export interface Brand {
   id: string;
@@ -19,7 +16,6 @@ export interface Category {
   description?: string;
 }
 
-// Respuesta del backend para productos (después de transformación en service)
 export interface ProductResponse {
   id: string;
   name: string;
@@ -58,9 +54,7 @@ export interface Product {
   updatedAt: string; // ISO string from backend
 }
 
-// ====================================
-// MAPPERS (Backend → Frontend)
-// ====================================
+// MAPPERS Backend → Frontend
 
 /**
  * Convierte la respuesta del backend a la interfaz Product del frontend
@@ -80,19 +74,16 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
       id: backendProduct.brand.id,
       name: backendProduct.brand.name,
       description: "",
-      createdAt: backendProduct.createdAt, // Keep as ISO string
-      updatedAt: backendProduct.updatedAt, // Keep as ISO string
+      createdAt: backendProduct.createdAt, 
+      updatedAt: backendProduct.updatedAt, 
     },
-    // Las categorías ya vienen aplanadas desde el backend
     categories: backendProduct.categories || [],
-    createdAt: backendProduct.createdAt, // Keep as ISO string
-    updatedAt: backendProduct.updatedAt, // Keep as ISO string
+    createdAt: backendProduct.createdAt,
+    updatedAt: backendProduct.updatedAt, 
   };
 }
 
-// ====================================
 // TIPOS PARA PAGINACIÓN
-// ====================================
 
 export interface PaginationMetadata {
   page: number;
@@ -119,9 +110,7 @@ export interface ProductFilters {
   sortOrder?: "asc" | "desc";
 }
 
-// ====================================
-// FUNCIONES DE API (reemplazan mocks)
-// ====================================
+// FUNCIONES DE API 
 
 /**
  * Obtiene productos con paginación y filtros del BFF
@@ -143,8 +132,8 @@ export const getProducts = async (
 
     const queryString = params.toString();
     const endpoint = queryString
-      ? `/api/products/list?${queryString}` // BFF endpoint
-      : `/api/products/list`; // BFF endpoint
+      ? `/api/products/list?${queryString}` 
+      : `/api/products/list`; 
 
     const response = await apiClient.get<{
       data: ProductResponse[];
@@ -152,28 +141,16 @@ export const getProducts = async (
     }>(endpoint);
 
     // Transform backend products to frontend format (dates stay as ISO strings)
-    const products = response.data.map((product) => ({
-      ...product,
-      brand: {
-        ...product.brand,
-        id: product.brand.id,
-        name: product.brand.name,
-        description: "",
-        createdAt: product.createdAt, // Keep as ISO string
-        updatedAt: product.updatedAt, // Keep as ISO string
-      },
-      categories: product.categories || [],
-    }));
+    const products: Product[] = response.data.map((bp) =>
+      mapBackendProductToFrontend(bp)
+    );
 
     return {
       data: products,
       meta: response.meta,
     };
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error("Error al obtener productos:", error.message);
-    }
-    throw error;
+    throw handleApiError(error, "obtener productos");
   }
 };
 
@@ -187,16 +164,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
     );
 
     // Transform backend product (dates stay as ISO strings)
-    return {
-      ...response,
-      brand: response.brand ? {
-        ...response.brand,
-        description: "",
-        createdAt: response.createdAt, // Keep as ISO string
-        updatedAt: response.updatedAt, // Keep as ISO string
-      } : undefined,
-      categories: response.categories || [],
-    };
+    return mapBackendProductToFrontend(response);
   } catch (error) {
     if (error instanceof ApiClientError) {
       console.error(`Error al obtener producto ${id}:`, error.message);
@@ -223,21 +191,9 @@ export const createProduct = async (
     );
 
     // Transform backend product (dates stay as ISO strings)
-    return {
-      ...response,
-      brand: response.brand ? {
-        ...response.brand,
-        description: "",
-        createdAt: response.createdAt, // Keep as ISO string
-        updatedAt: response.updatedAt, // Keep as ISO string
-      } : undefined,
-      categories: response.categories || [],
-    };
+    return mapBackendProductToFrontend(response);
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error("Error al crear producto:", error.message);
-    }
-    throw error;
+    throw handleApiError(error, "crear producto") ;
   }
 };
 
@@ -258,21 +214,9 @@ export const updateProduct = async (
     );
 
     // Transform backend product (dates stay as ISO strings)
-    return {
-      ...response,
-      brand: response.brand ? {
-        ...response.brand,
-        description: "",
-        createdAt: response.createdAt, // Keep as ISO string
-        updatedAt: response.updatedAt, // Keep as ISO string
-      } : undefined,
-      categories: response.categories || [],
-    };
+    return mapBackendProductToFrontend(response);
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error(`Error al actualizar producto ${id}:`, error.message);
-    }
-    throw error;
+    throw handleApiError(error, `actualizar producto ${id}`);
   }
 };
 
@@ -284,10 +228,7 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
     await apiClient.delete(`/api/products/${id}`); // BFF endpoint
     return true;
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error(`Error al eliminar producto ${id}:`, error.message);
-    }
-    return false;
+    return handleApiError(error, "Al eliminar producto", false);
   }
 };
 
@@ -301,10 +242,7 @@ export const getBrands = async (): Promise<Brand[]> => {
     // Dates are already ISO strings from BFF, just return as-is
     return response;
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error("Error al obtener marcas:", error.message);
-    }
-    return [];
+    return handleApiError(error, "obtener marcas", []);
   }
 };
 
@@ -316,9 +254,6 @@ export const getCategories = async (): Promise<Category[]> => {
     const response = await apiClient.get<Category[]>(`/api/categories`); // BFF endpoint
     return response;
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error("Error al obtener categorías:", error.message);
-    }
-    return [];
+    return handleApiError( error, "obtener categorías", []);
   }
 };

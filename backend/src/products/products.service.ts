@@ -14,6 +14,44 @@ import { UpdateProductDto } from "./dto/update-product.dto";
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
+  private transformProductToDto(product: any): ProductResponseDto {
+    return {
+      id : product.id,
+      name: product.name,
+      description: product.description || "",
+      sku: product.sku,
+      price: product.price.toNumber(),
+      stock: product.stock,
+      status: product.status,
+      brand: (product as any).brand,
+      categories: (product as any).categories.map((pc: any) => pc.category),
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    }
+  }
+
+  /**
+   * Include estándar para queries de productos
+   * Evita duplicación en findMany, create, update, findOne
+   */
+  private readonly productInclude = {
+    brand: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
+    categories: {
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true, 
+          }
+        }
+      }
+    }
+  } as const;
   /**
    * Obtiene productos con paginación, filtros y búsqueda optimizada
    *
@@ -89,24 +127,7 @@ export class ProductsService {
         skip,
         take: limit,
         orderBy,
-        include: {
-          brand: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          categories: {
-            include: {
-              category: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-            },
-          },
-        },
+        include: this.productInclude,
       }),
       this.prisma.product.count({ where }),
     ]);
@@ -123,12 +144,9 @@ export class ProductsService {
     };
 
     // Transformar datos de Prisma a DTO
-    const transformedProducts = products.map((product) => ({
-      ...product,
-      description: product.description || "", // null → string vacío
-      price: product.price.toNumber(), // Decimal → number
-      categories: product.categories.map((pc) => pc.category), // Aplanar relación many-to-many
-    }));
+    const transformedProducts = products.map((product) =>
+      this.transformProductToDto(product)
+    );
 
     return {
       data: transformedProducts,
@@ -168,40 +186,11 @@ export class ProductsService {
     // Crear producto con relaciones incluidas
     const product = await this.prisma.product.create({
       data: createData,
-      include: {
-        brand: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        categories: {
-          include: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.productInclude,
     });
 
     // Transformar respuesta a DTO
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description || "",
-      sku: product.sku,
-      price: product.price.toNumber(),
-      stock: product.stock,
-      status: product.status,
-      brand: (product as any).brand,
-      categories: (product as any).categories.map((pc: any) => pc.category),
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    };
+    return this.transformProductToDto(product);
   }
 
   async update(
@@ -230,83 +219,23 @@ export class ProductsService {
     const product = await this.prisma.product.update({
       where: { id },
       data: updateData,
-      include: {
-        brand: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        categories: {
-          include: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.productInclude,
     });
-    
     // Transformar respuesta a DTO  
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description || "",
-      sku: product.sku,
-      price: product.price.toNumber(),
-      stock: product.stock,
-      status: product.status,
-      brand: (product as any).brand,
-      categories: (product as any).categories.map((pc: any) => pc.category),
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    };
+    return this.transformProductToDto(product);
   }
 
   async findOne(id: string): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: {
-        brand: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        categories: {
-          include: {
-            category: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.productInclude,
     });
 
     if (!product) {
       throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
-
     // Transformar respuesta a DTO
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description || "",
-      sku: product.sku,
-      price: product.price.toNumber(),
-      stock: product.stock,
-      status: product.status,
-      brand: (product as any).brand,
-      categories: (product as any).categories.map((pc: any) => pc.category),
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    };
+    return this .transformProductToDto(product);
   }
 
   async remove(id: string): Promise<void>{
