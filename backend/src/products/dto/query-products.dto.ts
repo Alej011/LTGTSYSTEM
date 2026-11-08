@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, Min, IsIn } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min, Max, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -42,6 +42,17 @@ export class QueryProductsDto {
   @IsString()
   brandId?: string;
 
+  @ApiPropertyOptional({
+    description: 'Solo productos con stock menor o igual a este valor',
+    example: 5,
+    minimum: 0,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  maxStock?: number;
+
   // Paginación
   @ApiPropertyOptional({
     description: 'Número de página (empieza en 1)',
@@ -59,12 +70,14 @@ export class QueryProductsDto {
     description: 'Cantidad de items por página',
     example: 20,
     minimum: 1,
+    maximum: 100,
     default: 20,
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(100)
   limit?: number = 20;
 
   // Ordenamiento

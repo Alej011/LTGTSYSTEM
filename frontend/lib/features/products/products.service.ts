@@ -104,6 +104,7 @@ export interface ProductFilters {
   category?: string;
   status?: "active" | "inactive" | "discontinued";
   brandId?: string;
+  maxStock?: number;
   page?: number;
   limit?: number;
   sortBy?: "name" | "price" | "stock" | "createdAt";
@@ -125,6 +126,7 @@ export const getProducts = async (
     if (filters?.category) params.append("category", filters.category);
     if (filters?.status) params.append("status", filters.status);
     if (filters?.brandId) params.append("brandId", filters.brandId);
+    if (filters?.maxStock !== undefined) params.append("maxStock", filters.maxStock.toString());
     if (filters?.page) params.append("page", filters.page.toString());
     if (filters?.limit) params.append("limit", filters.limit.toString());
     if (filters?.sortBy) params.append("sortBy", filters.sortBy);

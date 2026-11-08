@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class BrandsService {
    * Obtiene una marca por ID
    */
   async findOne(id: string) {
-    return this.prisma.brand.findUnique({
+    const item = await this.prisma.brand.findUnique({
       where: { id },
       select: {
         id: true,
@@ -37,5 +37,7 @@ export class BrandsService {
         updatedAt: true,
       },
     });
+    if (!item) throw new NotFoundException('Marca no encontrada');
+    return item;
   }
 }

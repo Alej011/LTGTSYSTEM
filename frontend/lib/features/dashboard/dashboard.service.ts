@@ -23,22 +23,25 @@ export interface RecentActivity {
   priority?: string
 }
 
+const LOW_STOCK_THRESHOLD = 5
+
 export const getDashboardStats = async (userId: string, userRole: UserRole, userDepartment: string): Promise<DashboardStats> => {
-  // Obtener todos los productos (límite alto para dashboard)
-  const productsResponse = await getProducts({ limit: 1000 })
-  const products = productsResponse.data
+  // Solo se necesitan los totales: limit 1 evita traer el catálogo completo
+  const [allProducts, lowStock] = await Promise.all([
+    getProducts({ limit: 1 }),
+    getProducts({ limit: 1, maxStock: LOW_STOCK_THRESHOLD }),
+  ])
 
   const tickets = getTickets()
   const articles = getArticles("published")
   const unreadComms = getUnreadCount(userId, userRole, userDepartment)
 
-  const lowStockProducts = products.filter((p) => p.stock <= 5).length
   const openTickets = tickets.filter((t) => t.status === "abierto" || t.status === "en_progreso").length
   const myTickets = tickets.filter((t) => t.createdBy === userId || t.assignedTo === userId).length
 
   return {
-    totalProducts: productsResponse.meta.total, // Usar total de metadata
-    lowStockProducts,
+    totalProducts: allProducts.meta.total,
+    lowStockProducts: lowStock.meta.total,
     openTickets,
     myTickets,
     knowledgeArticles: articles.length,

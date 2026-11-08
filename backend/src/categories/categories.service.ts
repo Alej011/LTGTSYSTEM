@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class CategoriesService {
    * Obtiene una categoría por ID
    */
   async findOne(id: string) {
-    return this.prisma.category.findUnique({
+    const item = await this.prisma.category.findUnique({
       where: { id },
       select: {
         id: true,
@@ -37,5 +37,7 @@ export class CategoriesService {
         updatedAt: true,
       },
     });
+    if (!item) throw new NotFoundException('Categoría no encontrada');
+    return item;
   }
 }

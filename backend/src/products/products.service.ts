@@ -1,246 +1,108 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { QueryProductsDto } from "./dto/query-products.dto";
-import {
-  PaginatedProductsDto,
-  PaginationMetadata,
-} from "./dto/paginated-products.dto";
-import { Prisma } from "@prisma/client";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { ProductResponseDto } from "./dto/product-response.dto";
-import { UpdateProductDto } from "./dto/update-product.dto";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '../generated/prisma/client';
+import { QueryProductsDto } from './dto/query-products.dto';
+import { PaginatedProductsDto } from './dto/paginated-products.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
+
+const productInclude = {
+  brand: { select: { id: true, name: true } },
+  categories: { include: { category: { select: { id: true, name: true } } } },
+} satisfies Prisma.ProductInclude;
+
+type ProductWithRelations = Prisma.ProductGetPayload<{ include: typeof productInclude }>;
+
+function toCategoryLinks(categoryIds: string[]) {
+  return categoryIds.map((id) => ({ category: { connect: { id } } }));
+}
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  private transformProductToDto(product: any): ProductResponseDto {
-    return {
-      id : product.id,
-      name: product.name,
-      description: product.description || "",
-      sku: product.sku,
-      price: product.price.toNumber(),
-      stock: product.stock,
-      status: product.status,
-      brand: (product as any).brand,
-      categories: (product as any).categories.map((pc: any) => pc.category),
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-    }
-  }
-
-  /**
-   * Include estándar para queries de productos
-   * Evita duplicación en findMany, create, update, findOne
-   */
-  private readonly productInclude = {
-    brand: {
-      select: {
-        id: true,
-        name: true,
-      },
-    },
-    categories: {
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true, 
-          }
-        }
-      }
-    }
-  } as const;
-  /**
-   * Obtiene productos con paginación, filtros y búsqueda optimizada
-   *
-   * Los índices en Prisma optimizan estas queries:
-   * - @@index([sku]) → Búsqueda rápida por SKU
-   * - @@index([brandId]) → Filtro rápido por marca
-   * - @@index([status]) → Filtro rápido por estado
-   * - @@index([name]) → Búsqueda rápida por nombre
-   */
   async findAll(query: QueryProductsDto): Promise<PaginatedProductsDto> {
-    const {
-      search,
-      category,
-      status,
-      brandId,
-      page = 1,
-      limit = 20,
-      sortBy = "createdAt",
-      sortOrder = "desc",
-    } = query;
+    const { search, category, status, brandId, maxStock, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = query;
 
-    // Construir filtros WHERE (aprovecha índices)
     const where: Prisma.ProductWhereInput = {
-      AND: [
-        // Búsqueda por nombre, SKU o marca (usa índices de name y sku)
-        search
-          ? {
-              OR: [
-                { name: { contains: search, mode: "insensitive" } },
-                { sku: { contains: search, mode: "insensitive" } },
-                {
-                  brand: {
-                    name: { contains: search, mode: "insensitive" },
-                  },
-                },
-              ],
-            }
-          : {},
-
-        // Filtro por estado (usa índice de status)
-        status ? { status } : {},
-
-        // Filtro por marca (usa índice de brandId)
-        brandId ? { brandId } : {},
-
-        // Filtro por categoría (relación many-to-many)
-        category
-          ? {
-              categories: {
-                some: {
-                  category: {
-                    name: { equals: category, mode: "insensitive" },
-                  },
-                },
-              },
-            }
-          : {},
-      ],
+      ...(status && { status }),
+      ...(brandId && { brandId }),
+      ...(maxStock !== undefined && { stock: { lte: maxStock } }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { sku: { contains: search, mode: 'insensitive' } },
+          { brand: { name: { contains: search, mode: 'insensitive' } } },
+        ],
+      }),
+      ...(category && {
+        categories: { some: { category: { name: { equals: category, mode: 'insensitive' } } } },
+      }),
     };
 
-    // Configurar ordenamiento
-    const orderBy: Prisma.ProductOrderByWithRelationInput = {
-      [sortBy]: sortOrder,
-    };
-
-    // Calcular skip para paginación
-    const skip = (page - 1) * limit;
-
-    // Ejecutar queries en paralelo para optimizar
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        skip,
+        skip: (page - 1) * limit,
         take: limit,
-        orderBy,
-        include: this.productInclude,
+        orderBy: { [sortBy]: sortOrder },
+        include: productInclude,
       }),
       this.prisma.product.count({ where }),
     ]);
 
-    // Calcular metadata de paginación
     const totalPages = Math.ceil(total / limit);
-    const meta: PaginationMetadata = {
-      page,
-      limit,
-      total,
-      totalPages,
-      hasPrevPage: page > 1,
-      hasNextPage: page < totalPages,
-    };
-
-    // Transformar datos de Prisma a DTO
-    const transformedProducts = products.map((product) =>
-      this.transformProductToDto(product)
-    );
-
     return {
-      data: transformedProducts,
-      meta,
+      data: products.map(toResponse),
+      meta: { page, limit, total, totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages },
     };
-  }
-
-  async create(
-    createProductDto: CreateProductDto
-  ): Promise<ProductResponseDto> {
-    const { categoryIds, ...productData } = createProductDto;
-
-    // Preparar datos para crear
-    const createData: any = {
-      name: productData.name,
-      sku: productData.sku,
-      price: productData.price,
-      stock: productData.stock,
-      brandId: productData.brandId,
-      categories: {
-        create: categoryIds.map((categoryId) => ({
-          category: {
-            connect: { id: categoryId },
-          },
-        })),
-      },
-    };
-
-    // Agregar campos opcionales solo si existen
-    if (productData.description) {
-      createData.description = productData.description;
-    }
-    if (productData.status) {
-      createData.status = productData.status;
-    }
-
-    // Crear producto con relaciones incluidas
-    const product = await this.prisma.product.create({
-      data: createData,
-      include: this.productInclude,
-    });
-
-    // Transformar respuesta a DTO
-    return this.transformProductToDto(product);
-  }
-
-  async update(
-    id: string,
-    updateProductDto: UpdateProductDto
-  ): Promise<ProductResponseDto> {
-    const { categoryIds, ...productData } = updateProductDto;
-
-    // Preparar datos para actualizar
-    const updateData: any = { ...productData };
-
-    if (categoryIds && categoryIds.length > 0) {
-      await this.prisma.productCategory.deleteMany({
-        where: { productId: id },
-      });
-    }
-
-    updateData.categories = {
-      create: categoryIds?.map((categoryId) => ({
-        category: {
-          connect: { id: categoryId },
-        },
-      })),
-    }
-
-    const product = await this.prisma.product.update({
-      where: { id },
-      data: updateData,
-      include: this.productInclude,
-    });
-    // Transformar respuesta a DTO  
-    return this.transformProductToDto(product);
   }
 
   async findOne(id: string): Promise<ProductResponseDto> {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.product.findUnique({ where: { id }, include: productInclude });
+    if (!product) throw new NotFoundException('Producto no encontrado');
+    return toResponse(product);
+  }
+
+  async create({ categoryIds, ...data }: CreateProductDto): Promise<ProductResponseDto> {
+    const product = await this.prisma.product.create({
+      data: { ...data, categories: { create: toCategoryLinks(categoryIds) } },
+      include: productInclude,
+    });
+    return toResponse(product);
+  }
+
+  // La escritura anidada se ejecuta en una transacción: si falla, las categorías no se pierden.
+  async update(id: string, { categoryIds, ...data }: UpdateProductDto): Promise<ProductResponseDto> {
+    const product = await this.prisma.product.update({
       where: { id },
-      include: this.productInclude,
+      data: {
+        ...data,
+        ...(categoryIds && { categories: { deleteMany: {}, create: toCategoryLinks(categoryIds) } }),
+      },
+      include: productInclude,
     });
-
-    if (!product) {
-      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
-    }
-    // Transformar respuesta a DTO
-    return this .transformProductToDto(product);
+    return toResponse(product);
   }
 
-  async remove(id: string): Promise<void>{
-    await this.prisma.product.delete({
-      where: {id}
-    });
+  async remove(id: string): Promise<void> {
+    await this.prisma.product.delete({ where: { id } });
   }
+}
+
+function toResponse(product: ProductWithRelations): ProductResponseDto {
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description ?? '',
+    sku: product.sku,
+    price: product.price.toNumber(),
+    stock: product.stock,
+    status: product.status,
+    brand: product.brand,
+    categories: product.categories.map(({ category }) => category),
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
+  };
 }

@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Param, Patch, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -44,20 +45,12 @@ export class UsersController {
   @Patch('update/:id')
   @ApiOperation({ summary: 'Actualizar usuario (solo ADMIN)' })
   @ApiParam({ name: 'id', description: 'ID del usuario', example: 'clxyz123abc' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: 'Juan Pérez' },
-        role: { type: 'string', enum: ['ADMIN', 'SUPPORT'], example: 'SUPPORT' }
-      }
-    }
-  })
   @ApiResponse({ status: 200, description: 'Usuario actualizado' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos o campos no permitidos' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
-  update(@Param('id') id: string, @Body() body: { name?: string; role?: 'ADMIN' | 'SUPPORT' }) {
-    return this.users.update(id, body);
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.users.update(id, updateUserDto);
   }
 }
