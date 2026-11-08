@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       category: searchParams.get("category") || undefined,
       status: (searchParams.get("status") as "active" | "inactive" | "discontinued" | null) || undefined,
       brandId: searchParams.get("brandId") || undefined,
+      maxStock: searchParams.get("maxStock") ? parseInt(searchParams.get("maxStock")!) : undefined,
       page: searchParams.get("page") ? parseInt(searchParams.get("page")!) : undefined,
       limit: searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined,
       sortBy: (searchParams.get("sortBy") as "name" | "price" | "stock" | "createdAt" | null) || undefined,
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
     if (filters.category) params.append("category", filters.category)
     if (filters.status) params.append("status", filters.status)
     if (filters.brandId) params.append("brandId", filters.brandId)
+    if (filters.maxStock !== undefined) params.append("maxStock", filters.maxStock.toString())
     if (filters.page) params.append("page", filters.page.toString())
     if (filters.limit) params.append("limit", filters.limit.toString())
     if (filters.sortBy) params.append("sortBy", filters.sortBy)

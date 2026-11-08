@@ -136,8 +136,9 @@ export const ProductFiltersSchema = z.object({
   category: z.string().optional(),
   status: ProductStatusSchema.optional(),
   brandId: UUIDSchema.optional(),
+  maxStock: z.number().int().nonnegative().optional(),
   page: z.number().int().positive().optional(),
-  limit: z.number().int().positive().optional(),
+  limit: z.number().int().positive().max(100).optional(),
   sortBy: ProductSortBySchema.optional(),
   sortOrder: SortOrderSchema.optional(),
 })
