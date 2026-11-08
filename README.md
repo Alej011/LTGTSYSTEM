@@ -40,7 +40,11 @@ docker compose up -d
 | Swagger | http://localhost:4000/api/docs |
 | PostgreSQL | `localhost:5432` (usuario/clave/BD: `app` / `app` / `ltgt`) |
 
-Al arrancar, el backend aplica las migraciones pendientes (`prisma migrate deploy`).
+Al arrancar, el backend aplica las migraciones pendientes (`prisma migrate deploy`). Para cargar los usuarios de `backend/.env` y el catálogo de ejemplo:
+
+```bash
+docker compose exec backend pnpm db:seed
+```
 
 > **Permisos:** los contenedores escriben en las carpetas montadas como `root`. Si `dist/`, `.next/` o `prisma/migrations/` quedan bloqueadas, ejecuta:
 > `sudo chown -R $USER:$USER backend frontend`

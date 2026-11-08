@@ -19,7 +19,9 @@ src/
 └── categories/          # Lectura de categorías
 prisma/
 ├── schema.prisma        # Modelo de datos
-└── migrations/          # Historial de migraciones (no editar las ya aplicadas)
+├── migrations/          # Historial de migraciones (no editar las ya aplicadas)
+├── seed.ts              # Carga usuarios iniciales y catálogo de ejemplo
+└── seed-data.ts         # Datos del catálogo: marcas, categorías y productos
 ```
 
 Cada módulo sigue el patrón `controller` (rutas + Swagger) → `service` (lógica + Prisma) → `dto/` (validación con class-validator).
@@ -34,10 +36,12 @@ Copia `.env.template` a `.env`:
 | `JWT_ACCESS_SECRET` | Secreto para firmar tokens (mín. 32 caracteres aleatorios) | `openssl rand -base64 48` |
 | `PORT` | Puerto de la API | `4000` |
 | `FRONTEND_ORIGIN` | Origen permitido por CORS | `http://localhost:3000` |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | Usuario admin que crea el seed | — |
-| `SUPPORT_EMAIL` / `SUPPORT_PASSWORD` / `SUPPORT_NAME` | Usuario de soporte que crea el seed | — |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | Usuario admin que crea el seed. Obligatorio, contraseña de 8+ caracteres | — |
+| `SUPPORT_EMAIL` / `SUPPORT_PASSWORD` / `SUPPORT_NAME` | Usuario de soporte que crea el seed. Opcional | — |
 
 ## Desarrollo local
+
+El proyecto usa **pnpm 9.15.0** (campo `packageManager` en `package.json`). pnpm 10+ cambia a esa versión automáticamente; con otra versión de pnpm, `node_modules` puede quedar inconsistente.
 
 Con Docker (recomendado) basta con `docker compose up -d` desde la raíz. Sin Docker:
 
@@ -45,8 +49,11 @@ Con Docker (recomendado) basta con `docker compose up -d` desde la raíz. Sin Do
 pnpm install
 pnpm prisma:generate
 pnpm prisma:deploy      # aplica migraciones (requiere PostgreSQL accesible)
+pnpm db:seed            # usuarios iniciales y catálogo de ejemplo
 pnpm start:dev          # http://localhost:4000/api
 ```
+
+Desde tu máquina, con la BD de Docker, antepón `DATABASE_URL=postgresql://app:app@localhost:5432/ltgt` a los comandos de Prisma y del seed.
 
 | Script | Qué hace |
 |---|---|
@@ -55,7 +62,7 @@ pnpm start:dev          # http://localhost:4000/api
 | `prisma:generate` | Regenera el cliente de Prisma tras cambiar el schema |
 | `prisma:migrate` | Crea y aplica una migración nueva (solo desarrollo) |
 | `prisma:deploy` | Aplica migraciones pendientes (CI / producción) |
-| `db:seed` | Crea los usuarios iniciales — ⚠️ `prisma/seed.ts` no existe aún (solo `seed.ts.backup`) |
+| `db:seed` | Crea usuarios (desde `.env`), marcas, categorías y 30 productos. Se puede ejecutar varias veces: no duplica ni sobrescribe datos existentes |
 
 ## Base de datos
 
