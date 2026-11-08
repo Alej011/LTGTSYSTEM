@@ -4,7 +4,7 @@ Sistema interno de gestión: productos (con marcas y categorías), usuarios con 
 
 | Carpeta | Qué es | Stack |
 |---|---|---|
-| [`backend/`](backend/README.md) | API REST | NestJS 10 · Prisma 5 · PostgreSQL 16 |
+| [`backend/`](backend/README.md) | API REST | NestJS 11 · Prisma 7 · PostgreSQL 16 · Node 24 |
 | [`frontend/`](frontend/README.md) | Aplicación web + BFF | Next.js 14 (App Router) · React Query · Zod · shadcn/ui |
 | `docs/` | Análisis y documentación técnica | — |
 
@@ -46,7 +46,7 @@ Al arrancar, el backend aplica las migraciones pendientes (`prisma migrate deplo
 docker compose exec backend pnpm db:seed
 ```
 
-> **Permisos:** los contenedores escriben en las carpetas montadas como `root`. Si `dist/`, `.next/` o `prisma/migrations/` quedan bloqueadas, ejecuta:
+> **Permisos:** el backend de desarrollo corre como el usuario `node` (UID 1000), así que los archivos que genera quedan a tu nombre. Si tienes carpetas de root de versiones anteriores, ejecuta una vez:
 > `sudo chown -R $USER:$USER backend frontend`
 
 ## Desarrollo sin Docker
@@ -55,4 +55,13 @@ Ver las instrucciones de cada carpeta: [backend](backend/README.md#desarrollo-lo
 
 ## Producción
 
-`docker-compose.prod.yml` existe pero **todavía no es funcional** (ver `docs/analisis_ltgtsystem.md`, Fase 1 del plan).
+```bash
+cp .env.template .env                                   # credenciales de PostgreSQL
+cp backend/.env.template backend/.env.production         # JWT_ACCESS_SECRET, FRONTEND_ORIGIN, NODE_ENV=production
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+- El backend aplica las migraciones al arrancar y solo es accesible desde la red interna de Docker.
+- Para crear el usuario administrador la primera vez:
+  `docker compose -f docker-compose.prod.yml exec -e ADMIN_EMAIL=... -e ADMIN_PASSWORD=... -e ADMIN_NAME=... backend pnpm db:seed:prod`
+- La imagen de producción del **frontend** todavía no funciona; se corrige en el PR de la Fase 1 del frontend.
