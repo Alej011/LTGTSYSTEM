@@ -1,0 +1,9 @@
+node_modules
+.pnpm-store
+dist
+dist-seed
+src/generated
+.env
+.env.*
+!.env.template
+*.log
