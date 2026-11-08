@@ -1,14 +1,17 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+
+const USER_SELECT = { id: true, email: true, name: true, role: true } as const;
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.user.findMany({ select: { id: true, email: true, name: true, role: true } });
+    return this.prisma.user.findMany({ select: USER_SELECT });
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -43,11 +46,13 @@ export class UsersService {
     return user;
   }
 
-  findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id }, select: { id: true, email: true, name: true, role: true } });
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id }, select: USER_SELECT });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return user;
   }
 
-  update(id: string, data: { name?: string; role?: 'ADMIN' | 'SUPPORT' }) {
-    return this.prisma.user.update({ where: { id }, data, select: { id: true, email: true, name: true, role: true } });
+  update(id: string, data: UpdateUserDto) {
+    return this.prisma.user.update({ where: { id }, data, select: USER_SELECT });
   }
 }
