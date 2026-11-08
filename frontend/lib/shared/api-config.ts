@@ -1,6 +1,6 @@
 
-// URL base de la API desde variables de entorno
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+// URL del backend. Solo la usan las rutas BFF (servidor) y se lee al arrancar, no en el build.
+export const API_BASE_URL = process.env.API_URL || "http://localhost:4000"
 
 // Endpoints de la API organizados por módulo
 export const API_ENDPOINTS = {

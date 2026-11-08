@@ -9,7 +9,7 @@
  */
 
 import { z } from "zod"
-import { API_BASE_URL, API_TIMEOUT, STORAGE_KEYS } from "./api-config"
+import { API_TIMEOUT, STORAGE_KEYS } from "./api-config"
 
 // Tipos de respuesta de la API
 export interface ApiResponse<T = any> {
@@ -159,10 +159,8 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
     ...restConfig
   } = config
 
-  // Construir URL completa
-  // Si el endpoint empieza con /api/, es un endpoint del BFF (Next.js API Routes)
-  // Si no, es un endpoint del backend directo
-  const url = endpoint.startsWith("/api/") ? endpoint : `${API_BASE_URL}${endpoint}`
+  // El navegador solo habla con el BFF (rutas /api de Next.js), nunca con el backend directo
+  const url = endpoint
 
   // Headers por defecto
   const headers: Record<string, string> = {
