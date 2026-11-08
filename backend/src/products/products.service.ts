@@ -23,11 +23,12 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: QueryProductsDto): Promise<PaginatedProductsDto> {
-    const { search, category, status, brandId, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = query;
+    const { search, category, status, brandId, maxStock, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = query;
 
     const where: Prisma.ProductWhereInput = {
       ...(status && { status }),
       ...(brandId && { brandId }),
+      ...(maxStock !== undefined && { stock: { lte: maxStock } }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },

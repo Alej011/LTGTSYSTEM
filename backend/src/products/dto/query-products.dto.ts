@@ -42,6 +42,17 @@ export class QueryProductsDto {
   @IsString()
   brandId?: string;
 
+  @ApiPropertyOptional({
+    description: 'Solo productos con stock menor o igual a este valor',
+    example: 5,
+    minimum: 0,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  maxStock?: number;
+
   // Paginación
   @ApiPropertyOptional({
     description: 'Número de página (empieza en 1)',
