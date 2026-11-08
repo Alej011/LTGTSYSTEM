@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsEnum, IsArray, Min } from "class-validator";
+import { ArrayMinSize, ArrayUnique, IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductStatus } from "../../generated/prisma/enums";
 
@@ -8,7 +8,7 @@ export class CreateProductDto {
     @IsNotEmpty()
     name: string;
 
-    @ApiProperty({ example: 'Laptop ultrabook con procesador Intel i7...' })
+    @ApiProperty({ example: 'Laptop ultrabook con procesador Intel i7...', required: false })
     @IsString()
     @IsOptional()
     description?: string;
@@ -18,20 +18,20 @@ export class CreateProductDto {
     @IsNotEmpty()
     sku: string;
 
-    @ApiProperty({ example: 1299.99 })
-    @IsNumber()
-    @IsNotEmpty()
+    @ApiProperty({ example: 1299.99, minimum: 0 })
+    @IsNumber({ maxDecimalPlaces: 2 })
+    @Min(0)
     price: number;
 
-    @ApiProperty({ example: 25 })
-    @IsNumber()
+    @ApiProperty({ example: 25, minimum: 0 })
+    @IsInt()
     @Min(0)
     stock: number;
 
-    @ApiProperty({ enum: ProductStatus, example: 'active' })
+    @ApiProperty({ enum: ProductStatus, example: 'active', required: false, default: 'active' })
     @IsEnum(ProductStatus)
     @IsOptional()
-    status?: ProductStatus = 'active';
+    status?: ProductStatus;
 
     @ApiProperty({ example: 'clxyz123' })
     @IsString()
@@ -44,6 +44,8 @@ export class CreateProductDto {
         type: [String]
     })
     @IsArray()
+    @ArrayMinSize(1)
+    @ArrayUnique()
     @IsString({ each: true })
     @IsNotEmpty({ each: true })
     categoryIds: string[];
