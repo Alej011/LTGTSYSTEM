@@ -33,7 +33,8 @@ services:
       - ./backend:/app
       - /app/node_modules
     command: >
-      sh -c "pnpm prisma:deploy &&
+      sh -c "pnpm prisma:generate &&
+             pnpm prisma:deploy &&
              pnpm start:dev"
     networks:
       - ltgt_net

@@ -5,7 +5,7 @@ import {
   PaginatedProductsDto,
   PaginationMetadata,
 } from "./dto/paginated-products.dto";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../generated/prisma/client";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { ProductResponseDto } from "./dto/product-response.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";

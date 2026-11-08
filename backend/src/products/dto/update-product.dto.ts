@@ -8,7 +8,7 @@ import {
   Min,
 } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { ProductStatus } from "@prisma/client";
+import { ProductStatus } from "../../generated/prisma/enums";
 
 export class UpdateProductDto {
   @ApiProperty({ example: "Laptop HP Pavilion 15", required: false })

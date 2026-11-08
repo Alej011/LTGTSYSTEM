@@ -15,3 +15,5 @@ dist
 
 
             
+# Prisma Client generado (prisma generate)
+src/generated

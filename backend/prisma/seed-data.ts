@@ -1,4 +1,4 @@
-import { ProductStatus } from '@prisma/client';
+import { ProductStatus } from '../src/generated/prisma/enums';
 
 export type SeedProduct = {
   sku: string;

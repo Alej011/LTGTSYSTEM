@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsNumber, IsOptional, IsEnum, IsArray, Min } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { ProductStatus } from "@prisma/client";
+import { ProductStatus } from "../../generated/prisma/enums";
 
 export class CreateProductDto {
     @ApiProperty({ example: 'Laptop Dell XPS 13' })
