@@ -33,13 +33,13 @@ export async function GET(request: NextRequest) {
 
     const validationResult = ProductFiltersSchema.safeParse(filters)
     if (!validationResult.success) {
-      console.error("[BFF] Filter validation failed:", validationResult.error.errors)
+      console.error("[BFF] Filter validation failed:", validationResult.error.issues)
       console.error("[BFF] Filters received:", filters)
       return NextResponse.json(
         {
           message: "Parámetros de búsqueda inválidos",
           error: "VALIDATION_ERROR",
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       )
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     const responseValidation = PaginatedProductsSchema.safeParse(backendData)
 
     if (!responseValidation.success) {
-      console.error("[BFF LIST] Backend response validation failed:", responseValidation.error.errors)
+      console.error("[BFF LIST] Backend response validation failed:", responseValidation.error.issues)
       // Still return backend data even if validation fails (backend is source of truth)
       return NextResponse.json(backendData, { status: 200 })
     }

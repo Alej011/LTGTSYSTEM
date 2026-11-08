@@ -2,7 +2,6 @@ import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
-import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "sonner"
 import { Providers } from "./providers"
 import { AuthProvider } from "@/contexts/auth-context"
@@ -32,7 +31,6 @@ export default function RootLayout({
         </Suspense>
         {/* Toast notifications */}
         <Toaster position="top-right" richColors closeButton />
-        <Analytics />
       </body>
     </html>
   )

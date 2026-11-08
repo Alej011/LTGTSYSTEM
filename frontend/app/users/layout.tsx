@@ -7,8 +7,8 @@ const LOGIN_ROUTE = "/"
 const ADMIN_REDIRECT = "/dashboard"
 const USERS_PATH = "/users"
 
-export default function UsersLayout({ children }: { children: ReactNode }) {
-  const token = cookies().get("ltgt_access_token")?.value
+export default async function UsersLayout({ children }: { children: ReactNode }) {
+  const token = (await cookies()).get("ltgt_access_token")?.value
 
   if (!token) {
     redirect(`${LOGIN_ROUTE}?redirect=${encodeURIComponent(USERS_PATH)}`)
