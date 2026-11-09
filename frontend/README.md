@@ -28,7 +28,7 @@ Componente ──► hook de React Query (lib/queries)
 app/
 ├── page.tsx                 # Login
 ├── (app)/                   # Secciones con sidebar fijo (el grupo no cambia las URLs)
-│   ├── layout.tsx           # Sidebar + menú móvil
+│   ├── layout.tsx           # Sidebar plegable (botón o Ctrl+B) + menú móvil
 │   └── dashboard/ products/ users/ tickets/ knowledge/ communications/
 ├── api/                     # Rutas BFF (auth, users, products, brands, categories)
 ├── layout.tsx, providers.tsx # Layout raíz, tema (next-themes) y React Query
