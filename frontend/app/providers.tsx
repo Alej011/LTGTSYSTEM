@@ -43,7 +43,7 @@ export function Providers({ children }: ProvidersProps) {
         <ReactQueryDevtools
           initialIsOpen={false}
           position="bottom"
-          buttonPosition="bottom-right"
+          buttonPosition="top-right"
         />
       )}
     </QueryClientProvider>
