@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
@@ -55,14 +56,14 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
   }
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      draft: "secondary",
-      published: "default",
-      archived: "outline",
-    } as const
+    const tones = {
+      draft: TONE_CLASSES.warning,
+      published: TONE_CLASSES.success,
+      archived: TONE_CLASSES.neutral,
+    }
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>{getStatusLabel(status as any)}</Badge>
+      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>{getStatusLabel(status as any)}</Badge>
     )
   }
 
@@ -158,12 +159,12 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
 
                     <div className="flex flex-wrap gap-1 mb-4">
                       {article.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <Badge key={tag} variant="outline" className={`text-xs ${TONE_CLASSES.neutral}`}>
                           {tag}
                         </Badge>
                       ))}
                       {article.tags.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="outline" className={`text-xs ${TONE_CLASSES.neutral}`}>
                           +{article.tags.length - 3}
                         </Badge>
                       )}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
@@ -84,11 +85,11 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
   }
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      draft: "secondary",
-      published: "default",
-      archived: "outline",
-    } as const
+    const tones = {
+      draft: TONE_CLASSES.warning,
+      published: TONE_CLASSES.success,
+      archived: TONE_CLASSES.neutral,
+    }
 
     const labels = {
       draft: "Borrador",
@@ -97,7 +98,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
     }
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
+      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )
@@ -210,7 +211,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                               </div>
                             </div>
                             {communication.expiresAt && (
-                              <span className="text-orange-600">
+                              <span className="text-warning">
                                 Expira: {formatDistanceToNow(communication.expiresAt, { addSuffix: true, locale: es })}
                               </span>
                             )}

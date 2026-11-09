@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -171,11 +172,11 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Valoraciones</label>
                 <div className="mt-2 flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1 text-green-600">
+                  <div className="flex items-center gap-1 text-success">
                     <ThumbsUp className="h-3 w-3" />
                     {article.helpful}
                   </div>
-                  <div className="flex items-center gap-1 text-red-600">
+                  <div className="flex items-center gap-1 text-destructive">
                     <ThumbsDown className="h-3 w-3" />
                     {article.notHelpful}
                   </div>
@@ -195,7 +196,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {article.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
+                    <Badge key={tag} variant="outline" className={TONE_CLASSES.neutral}>
                       {tag}
                     </Badge>
                   ))}

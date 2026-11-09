@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
@@ -49,10 +50,10 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
   })
 
   const getRoleBadge = (role: string) => {
-    const variants = {
-      admin: "default",
-      empleado: "secondary",
-    } as const
+    const tones = {
+      admin: TONE_CLASSES.primary,
+      empleado: TONE_CLASSES.info,
+    }
 
     const labels = {
       admin: "Administrador",
@@ -60,7 +61,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
     }
 
     return (
-      <Badge variant={variants[role as keyof typeof variants] || "secondary"}>
+      <Badge variant="outline" className={tones[role as keyof typeof tones] ?? TONE_CLASSES.neutral}>
         {labels[role as keyof typeof labels] || role}
       </Badge>
     )

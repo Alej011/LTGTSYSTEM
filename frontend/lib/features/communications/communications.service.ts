@@ -1,3 +1,4 @@
+import { TONE_CLASSES } from "@/lib/shared/tones"
 export type CommunicationType = "anuncio" | "politica" | "evento" | "urgente" | "general"
 export type CommunicationStatus = "draft" | "published" | "archived"
 
@@ -341,11 +342,11 @@ export const getTypeLabel = (type: CommunicationType): string => {
 
 export const getTypeColor = (type: CommunicationType): string => {
   const colors = {
-    anuncio: "text-blue-600 bg-blue-50",
-    politica: "text-purple-600 bg-purple-50",
-    evento: "text-green-600 bg-green-50",
-    urgente: "text-red-600 bg-red-50",
-    general: "text-gray-600 bg-gray-50",
+    anuncio: TONE_CLASSES.info,
+    politica: TONE_CLASSES.primary,
+    evento: TONE_CLASSES.success,
+    urgente: TONE_CLASSES.danger,
+    general: TONE_CLASSES.neutral,
   }
   return colors[type]
 }

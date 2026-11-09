@@ -16,7 +16,6 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
       value: stats.totalProducts.toString(),
       change: stats.lowStockProducts > 0 ? `${stats.lowStockProducts} con stock bajo` : "Stock normal",
       icon: Package,
-      color: "text-blue-600",
       show: ["admin", "empleado"].includes(userRole),
     },
     {
@@ -24,7 +23,6 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
       value: stats.openTickets.toString(),
       change: stats.myTickets > 0 ? `${stats.myTickets} asignados a ti` : "Sin tickets asignados",
       icon: Headphones,
-      color: "text-orange-600",
       show: true,
     },
     {
@@ -32,7 +30,6 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
       value: stats.knowledgeArticles.toString(),
       change: "Soluciones disponibles",
       icon: BookOpen,
-      color: "text-green-600",
       show: true,
     },
     {
@@ -40,7 +37,6 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
       value: stats.unreadCommunications.toString(),
       change: stats.unreadCommunications > 0 ? "Sin leer" : "Todo leído",
       icon: MessageSquare,
-      color: "text-purple-600",
       show: true,
     },
   ]
@@ -52,17 +48,19 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
         .map((card, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <card.icon className={`h-4 w-4 ${card.color}`} />
+              <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <card.icon className="h-4 w-4" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{card.value}</div>
+              <div className="text-2xl font-bold tracking-tight">{card.value}</div>
               <div className="flex items-center gap-2 mt-1">
                 {card.title === "Productos Totales" && stats.lowStockProducts > 0 && (
-                  <AlertTriangle className="h-3 w-3 text-orange-500" />
+                  <AlertTriangle className="h-3 w-3 text-warning" />
                 )}
                 {card.title === "Comunicaciones" && stats.unreadCommunications === 0 && (
-                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <CheckCircle className="h-3 w-3 text-success" />
                 )}
                 <p className="text-xs text-muted-foreground">{card.change}</p>
               </div>

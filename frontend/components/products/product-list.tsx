@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -82,11 +83,11 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      active: "default",
-      inactive: "secondary",
-      discontinued: "destructive",
-    } as const
+    const tones = {
+      active: TONE_CLASSES.success,
+      inactive: TONE_CLASSES.neutral,
+      discontinued: TONE_CLASSES.danger,
+    }
 
     const labels = {
       active: "Activo",
@@ -95,7 +96,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
     }
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
+      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )
@@ -103,9 +104,9 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
 
   const getStockBadge = (stock: number) => {
     if (stock === 0) {
-      return <Badge variant="destructive">Sin Stock</Badge>
+      return <Badge variant="outline" className={TONE_CLASSES.danger}>Sin stock</Badge>
     } else if (stock <= 5) {
-      return <Badge variant="secondary">Stock Bajo</Badge>
+      return <Badge variant="outline" className={TONE_CLASSES.warning}>Stock bajo</Badge>
     }
     return <Badge variant="outline">{stock} unidades</Badge>
   }

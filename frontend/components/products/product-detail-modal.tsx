@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { type Product, getProductById } from "@/lib/features/products/products.service"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import {
   Dialog,
   DialogContent,
@@ -43,11 +44,11 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
   }
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      active: "default",
-      inactive: "secondary",
-      discontinued: "destructive",
-    } as const
+    const tones = {
+      active: TONE_CLASSES.success,
+      inactive: TONE_CLASSES.neutral,
+      discontinued: TONE_CLASSES.danger,
+    }
 
     const labels = {
       active: "Activo",
@@ -56,7 +57,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
     }
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
+      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )
@@ -64,9 +65,9 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
 
   const getStockBadge = (stock: number) => {
     if (stock === 0) {
-      return <Badge variant="destructive">Sin Stock</Badge>
+      return <Badge variant="outline" className={TONE_CLASSES.danger}>Sin stock</Badge>
     } else if (stock <= 5) {
-      return <Badge variant="secondary">Stock Bajo</Badge>
+      return <Badge variant="outline" className={TONE_CLASSES.warning}>Stock bajo</Badge>
     }
     return <Badge variant="outline">{stock} unidades</Badge>
   }

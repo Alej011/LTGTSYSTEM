@@ -152,7 +152,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <CheckCircle className="h-5 w-5 text-success" />
                   Solución
                 </CardTitle>
               </CardHeader>
@@ -254,7 +254,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Resuelto</label>
                   <p className="mt-1 flex items-center text-sm">
-                    <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
+                    <CheckCircle className="h-3 w-3 mr-1 text-success" />
                     {format(ticket.resolvedAt, "PPP 'a las' p", { locale: es })}
                   </p>
                 </div>
