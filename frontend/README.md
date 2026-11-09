@@ -58,7 +58,7 @@ proxy.ts                     # Protección de rutas y renovación de sesión
 
 Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt000004l3a92a7n1m) (shadcn/ui + Tailwind 4), definido en `app/globals.css`.
 
-- **Modo claro:** colores de marca de LTGT (azul petróleo `#164e63`, naranja `#c2410c`, cian claro).
+- **Modo claro:** neutros del tema (fondo y tarjetas blancas, sidebar gris claro) con el azul `oklch(0.488 0.243 264)` como color principal. Es el mismo azul que el tema usa en el modo oscuro y en las gráficas.
 - **Modo oscuro:** el del tema, sin cambios.
 - **Tipografía, radios, sombras y espaciado:** los del tema en los dos modos. La fuente es la del sistema, sin descargas.
 - **Selector de tema:** en el sidebar, en *Configuración*, con las opciones Claro, Oscuro y Sistema. La elección se guarda en el navegador.
@@ -66,7 +66,7 @@ Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt00000
 **Reglas para mantenerlo coherente:**
 - No uses colores fijos de Tailwind (`text-blue-600`, `bg-red-50`...), porque no cambian con el modo oscuro. Usa los tokens: `primary`, `muted-foreground`, `destructive`, `success`, `warning`, `info`.
 - Para badges de estado usa `TONE_CLASSES` de `lib/shared/tones.ts`. Elige el tono por significado (éxito, alerta, error, información), no por color.
-- Los colores del modo claro cumplen contraste AA (4.5:1 en texto). Si cambias un color, revisa el contraste.
+- Los colores cumplen contraste AA (4.5:1 en texto). Respecto al tema, en modo claro se oscurecieron un poco el texto secundario y el borde de los inputs (3:1). Si cambias un color, revisa el contraste.
 
 ## Estado de los módulos
 

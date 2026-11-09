@@ -4,43 +4,46 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Tema "ltgtsystem" (tweakcn). Modo claro con los colores de marca de LTGT;
- * modo oscuro, tipografía, radios y sombras tal como los define el tema.
+ * Tema "ltgtsystem" (tweakcn). Modo claro: neutros del tema con el azul que el propio tema
+ * usa en el modo oscuro y en las gráficas, para que ambos modos se vean como la misma app.
+ * Modo oscuro, tipografía, radios y sombras tal como los define el tema.
  * Los colores de estado (success, warning, info) no vienen en el tema y se agregan aquí.
  */
 :root {
-  --background: #ffffff;
-  --foreground: #475569;
-  --card: #ecfeff;
-  --card-foreground: #475569;
-  --popover: #ffffff;
-  --popover-foreground: #475569;
-  --primary: #164e63;
-  --primary-foreground: #ffffff;
-  --secondary: #c2410c;
-  --secondary-foreground: #ffffff;
-  --muted: #f0f4f8;
-  --muted-foreground: #5b6779;
-  --accent: #cffafe;
-  --accent-foreground: #164e63;
-  --destructive: #c81e1e;
-  --destructive-foreground: #ffffff;
-  --border: #d1d5db;
-  --input: #8b95a5;
-  --ring: #164e63;
-  --chart-1: #164e63;
-  --chart-2: #c2410c;
-  --chart-3: #0891b2;
-  --chart-4: #d97706;
-  --chart-5: #64748b;
-  --sidebar: #ecfeff;
-  --sidebar-foreground: #475569;
-  --sidebar-primary: #164e63;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #cffafe;
-  --sidebar-accent-foreground: #164e63;
-  --sidebar-border: #d1d5db;
-  --sidebar-ring: #164e63;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.488 0.243 264.376);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0.014 254.604);
+  --secondary-foreground: oklch(0.424 0.199 265.638);
+  --muted: oklch(0.97 0 0);
+  /* 0.54 en lugar de 0.556 del tema: sobre fondos muted queda en 4.6:1 (AA) */
+  --muted-foreground: oklch(0.54 0 0);
+  --accent: oklch(0.97 0.014 254.604);
+  --accent-foreground: oklch(0.424 0.199 265.638);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.922 0 0);
+  /* Más oscuro que en el tema (0.922) para que el borde de los campos llegue a 3:1 (WCAG 1.4.11) */
+  --input: oklch(0.66 0 0);
+  --ring: oklch(0.488 0.243 264.376);
+  --chart-1: oklch(0.81 0.1 252);
+  --chart-2: oklch(0.62 0.19 260);
+  --chart-3: oklch(0.55 0.22 263);
+  --chart-4: oklch(0.49 0.22 264);
+  --chart-5: oklch(0.42 0.18 266);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0.014 254.604);
+  --sidebar-accent-foreground: oklch(0.424 0.199 265.638);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.488 0.243 264.376);
 
   --success: #157a3a;
   --warning: #a14a07;
