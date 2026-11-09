@@ -136,7 +136,7 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
                   <Separator />
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Expira</label>
-                    <p className="mt-1 flex items-center text-sm text-orange-600">
+                    <p className="mt-1 flex items-center text-sm text-warning">
                       <Calendar className="h-3 w-3 mr-1" />
                       {format(communication.expiresAt, "PPP 'a las' p", { locale: es })}
                     </p>

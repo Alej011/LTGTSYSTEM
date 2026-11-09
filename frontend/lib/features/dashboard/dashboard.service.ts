@@ -108,7 +108,6 @@ export const getQuickActions = (userRole: UserRole) => {
       description: "Reportar problema técnico",
       href: "/tickets",
       icon: "Headphones",
-      color: "text-orange-600",
       roles: ["empleado", "admin"],
     },
     {
@@ -116,7 +115,6 @@ export const getQuickActions = (userRole: UserRole) => {
       description: "Consultar catálogo",
       href: "/products",
       icon: "Package",
-      color: "text-blue-600",
       roles: ["empleado", "admin"],
     },
     {
@@ -124,7 +122,6 @@ export const getQuickActions = (userRole: UserRole) => {
       description: "Buscar soluciones",
       href: "/knowledge",
       icon: "BookOpen",
-      color: "text-green-600",
       roles: ["empleado", "admin"],
     },
     {
@@ -132,7 +129,6 @@ export const getQuickActions = (userRole: UserRole) => {
       description: "Ver novedades",
       href: "/communications",
       icon: "MessageSquare",
-      color: "text-purple-600",
       roles: ["empleado", "admin"],
     },
     {
@@ -140,7 +136,6 @@ export const getQuickActions = (userRole: UserRole) => {
       description: "Administrar personal",
       href: "/users",
       icon: "Users",
-      color: "text-indigo-600",
       roles: ["admin"],
     },
     {
@@ -148,7 +143,6 @@ export const getQuickActions = (userRole: UserRole) => {
       description: "Resolver incidencias",
       href: "/tickets",
       icon: "AlertCircle",
-      color: "text-red-600",
       roles: ["empleado", "admin"],
     },
   ]

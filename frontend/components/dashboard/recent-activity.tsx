@@ -6,6 +6,7 @@ import { Clock, Headphones, Package, MessageSquare, BookOpen } from "lucide-reac
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import type { RecentActivity } from "@/lib/features/dashboard/dashboard.service"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface RecentActivityProps {
   activities: RecentActivity[]
@@ -15,25 +16,25 @@ export function RecentActivityComponent({ activities }: RecentActivityProps) {
   const getIcon = (type: string) => {
     switch (type) {
       case "ticket":
-        return <Headphones className="h-4 w-4 text-orange-600" />
+        return <Headphones className="h-4 w-4" />
       case "product":
-        return <Package className="h-4 w-4 text-blue-600" />
+        return <Package className="h-4 w-4" />
       case "communication":
-        return <MessageSquare className="h-4 w-4 text-purple-600" />
+        return <MessageSquare className="h-4 w-4" />
       case "knowledge":
-        return <BookOpen className="h-4 w-4 text-green-600" />
+        return <BookOpen className="h-4 w-4" />
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />
+        return <Clock className="h-4 w-4" />
     }
   }
 
   const getStatusBadge = (activity: RecentActivity) => {
     if (activity.type === "ticket" && activity.status) {
       const statusColors = {
-        abierto: "bg-blue-50 text-blue-600",
-        en_progreso: "bg-yellow-50 text-yellow-600",
-        resuelto: "bg-green-50 text-green-600",
-        cerrado: "bg-gray-50 text-gray-600",
+        abierto: TONE_CLASSES.info,
+        en_progreso: TONE_CLASSES.warning,
+        resuelto: TONE_CLASSES.success,
+        cerrado: TONE_CLASSES.neutral,
       }
       const statusLabels = {
         abierto: "Abierto",
@@ -50,10 +51,10 @@ export function RecentActivityComponent({ activities }: RecentActivityProps) {
 
     if (activity.type === "ticket" && activity.priority) {
       const priorityColors = {
-        baja: "bg-green-50 text-green-600",
-        media: "bg-yellow-50 text-yellow-600",
-        alta: "bg-orange-50 text-orange-600",
-        critica: "bg-red-50 text-red-600",
+        baja: TONE_CLASSES.neutral,
+        media: TONE_CLASSES.info,
+        alta: TONE_CLASSES.warning,
+        critica: TONE_CLASSES.danger,
       }
       return (
         <Badge variant="outline" className={priorityColors[activity.priority as keyof typeof priorityColors]}>
@@ -64,11 +65,11 @@ export function RecentActivityComponent({ activities }: RecentActivityProps) {
 
     if (activity.type === "communication" && activity.status) {
       const typeColors = {
-        anuncio: "bg-blue-50 text-blue-600",
-        politica: "bg-purple-50 text-purple-600",
-        evento: "bg-green-50 text-green-600",
-        urgente: "bg-red-50 text-red-600",
-        general: "bg-gray-50 text-gray-600",
+        anuncio: TONE_CLASSES.info,
+        politica: TONE_CLASSES.primary,
+        evento: TONE_CLASSES.success,
+        urgente: TONE_CLASSES.danger,
+        general: TONE_CLASSES.neutral,
       }
       const typeLabels = {
         anuncio: "Anuncio",
@@ -100,7 +101,7 @@ export function RecentActivityComponent({ activities }: RecentActivityProps) {
           ) : (
             activities.map((activity) => (
               <div key={`${activity.type}-${activity.id}`} className="flex items-start space-x-4">
-                <div className="flex-shrink-0 mt-1">{getIcon(activity.type)}</div>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">{getIcon(activity.type)}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{activity.title}</p>
                   <p className="text-sm text-muted-foreground">{activity.description}</p>

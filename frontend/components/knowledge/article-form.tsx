@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   type KnowledgeArticle,
@@ -198,7 +199,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                    <Badge key={tag} variant="outline" className={`flex items-center gap-1 ${TONE_CLASSES.neutral}`}>
                       {tag}
                       <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(tag)} />
                     </Badge>

@@ -1,3 +1,4 @@
+import { TONE_CLASSES } from "@/lib/shared/tones"
 export type TicketStatus = "abierto" | "en_progreso" | "resuelto" | "cerrado"
 export type TicketPriority = "baja" | "media" | "alta" | "critica"
 export type TicketCategory = "hardware" | "software" | "red" | "acceso" | "otro"
@@ -162,20 +163,20 @@ export const addComment = async (commentData: Omit<TicketComment, "id" | "create
 
 export const getPriorityColor = (priority: TicketPriority): string => {
   const colors = {
-    baja: "text-green-600 bg-green-50",
-    media: "text-yellow-600 bg-yellow-50",
-    alta: "text-orange-600 bg-orange-50",
-    critica: "text-red-600 bg-red-50",
+    baja: TONE_CLASSES.neutral,
+    media: TONE_CLASSES.info,
+    alta: TONE_CLASSES.warning,
+    critica: TONE_CLASSES.danger,
   }
   return colors[priority]
 }
 
 export const getStatusColor = (status: TicketStatus): string => {
   const colors = {
-    abierto: "text-blue-600 bg-blue-50",
-    en_progreso: "text-yellow-600 bg-yellow-50",
-    resuelto: "text-green-600 bg-green-50",
-    cerrado: "text-gray-600 bg-gray-50",
+    abierto: TONE_CLASSES.info,
+    en_progreso: TONE_CLASSES.warning,
+    resuelto: TONE_CLASSES.success,
+    cerrado: TONE_CLASSES.neutral,
   }
   return colors[status]
 }

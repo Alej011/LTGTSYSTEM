@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { type User, getUsers } from "@/lib/features/users/users.service"
-import { Users, Plus, Edit, ArrowLeft, Search } from "lucide-react"
+import { Users, Plus, Edit, Search } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useUserPermissions } from "@/lib/shared/permissions"
 
@@ -18,7 +18,6 @@ interface UserListProps {
 }
 
 export function UserList({ onEdit, onAdd }: UserListProps) {
-  const router = useRouter()
   const { user: currentUser } = useAuth()
   const permissions = useUserPermissions(currentUser?.role)
   const [users, setUsers] = useState<User[]>([])
@@ -51,10 +50,10 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
   })
 
   const getRoleBadge = (role: string) => {
-    const variants = {
-      admin: "default",
-      empleado: "secondary",
-    } as const
+    const tones = {
+      admin: TONE_CLASSES.primary,
+      empleado: TONE_CLASSES.info,
+    }
 
     const labels = {
       admin: "Administrador",
@@ -62,7 +61,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
     }
 
     return (
-      <Badge variant={variants[role as keyof typeof variants] || "secondary"}>
+      <Badge variant="outline" className={tones[role as keyof typeof tones] ?? TONE_CLASSES.neutral}>
         {labels[role as keyof typeof labels] || role}
       </Badge>
     )
@@ -70,14 +69,6 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Botón de retorno al dashboard */}
-      <div>
-        <Button variant="ghost" onClick={() => router.push("/dashboard")} className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver al Dashboard
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type Product, type PaginationMetadata, getProducts, deleteProduct } from "@/lib/features/products/products.service"
-import { Search, Plus, Edit, Trash2, Package, Eye, ArrowLeft } from "lucide-react"
+import { Search, Plus, Edit, Trash2, Package, Eye } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +30,6 @@ interface ProductListProps {
 }
 
 export function ProductList({ onEdit, onAdd }: ProductListProps) {
-  const router = useRouter()
   const { user } = useAuth()
   const permissions = useProductPermissions(user?.role)
   const [products, setProducts] = useState<Product[]>([])
@@ -84,11 +83,11 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      active: "default",
-      inactive: "secondary",
-      discontinued: "destructive",
-    } as const
+    const tones = {
+      active: TONE_CLASSES.success,
+      inactive: TONE_CLASSES.neutral,
+      discontinued: TONE_CLASSES.danger,
+    }
 
     const labels = {
       active: "Activo",
@@ -97,7 +96,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
     }
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
+      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )
@@ -105,9 +104,9 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
 
   const getStockBadge = (stock: number) => {
     if (stock === 0) {
-      return <Badge variant="destructive">Sin Stock</Badge>
+      return <Badge variant="outline" className={TONE_CLASSES.danger}>Sin stock</Badge>
     } else if (stock <= 5) {
-      return <Badge variant="secondary">Stock Bajo</Badge>
+      return <Badge variant="outline" className={TONE_CLASSES.warning}>Stock bajo</Badge>
     }
     return <Badge variant="outline">{stock} unidades</Badge>
   }
@@ -142,14 +141,6 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Botón de retorno al dashboard */}
-      <div>
-        <Button variant="ghost" onClick={() => router.push("/dashboard")} className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver al Dashboard
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

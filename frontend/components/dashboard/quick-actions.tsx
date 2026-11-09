@@ -40,7 +40,6 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: "Reportar problema técnico",
       href: "/tickets",
       icon: "Headphones",
-      color: "text-orange-600 hover:bg-orange-50",
       roles: ["empleado", "admin"],
       action: "create",
     },
@@ -49,7 +48,6 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: "Consultar catálogo",
       href: "/products",
       icon: "Package",
-      color: "text-blue-600 hover:bg-blue-50",
       roles: ["empleado", "admin"],
       action: "view",
     },
@@ -58,7 +56,6 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: "Buscar soluciones",
       href: "/knowledge",
       icon: "BookOpen",
-      color: "text-green-600 hover:bg-green-50",
       roles: ["empleado", "admin"],
       action: "search",
     },
@@ -67,7 +64,6 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: "Ver novedades",
       href: "/communications",
       icon: "MessageSquare",
-      color: "text-purple-600 hover:bg-purple-50",
       roles: ["empleado", "admin"],
       action: "view",
     },
@@ -76,7 +72,6 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: "Administrar personal",
       href: "/users",
       icon: "Users",
-      color: "text-indigo-600 hover:bg-indigo-50",
       roles: ["admin"],
       action: "manage",
     },
@@ -85,7 +80,6 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: "Resolver incidencias",
       href: "/tickets",
       icon: "AlertCircle",
-      color: "text-red-600 hover:bg-red-50",
       roles: ["empleado", "admin"],
       action: "manage",
     },
@@ -118,15 +112,15 @@ export function QuickActions({ userRole }: QuickActionsProps) {
             <Link key={index} href={action.href}>
               <Button
                 variant="outline"
-                className={`w-full h-auto p-4 justify-start ${action.color} border-border hover:border-current transition-colors`}
+                className="h-auto w-full justify-start whitespace-normal p-4 transition-colors hover:border-primary/40"
               >
                 <div className="flex items-center gap-3 w-full">
-                  <div className="flex-shrink-0">{getIcon(action.icon)}</div>
-                  <div className="flex-1 text-left">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">{getIcon(action.icon)}</div>
+                  <div className="min-w-0 flex-1 text-left">
                     <div className="font-medium text-sm">{action.title}</div>
                     <div className="text-xs text-muted-foreground">{action.description}</div>
                   </div>
-                  <div className="flex-shrink-0">{getActionIcon(action.action)}</div>
+                  <div className="shrink-0 text-muted-foreground">{getActionIcon(action.action)}</div>
                 </div>
               </Button>
             </Link>
