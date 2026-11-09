@@ -38,6 +38,9 @@ import { ApiProperty } from '@nestjs/swagger';
     @ApiProperty({ enum: ['active', 'inactive', 'discontinued'], example: 'active' })
     status: string;
 
+    @ApiProperty({ example: 'clx1brand000001' })
+    brandId: string;
+
     @ApiProperty({ type: BrandResponseDto })
     brand: BrandResponseDto;
 

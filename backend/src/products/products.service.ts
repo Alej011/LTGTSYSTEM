@@ -100,6 +100,7 @@ function toResponse(product: ProductWithRelations): ProductResponseDto {
     price: product.price.toNumber(),
     stock: product.stock,
     status: product.status,
+    brandId: product.brandId,
     brand: product.brand,
     categories: product.categories.map(({ category }) => category),
     createdAt: product.createdAt,
