@@ -27,9 +27,12 @@ Componente ──► hook de React Query (lib/queries)
 ```
 app/
 ├── page.tsx                 # Login
-├── dashboard/ products/ users/ tickets/ knowledge/ communications/   # Páginas
+├── (app)/                   # Secciones con sidebar fijo (el grupo no cambia las URLs)
+│   ├── layout.tsx           # Sidebar + menú móvil
+│   └── dashboard/ products/ users/ tickets/ knowledge/ communications/
 ├── api/                     # Rutas BFF (auth, users, products, brands, categories)
-├── layout.tsx, providers.tsx # Layout raíz y React Query / tema
+├── layout.tsx, providers.tsx # Layout raíz, tema (next-themes) y React Query
+├── globals.css              # Tokens del tema
 components/
 ├── <módulo>/                # Componentes de cada pantalla (lista, formulario, detalle)
 ├── ui/                      # Componentes base de shadcn/ui
@@ -43,12 +46,27 @@ lib/
     ├── api-client.ts        # Cliente HTTP hacia el BFF (timeout, errores tipados, 401 → login)
     ├── api-config.ts        # URL del backend y endpoints
     ├── permissions.ts       # Matriz de permisos por rol (fuente única)
+    ├── tones.ts             # Clases de badge por significado (info, success, warning, danger...)
     └── error-handler.ts
 lib/server/                  # Solo servidor (import "server-only")
 ├── backend.ts               # Helper de las rutas BFF: cookie → Bearer, IP, timeout, validación Zod
 └── session.ts               # Cookies de sesión, verificación del JWT y refresh
 proxy.ts                     # Protección de rutas y renovación de sesión
 ```
+
+## Tema y estilos
+
+Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt000004l3a92a7n1m) (shadcn/ui + Tailwind 4), definido en `app/globals.css`.
+
+- **Modo claro:** colores de marca de LTGT (azul petróleo `#164e63`, naranja `#c2410c`, cian claro).
+- **Modo oscuro:** el del tema, sin cambios.
+- **Tipografía, radios, sombras y espaciado:** los del tema en los dos modos. La fuente es la del sistema, sin descargas.
+- **Selector de tema:** en el sidebar, en *Configuración*, con las opciones Claro, Oscuro y Sistema. La elección se guarda en el navegador.
+
+**Reglas para mantenerlo coherente:**
+- No uses colores fijos de Tailwind (`text-blue-600`, `bg-red-50`...), porque no cambian con el modo oscuro. Usa los tokens: `primary`, `muted-foreground`, `destructive`, `success`, `warning`, `info`.
+- Para badges de estado usa `TONE_CLASSES` de `lib/shared/tones.ts`. Elige el tono por significado (éxito, alerta, error, información), no por color.
+- Los colores del modo claro cumplen contraste AA (4.5:1 en texto). Si cambias un color, revisa el contraste.
 
 ## Estado de los módulos
 
