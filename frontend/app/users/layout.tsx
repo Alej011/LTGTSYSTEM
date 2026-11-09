@@ -1,23 +1,13 @@
 import type { ReactNode } from "react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { getRoleFromToken } from "@/lib/shared/jwt"
-
-const LOGIN_ROUTE = "/"
-const ADMIN_REDIRECT = "/dashboard"
-const USERS_PATH = "/users"
+import { ACCESS_COOKIE, verifyAccessToken } from "@/lib/server/session"
 
 export default async function UsersLayout({ children }: { children: ReactNode }) {
-  const token = (await cookies()).get("ltgt_access_token")?.value
+  const session = await verifyAccessToken((await cookies()).get(ACCESS_COOKIE)?.value)
 
-  if (!token) {
-    redirect(`${LOGIN_ROUTE}?redirect=${encodeURIComponent(USERS_PATH)}`)
-  }
-
-  const role = getRoleFromToken(token)
-  if (role !== "admin") {
-    redirect(ADMIN_REDIRECT)
-  }
+  if (!session) redirect(`/?redirect=${encodeURIComponent("/users")}`)
+  if (session.role !== "ADMIN") redirect("/dashboard")
 
   return <>{children}</>
 }

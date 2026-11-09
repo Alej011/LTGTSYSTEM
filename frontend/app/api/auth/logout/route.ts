@@ -1,48 +1,25 @@
-/**
- * BFF Endpoint: POST /api/auth/logout
- * Handle user logout (currently client-side only, can be extended for token invalidation)
- */
-import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
+import { callBackend } from "@/lib/server/backend"
+import { REFRESH_COOKIE, clearSessionCookies } from "@/lib/server/session"
 
-export async function POST(request: NextRequest) {
-  try {
-    // Extract token from request (for future backend logout endpoint)
-    const authHeader = request.headers.get("authorization")
+export async function POST() {
+  const refreshToken = (await cookies()).get(REFRESH_COOKIE)?.value
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      // If no token, logout is still successful (idempotent)
-      return NextResponse.json(
-        {
-          message: "Sesión cerrada exitosamente",
-        },
-        { status: 200 }
-      )
-    }
-
-    // TODO: If backend implements logout endpoint, call it here
-    // const token = authHeader.substring(7)
-    // await fetch(`${API_BASE_URL}/api/auth/logout`, {
-    //   method: 'POST',
-    //   headers: { Authorization: `Bearer ${token}` }
-    // })
-
-    // For now, just return success
-    // Token removal is handled on the client side
-    return NextResponse.json(
-      {
-        message: "Sesión cerrada exitosamente",
-      },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error("[BFF] Logout error:", error)
-
-    // Even on error, logout should succeed on client
-    return NextResponse.json(
-      {
-        message: "Sesión cerrada exitosamente",
-      },
-      { status: 200 }
-    )
+  if (refreshToken) {
+    const result = await callBackend({
+      path: API_ENDPOINTS.auth.logout,
+      method: "POST",
+      body: { refreshToken },
+      errorMessage: "Error al cerrar sesión",
+      auth: false,
+    })
+    // Las cookies se borran igual: un fallo del backend no debe dejar la sesión abierta en el navegador
+    if (!result.ok) console.error("[BFF] No se pudo revocar el refresh token:", result.status)
   }
+
+  const response = new NextResponse(null, { status: 204 })
+  clearSessionCookies(response)
+  return response
 }

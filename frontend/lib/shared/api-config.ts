@@ -6,6 +6,8 @@ export const API_BASE_URL = process.env.API_URL || "http://localhost:4000"
 export const API_ENDPOINTS = {
   auth: {
     login: "/api/auth/login",
+    refresh: "/api/auth/refresh",
+    logout: "/api/auth/logout",
     register: "/api/auth/register",
     me: "/api/auth/me",
   },
@@ -47,9 +49,3 @@ export const API_ENDPOINTS = {
 
 // Timeout por defecto para las peticiones
 export const API_TIMEOUT = 10000 // 10 segundos
-
-// Keys para localStorage
-export const STORAGE_KEYS = {
-  ACCESS_TOKEN: "ltgt_access_token",
-  USER_DATA: "ltgt_user",
-} as const
