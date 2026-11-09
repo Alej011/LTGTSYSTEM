@@ -1,4 +1,5 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger, ValidationPipe, type INestApplication } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -27,10 +28,12 @@ function setupSwagger(app: INestApplication) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('Bootstrap');
 
   // Swagger UI usa scripts inline, incompatibles con la CSP por defecto; solo se expone fuera de producción.
+  // El BFF reenvía la IP del cliente en X-Forwarded-For; solo se confía en saltos de redes privadas.
+  app.set('trust proxy', 'loopback, linklocal, uniquelocal');
   app.use(helmet({ contentSecurityPolicy: isProduction ? undefined : false }));
   app.enableCors({
     origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
