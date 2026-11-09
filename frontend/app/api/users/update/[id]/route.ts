@@ -32,12 +32,12 @@ export async function PATCH(
 
     const validationResult = UpdateUserRequestSchema.safeParse(body)
     if (!validationResult.success) {
-      console.error("[BFF UPDATE USER] Validation failed:", validationResult.error.errors)
+      console.error("[BFF UPDATE USER] Validation failed:", validationResult.error.issues)
       return NextResponse.json(
         {
           message: "Datos del usuario inválidos",
           error: "VALIDATION_ERROR",
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       )
@@ -83,7 +83,7 @@ export async function PATCH(
     const responseValidation = BackendUserListItemSchema.safeParse(backendData)
 
     if (!responseValidation.success) {
-      console.error("[BFF UPDATE USER] Backend response validation failed:", responseValidation.error.errors)
+      console.error("[BFF UPDATE USER] Backend response validation failed:", responseValidation.error.issues)
       // Still return backend data even if validation fails (backend is source of truth)
       return NextResponse.json(backendData, { status: 200 })
     }

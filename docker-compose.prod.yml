@@ -38,10 +38,11 @@ services:
   frontend:
     build:
       context: ./frontend
+      target: runner
     container_name: ltgt_frontend
     restart: always
-    env_file:
-      - ./frontend/.env.production
+    environment:
+      API_URL: http://backend:4000
     depends_on:
       backend:
         condition: service_healthy

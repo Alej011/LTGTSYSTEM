@@ -179,7 +179,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         <span className="font-medium">{comment.userName}</span>
-                        <Badge variant="outline" size="sm">
+                        <Badge variant="outline">
                           {comment.userRole}
                         </Badge>
                       </div>

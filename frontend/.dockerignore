@@ -1,0 +1,9 @@
+node_modules
+.pnpm-store
+.next
+.env*
+!.env.template
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.pnpm-debug.log*

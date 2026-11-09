@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const responseValidation = UsersListResponseSchema.safeParse(backendData)
 
     if (!responseValidation.success) {
-      console.error("[BFF USERS LIST] Backend response validation failed:", responseValidation.error.errors)
+      console.error("[BFF USERS LIST] Backend response validation failed:", responseValidation.error.issues)
       // Still return backend data even if validation fails (backend is source of truth)
       return NextResponse.json(backendData, { status: 200 })
     }

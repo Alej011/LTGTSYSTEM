@@ -27,12 +27,12 @@ export async function POST(request: NextRequest) {
     const validationResult = CreateProductRequestSchema.safeParse(body)
 
     if (!validationResult.success) {
-      console.error("[BFF CREATE] Validation failed:", validationResult.error.errors)
+      console.error("[BFF CREATE] Validation failed:", validationResult.error.issues)
       return NextResponse.json(
         {
           message: "Datos del producto inválidos",
           error: "VALIDATION_ERROR",
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       )
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const responseValidation = BackendProductSchema.safeParse(backendData)
 
     if (!responseValidation.success) {
-      console.error("[BFF CREATE] Backend response validation failed:", responseValidation.error.errors)
+      console.error("[BFF CREATE] Backend response validation failed:", responseValidation.error.issues)
       // Still return backend data even if validation fails (backend is source of truth)
       return NextResponse.json(backendData, { status: 201 })
     }

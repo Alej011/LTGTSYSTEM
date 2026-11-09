@@ -12,10 +12,18 @@ import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
 import { ApiClientError } from "@/lib/shared/api-client"
 import { Building2, Loader2, Eye, EyeOff } from "lucide-react"
 
+// Solo rutas internas: evita redirecciones abiertas a otros dominios
+function safeRedirect(target: string | null): string {
+  if (!target || !target.startsWith("/") || target.startsWith("//") || target.startsWith("/\\")) {
+    return "/dashboard"
+  }
+  return target
+}
+
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/dashboard"
+  const redirectTo = safeRedirect(searchParams.get("redirect"))
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -35,7 +43,7 @@ export function LoginForm() {
 
     if (!validation.success) {
       const errors: { email?: string; password?: string } = {}
-      validation.error.errors.forEach((err) => {
+      validation.error.issues.forEach((err) => {
         if (err.path[0] === "email") {
           errors.email = err.message
         } else if (err.path[0] === "password") {

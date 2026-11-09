@@ -41,13 +41,14 @@ services:
       - ltgt_net
 
   frontend:
-    image: node:20-slim
+    build:
+      context: ./frontend
+      target: dev
     container_name: ltgt_frontend_dev
     restart: unless-stopped
-    working_dir: /app
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://backend:4000
+      - API_URL=http://backend:4000
     depends_on:
       - backend
     ports:
@@ -55,7 +56,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: sh -c "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install && pnpm dev"
     networks:
       - ltgt_net
 

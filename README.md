@@ -5,7 +5,7 @@ Sistema interno de gestión: productos (con marcas y categorías), usuarios con 
 | Carpeta | Qué es | Stack |
 |---|---|---|
 | [`backend/`](backend/README.md) | API REST | NestJS 11 · Prisma 7 · PostgreSQL 16 · Node 24 |
-| [`frontend/`](frontend/README.md) | Aplicación web + BFF | Next.js 14 (App Router) · React Query · Zod · shadcn/ui |
+| [`frontend/`](frontend/README.md) | Aplicación web + BFF | Next.js 16 (App Router) · React 19 · React Query · Zod 4 · shadcn/ui |
 | `docs/` | Análisis y documentación técnica | — |
 
 ```
@@ -29,7 +29,6 @@ Requisitos: Docker y Docker Compose.
 
 ```bash
 cp backend/.env.template backend/.env          # y completa los valores
-cp frontend/.env.template frontend/.env.local
 docker compose up -d
 ```
 
@@ -46,7 +45,7 @@ Al arrancar, el backend aplica las migraciones pendientes (`prisma migrate deplo
 docker compose exec backend pnpm db:seed
 ```
 
-> **Permisos:** el backend de desarrollo corre como el usuario `node` (UID 1000), así que los archivos que genera quedan a tu nombre. Si tienes carpetas de root de versiones anteriores, ejecuta una vez:
+> **Permisos:** los contenedores de desarrollo corren como el usuario `node` (UID 1000), así que los archivos que genera quedan a tu nombre. Si tienes carpetas de root de versiones anteriores, ejecuta una vez:
 > `sudo chown -R $USER:$USER backend frontend`
 
 ## Desarrollo sin Docker
@@ -64,4 +63,4 @@ docker compose -f docker-compose.prod.yml up -d --build
 - El backend aplica las migraciones al arrancar y solo es accesible desde la red interna de Docker.
 - Para crear el usuario administrador la primera vez:
   `docker compose -f docker-compose.prod.yml exec -e ADMIN_EMAIL=... -e ADMIN_PASSWORD=... -e ADMIN_NAME=... backend pnpm db:seed:prod`
-- La imagen de producción del **frontend** todavía no funciona; se corrige en el PR de la Fase 1 del frontend.
+- El frontend corre como servidor standalone de Next.js en el puerto 3000 y llega al backend por `http://backend:4000`.

@@ -1,6 +1,6 @@
 # LTGT System — Frontend
 
-Aplicación web en **Next.js 14 (App Router)** con React Query, Zod, React Hook Form y componentes shadcn/ui (Tailwind).
+Aplicación web en **Next.js 16 (App Router) + React 19** con React Query, Zod 4 y componentes shadcn/ui (Tailwind 4). Requiere Node 20.9 o superior (las imágenes Docker usan Node 24).
 
 ## Cómo fluyen los datos
 
@@ -12,8 +12,8 @@ Componente ──► hook de React Query (lib/queries)
 ```
 
 - **BFF (Backend for Frontend):** las rutas de `app/api/` reenvían cada petición al backend, validan entrada y salida con Zod y traducen el formato (p. ej. roles `ADMIN`/`SUPPORT` del backend ↔ `admin`/`empleado` en el frontend).
-- **Token:** tras el login, el JWT se guarda en `localStorage` y en la cookie `ltgt_access_token` (la usa el middleware). El cliente lo envía como `Authorization: Bearer` a las rutas BFF. *Pendiente pasarlo a una cookie HttpOnly (Fase 2 del plan).*
-- **Middleware (`middleware.ts`):** redirige al login si no hay cookie y bloquea `/users` a quienes no son admin. Es solo una protección de interfaz: la autorización real la hace el backend.
+- **Token:** tras el login, el JWT se guarda en `localStorage` y en la cookie `ltgt_access_token` (la usa el proxy). El cliente lo envía como `Authorization: Bearer` a las rutas BFF. *Pendiente pasarlo a una cookie HttpOnly (Fase 2 del plan).*
+- **Proxy (`proxy.ts`, antes `middleware.ts`):** redirige al login si no hay cookie y bloquea `/users` a quienes no son admin. Es solo una protección de interfaz: la autorización real la hace el backend.
 
 ## Estructura
 
@@ -38,7 +38,7 @@ lib/
     ├── permissions.ts       # Matriz de permisos por rol (fuente única)
     ├── error-handler.ts
     └── jwt.ts               # Lectura del payload del JWT (sin verificar firma)
-middleware.ts                # Protección de rutas
+proxy.ts                     # Protección de rutas
 ```
 
 ## Estado de los módulos
@@ -69,12 +69,12 @@ pnpm dev           # http://localhost:3000
 
 | Variable | Descripción | Ejemplo |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | URL del backend NestJS (sin `/api`) | `http://localhost:4000` |
+| `API_URL` | URL del backend NestJS (sin `/api`). Solo la usa el servidor y se lee al arrancar, así que la misma imagen sirve para cualquier entorno. En Docker la define `docker-compose`. | `http://localhost:4000` |
 
 | Script | Qué hace |
 |---|---|
 | `dev` | Servidor de desarrollo |
-| `build` / `start` | Build de producción / servirlo |
-| `lint` | ESLint de Next |
+| `build` / `start` | Build de producción (falla si hay errores de TypeScript) / servirlo |
+| `typecheck` | Revisión de tipos sin compilar |
 
-> ⚠️ `next.config.mjs` tiene `ignoreBuildErrors: true`, así que `pnpm build` no detecta errores de TypeScript. Para revisarlos: `pnpm exec tsc --noEmit`.
+El build genera la salida `standalone` (`.next/standalone/server.js`), que es lo que ejecuta la imagen de producción.

@@ -64,7 +64,7 @@ export async function GET(
     const responseValidation = BackendProductSchema.safeParse(backendData)
 
     if (!responseValidation.success) {
-      console.error("[BFF GET] Backend response validation failed:", responseValidation.error.errors)
+      console.error("[BFF GET] Backend response validation failed:", responseValidation.error.issues)
       // Still return backend data even if validation fails (backend is source of truth)
       return NextResponse.json(backendData, { status: 200 })
     }
@@ -119,12 +119,12 @@ export async function PATCH(
     const validationResult = UpdateProductRequestSchema.safeParse(body)
 
     if (!validationResult.success) {
-      console.error("[BFF PATCH] Validation failed:", validationResult.error.errors)
+      console.error("[BFF PATCH] Validation failed:", validationResult.error.issues)
       return NextResponse.json(
         {
           message: "Datos del producto inválidos",
           error: "VALIDATION_ERROR",
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       )
@@ -169,7 +169,7 @@ export async function PATCH(
     const responseValidation = BackendProductSchema.safeParse(backendData)
 
     if (!responseValidation.success) {
-      console.error("[BFF PATCH] Backend response validation failed:", responseValidation.error.errors)
+      console.error("[BFF PATCH] Backend response validation failed:", responseValidation.error.issues)
       // Still return backend data even if validation fails (backend is source of truth)
       return NextResponse.json(backendData, { status: 200 })
     }

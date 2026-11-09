@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         {
           message: "Datos de inicio de sesión inválidos",
           error: "VALIDATION_ERROR",
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       )
