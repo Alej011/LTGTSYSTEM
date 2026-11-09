@@ -27,6 +27,7 @@ services:
       - ./backend/.env.production
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Define JWT_ACCESS_SECRET en .env}
     depends_on:
       db:
         condition: service_healthy
@@ -43,6 +44,8 @@ services:
     restart: always
     environment:
       API_URL: http://backend:4000
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Define JWT_ACCESS_SECRET en .env}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
     depends_on:
       backend:
         condition: service_healthy

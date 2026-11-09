@@ -2,8 +2,7 @@
  * React Query hooks for authentication
  */
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
-import { authenticate, getCurrentUser, type User } from "@/lib/features/auth/auth.service"
-import { removeToken } from "@/lib/shared/api-client"
+import { authenticate, getCurrentUser, logout, type User } from "@/lib/features/auth/auth.service"
 
 /**
  * Query keys for auth-related queries
@@ -74,7 +73,7 @@ export function useLogin() {
 
 /**
  * Hook to logout
- * Automatically clears the currentUser query and token
+ * Revokes the session in the BFF and clears all cached queries
  *
  * @example
  * const logoutMutation = useLogout()
@@ -89,14 +88,9 @@ export function useLogout() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async () => {
-      // Clear token
-      removeToken()
-
-      // Optional: Call BFF logout endpoint if needed
-      // await apiClient.post("/api/auth/logout")
-    },
-    onSuccess: () => {
+    mutationFn: logout,
+    // Se limpia la caché aunque falle la petición: el usuario quiere salir
+    onSettled: () => {
       // Clear all auth-related queries
       queryClient.removeQueries({ queryKey: authKeys.all })
 

@@ -1,7 +1,7 @@
 /**
- * Cliente HTTP centralizado con interceptors
+ * Cliente HTTP centralizado para llamar al BFF.
+ * La sesión viaja en cookies HttpOnly que el navegador envía solo; aquí no se maneja ningún token.
  * Maneja automáticamente:
- * - Headers de autorización (JWT)
  * - Timeouts
  * - Manejo de errores
  * - Logs en desarrollo
@@ -9,7 +9,7 @@
  */
 
 import { z } from "zod"
-import { API_TIMEOUT, STORAGE_KEYS } from "./api-config"
+import { API_TIMEOUT } from "./api-config"
 
 // Tipos de respuesta de la API
 export interface ApiResponse<T = any> {
@@ -99,43 +99,11 @@ export class ApiClientError extends Error {
   }
 }
 
-/**
- * Obtiene el token JWT del localStorage
- */
-function getToken(): string | null {
-  if (typeof window === "undefined") return null
-  return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
-}
-
-/**
- * Guarda el token JWT en localStorage y cookies
- * Cookies are needed for middleware access
- */
-export function saveToken(token: string): void {
-  if (typeof window === "undefined") return
-
-  // Save to localStorage
-  localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token)
-
-  // Save to cookie (7 days expiration)
-  const expirationDays = 7
-  const expirationDate = new Date()
-  expirationDate.setDate(expirationDate.getDate() + expirationDays)
-
-  document.cookie = `${STORAGE_KEYS.ACCESS_TOKEN}=${token}; path=/; expires=${expirationDate.toUTCString()}; SameSite=Lax`
-}
-
-/**
- * Elimina el token JWT del localStorage y cookies
- */
-export function removeToken(): void {
-  if (typeof window === "undefined") return
-
-  // Remove from localStorage
-  localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
-
-  // Remove from cookies
-  document.cookie = `${STORAGE_KEYS.ACCESS_TOKEN}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`
+// Una 401 fuera de /api/auth significa que la sesión terminó y no se pudo renovar
+function handleExpiredSession(endpoint: string): void {
+  if (typeof window === "undefined" || endpoint.startsWith("/api/auth/")) return
+  const redirect = encodeURIComponent(window.location.pathname)
+  window.location.assign(`/?redirect=${redirect}`)
 }
 
 /**
@@ -143,7 +111,6 @@ export function removeToken(): void {
  */
 interface RequestConfig extends RequestInit {
   timeout?: number
-  requiresAuth?: boolean
   schema?: z.ZodType<any> // Optional Zod schema for response validation
 }
 
@@ -153,7 +120,6 @@ interface RequestConfig extends RequestInit {
 async function request<T = any>(endpoint: string, config: RequestConfig = {}): Promise<T> {
   const {
     timeout = API_TIMEOUT,
-    requiresAuth = true,
     headers: customHeaders = {},
     schema,
     ...restConfig
@@ -166,14 +132,6 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(customHeaders as Record<string, string>),
-  }
-
-  // Agregar token si es necesario
-  if (requiresAuth) {
-    const token = getToken()
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
   }
 
   // Controller para timeout
@@ -206,6 +164,7 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
 
     // Manejar errores HTTP
     if (!response.ok) {
+      if (response.status === 401) handleExpiredSession(endpoint)
       const errorMessage = data?.message || data?.error || "Error en la petición"
       throw new ApiClientError(errorMessage, response.status, data?.error)
     }

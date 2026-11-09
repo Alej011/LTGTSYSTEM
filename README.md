@@ -16,7 +16,7 @@ Navegador ──► Next.js (páginas + rutas /api = BFF) ──► NestJS /api 
 
 | Módulo | Backend | Frontend |
 |---|---|---|
-| Autenticación (JWT, roles `ADMIN` / `SUPPORT`) | ✅ | ✅ |
+| Autenticación (JWT + refresh token en cookies HttpOnly, roles `ADMIN` / `SUPPORT`) | ✅ | ✅ |
 | Usuarios | ✅ | ✅ |
 | Productos, marcas, categorías | ✅ | ✅ |
 | Tickets y comentarios | Solo esquema de BD | Datos de prueba (mock) |
@@ -29,6 +29,7 @@ Requisitos: Docker y Docker Compose.
 
 ```bash
 cp backend/.env.template backend/.env          # y completa los valores
+cp frontend/.env.template frontend/.env.local  # mismo JWT_ACCESS_SECRET que en backend/.env
 docker compose up -d
 ```
 
@@ -38,6 +39,8 @@ docker compose up -d
 | API | http://localhost:4000/api |
 | Swagger | http://localhost:4000/api/docs |
 | PostgreSQL | `localhost:5432` (usuario/clave/BD: `app` / `app` / `ltgt`) |
+
+Si cambian las dependencias (`package.json`), reconstruye con `docker compose up -d --build -V`: `-V` recrea los volúmenes de `node_modules`, que si no conservan las versiones anteriores.
 
 Al arrancar, el backend aplica las migraciones pendientes (`prisma migrate deploy`). Para cargar los usuarios de `backend/.env` y el catálogo de ejemplo:
 
@@ -55,8 +58,8 @@ Ver las instrucciones de cada carpeta: [backend](backend/README.md#desarrollo-lo
 ## Producción
 
 ```bash
-cp .env.template .env                                   # credenciales de PostgreSQL
-cp backend/.env.template backend/.env.production         # JWT_ACCESS_SECRET, FRONTEND_ORIGIN, NODE_ENV=production
+cp .env.template .env                                   # PostgreSQL y JWT_ACCESS_SECRET (compartido por backend y frontend)
+cp backend/.env.template backend/.env.production         # FRONTEND_ORIGIN, NODE_ENV=production
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
@@ -64,3 +67,4 @@ docker compose -f docker-compose.prod.yml up -d --build
 - Para crear el usuario administrador la primera vez:
   `docker compose -f docker-compose.prod.yml exec -e ADMIN_EMAIL=... -e ADMIN_PASSWORD=... -e ADMIN_NAME=... backend pnpm db:seed:prod`
 - El frontend corre como servidor standalone de Next.js en el puerto 3000 y llega al backend por `http://backend:4000`.
+- Las cookies de sesión son `Secure`: sirve el frontend por HTTPS (proxy inverso delante). Para probar por HTTP, define `SESSION_COOKIE_SECURE=false` en el `.env` de la raíz.

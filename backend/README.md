@@ -15,7 +15,8 @@ src/
 │   ├── decorators/      # @Roles(...), @User()
 │   └── filters/         # Traducción de errores de Prisma a códigos HTTP
 ├── health/              # GET /api/health (estado de la API y la BD)
-├── auth/                # Login (con límite de intentos), registro, /me, estrategia JWT
+├── auth/                # Login (con límites de intentos), refresh, logout, registro, /me, estrategia JWT
+├── config/              # Validación de variables de entorno
 ├── users/               # CRUD de usuarios (solo ADMIN)
 ├── products/            # CRUD de productos + DTOs de paginación/filtros
 ├── brands/              # Lectura de marcas
@@ -37,11 +38,13 @@ Copia `.env.template` a `.env`:
 | Variable | Descripción | Ejemplo |
 |---|---|---|
 | `DATABASE_URL` | Conexión a PostgreSQL. Usa `db` como host dentro de Docker y `localhost` fuera | `postgresql://app:app@db:5432/ltgt` |
-| `JWT_ACCESS_SECRET` | Secreto para firmar tokens (mín. 32 caracteres aleatorios) | `openssl rand -base64 48` |
+| `JWT_ACCESS_SECRET` | Secreto para firmar tokens (mín. 32 caracteres aleatorios). El frontend usa el mismo valor | `openssl rand -base64 48` |
 | `PORT` | Puerto de la API | `4000` |
 | `FRONTEND_ORIGIN` | Origen permitido por CORS | `http://localhost:3000` |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` | Usuario admin que crea el seed. Obligatorio, contraseña de 8+ caracteres | — |
 | `SUPPORT_EMAIL` / `SUPPORT_PASSWORD` / `SUPPORT_NAME` | Usuario de soporte que crea el seed. Opcional | — |
+
+Al arrancar se validan `DATABASE_URL`, `JWT_ACCESS_SECRET`, `PORT`, `FRONTEND_ORIGIN` y `NODE_ENV` (`src/config/env.validation.ts`): si falta alguna obligatoria o no cumple el formato, la API no inicia y muestra cuál.
 
 ## Desarrollo local
 
@@ -100,9 +103,20 @@ Para **renombrar** tablas o columnas, usa `--create-only` y cambia el `DROP` + `
 
 ## Autenticación y roles
 
-- `POST /api/auth/login` devuelve un JWT (expira en 15 min) con `sub`, `role`, `email` y `name`.
-- Las rutas protegidas usan `@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles('ADMIN', ...)` y esperan el header `Authorization: Bearer <token>`.
-- El login admite **5 intentos por minuto por email** (luego responde `429`). El límite es por cuenta y no por IP porque todas las peticiones llegan desde el BFF. El contador vive en memoria: con varias instancias del backend habría que usar un almacenamiento compartido (por ejemplo, Redis).
+- `POST /api/auth/login` devuelve:
+  - un **access token** JWT (HS256, 15 min) con `sub`, `role`, `email` y `name`;
+  - un **refresh token** opaco (7 días), guardado como hash SHA-256 en la tabla `refresh_tokens`;
+  - las fechas de expiración de ambos.
+- `POST /api/auth/refresh` **rota** el refresh token: el usado queda revocado y se emite uno nuevo.
+  - Si un token ya rotado se vuelve a usar en los 30 s siguientes (peticiones en paralelo), solo se emite un access token nuevo.
+  - Si se reutiliza después de esa ventana, se trata como posible robo y se revocan todas las sesiones del usuario.
+- `POST /api/auth/logout` revoca el refresh token. El access token sigue siendo válido hasta que expire (máx. 15 min).
+- Las rutas protegidas usan `@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles('ADMIN', ...)` y esperan el header `Authorization: Bearer <token>`. Lo envía el BFF; el navegador nunca ve los tokens.
+- **Límites de login** (luego responden `429`):
+  - 5 intentos por minuto por email, aunque cambie la IP;
+  - 20 por minuto por IP, contra probar muchas cuentas desde un mismo origen.
+- La IP sale de `X-Forwarded-For`, que reenvía el BFF. Solo se confía en saltos de redes privadas (`trust proxy`). Next.js conserva el `X-Forwarded-For` que envía el cliente, así que el límite por IP solo es fiable si un proxy inverso delante del frontend lo sobrescribe.
+- Los contadores viven en memoria: con varias instancias del backend habría que usar un almacenamiento compartido (por ejemplo, Redis).
 
 ## Errores
 
@@ -111,6 +125,7 @@ Para **renombrar** tablas o columnas, usa `--create-only` y cambia el `DROP` + `
 | `400` | Datos inválidos, campos no permitidos o referencia a un registro inexistente (p. ej. `brandId`) |
 | `404` | Registro no encontrado |
 | `409` | Valor único duplicado (p. ej. SKU o email) |
+| `401` | Sin token, token inválido o expirado; refresh token inválido o revocado |
 | `429` | Demasiados intentos de login |
 
 ## Endpoints
@@ -119,6 +134,8 @@ Para **renombrar** tablas o columnas, usa `--create-only` y cambia el `DROP` + `
 |---|---|---|
 | GET | `/api/health` | Público |
 | POST | `/api/auth/login` | Público |
+| POST | `/api/auth/refresh` | Público (requiere refresh token) |
+| POST | `/api/auth/logout` | Público (requiere refresh token) |
 | POST | `/api/auth/register` | ADMIN |
 | GET | `/api/auth/me` | Autenticado |
 | GET | `/api/users/list` | ADMIN |

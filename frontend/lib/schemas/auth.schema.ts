@@ -87,20 +87,9 @@ export const LoginRequestSchema = z.object({
 export type LoginRequest = z.infer<typeof LoginRequestSchema>
 
 /**
- * Login response schema (from backend)
- */
-export const LoginResponseSchema = z.object({
-  accessToken: z.string().min(1, "Token inválido"),
-  user: BackendUserSchema,
-})
-
-export type LoginResponse = z.infer<typeof LoginResponseSchema>
-
-/**
- * Frontend login result (after transformation)
+ * Respuesta del BFF al iniciar sesión (los tokens van en cookies HttpOnly)
  */
 export const LoginResultSchema = z.object({
-  accessToken: z.string(),
   user: UserSchema,
 })
 
