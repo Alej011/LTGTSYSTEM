@@ -1,14 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
-import { ProductsService } from "./products.service";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { PaginatedProductsDto } from "./dto/paginated-products.dto";
-import { QueryProductsDto } from "./dto/query-products.dto";
+import { ApiBearerAuth,ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+
+import { Roles } from "../common/decorators/roles.decorator";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
 import { RolesGuard } from "../common/guards/roles.guard";
-import { Roles } from "../common/decorators/roles.decorator";
+import { CreateProductDto } from "./dto/create-product.dto";
+import { PaginatedProductsDto } from "./dto/paginated-products.dto";
 import { ProductResponseDto } from "./dto/product-response.dto";
+import { QueryProductsDto } from "./dto/query-products.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
+import { ProductsService } from "./products.service";
 
 @ApiTags("products")
 @Controller("products")
