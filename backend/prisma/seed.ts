@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
+
 import { PrismaClient } from '../src/generated/prisma/client';
 import { Role } from '../src/generated/prisma/enums';
 import { brands, categories, products } from './seed-data';
@@ -81,7 +82,7 @@ async function main() {
 }
 
 main()
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);
   })
