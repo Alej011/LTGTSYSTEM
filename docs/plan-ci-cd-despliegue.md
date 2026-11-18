@@ -169,6 +169,35 @@ Ese diseño es adecuado para el tamaño del proyecto y no cambia. Lo que falla e
 | Mocks mezclados con código real | `tickets`, `knowledge`, `communications` y `dashboard` guardan datos en memoria dentro de su `*.service.ts` | Reemplazarlos por el backend real obliga a reescribir los componentes |
 | Código sin uso | ~30 componentes de `components/ui` sin importar; `hooks/use-mobile` y `hooks/use-toast` duplicados en `components/ui`; toast antiguo junto a `sonner`; carpeta `cypress/` vacía | Ruido, más superficie para dependencias y lint |
 
+### Revisión de arquitectura (18 nov 2026)
+
+Una revisión de profundidad de módulos confirmó el diagnóstico y encontró un problema más de fondo: **mover los archivos a `features/` no basta**. Si `products.api.ts` y `products.queries.ts` solo cambian de carpeta, siguen siendo capas delgadas que reenvían llamadas, cada una con su propio modo de error. El objetivo es que cada dominio exponga **una interfaz pequeña** (hooks) y esconda todo lo demás detrás de ella.
+
+El backend (`ProductsService`, `AuthService`) y `lib/server/backend.ts` ya están bien resueltos; los problemas están en el frontend y en la conexión entre ambos. Hoy no existe ningún test, así que cada cambio de esta sección debe llegar con los tests de su interfaz.
+
+**Bugs encontrados (se corrigen primero, fase C.1):**
+
+| Bug | Evidencia | Efecto |
+|---|---|---|
+| Un producto con precio 0 rompe toda la lista | Backend acepta `@Min(0)`; el BFF exige `price: z.number().positive()` (`product.schema.ts:54`) | La lista completa responde 502; el formulario tampoco puede crear con precio 0 |
+| Descripción opcional en backend, obligatoria en el BFF | `@IsOptional` en el DTO vs `description: z.string()` | Productos sin descripción fallan la validación de respuesta |
+| Borrado fallido silencioso | `deleteProduct` devuelve `false` en vez de lanzar error (`products.service.ts:233`) | El diálogo se cierra como si hubiera funcionado |
+| Detalle no distingue "no existe" de "servidor caído" | `getProductById` devuelve `null` ante cualquier error | El modal muestra lo mismo en ambos casos |
+| Empleado puede gestionar artículos de conocimiento | `article-list.tsx:71` y `knowledge/page.tsx:51` contradicen `PERMISSION_MATRIX.knowledge.create = ["admin"]`; además un rol ausente se trata como `empleado` | Permiso mayor al definido |
+| El bloqueo por intentos de login es invisible | `auth.service` → `null` → `auth.queries` → "Credenciales inválidas" → `auth-context` → `false` | Un 429, un 502 o un timeout se muestran como contraseña incorrecta |
+| El BFF acepta roles en minúscula que el backend rechaza | `BackendRoleSchema` admite `admin`, `support`…; el backend usa `@IsEnum(Role)` | Crear o editar usuario falla con 400 |
+
+**Problemas de diseño (ordenados por importancia):**
+
+| # | Problema | Evidencia | Propuesta |
+|---|---|---|---|
+| 1 | Cliente de productos con capas delgadas y modos de error contradictorios | Listar productos cruza 11 módulos; `products.service.ts` tiene 7 funciones y 7 tipos y cada una falla distinto; `error-handler.ts` solo reenvía; `product.queries.ts` no se usa; la regla de stock bajo (`<= 5`) está repetida en componente y dashboard | Un único **cliente de productos** con hooks de React Query como interfaz y un solo modo de error (siempre lanza `ApiClientError`). URLs, filtros, query keys, invalidación y reglas quedan dentro |
+| 2 | Permisos en tres fuentes que se contradicen | `permissions.ts` (196 líneas, ~20 útiles y 9 envoltorios heredados), `hasPermission` de `auth.service.ts` y comparaciones `role ===` en componentes; "usuarios solo admin" está en 6 lugares | Una función pura rol × recurso × acción, usada por componentes, `proxy.ts` y layouts, y un test que la compara con los `@Roles` del backend |
+| 3 | El contrato se escribe a mano 3 a 5 veces | La forma de `Product` existe 5 veces y su mapper 2; los filtros 3 veces; `User` y `UserRole` duplicados; el backend crea usuarios por dos caminos (`AuthService.register` y `UsersService.create`) con errores distintos | OpenAPI → tipos generados como única fuente; el BFF solo valida respuestas y deja de inventar reglas propias de entrada; un solo camino de alta de usuarios |
+| 4 | Ningún módulo es dueño de la sesión | ~15 archivos conocen tokens, cookies, refresh o roles; "sesión expirada → login" está implementado 4 veces; dos vocabularios de roles (`ADMIN/SUPPORT` y `admin/empleado`) | Un módulo de sesión en el servidor (verificar, refrescar, cookies) con el refresh detrás de un adaptador reemplazable en tests, y un hook de sesión en el cliente con errores tipados (credenciales, bloqueado, no disponible). Un solo vocabulario de roles: el del backend |
+| 5 | Los mocks definen la interfaz de tickets, conocimiento y comunicaciones | Lecturas síncronas sobre arrays en memoria (`getTickets(): Ticket[]`), fechas como `Date`, reglas de negocio dentro del mock | Darles ya la misma interfaz asíncrona que productos; el mock queda como un adaptador y luego se cambia por el BFF sin tocar componentes |
+| 6 | El BFF copia a mano la tabla de rutas del backend | Tres tablas de rutas que no coinciden (navegador `/api/products/:id`, BFF `app/api/products/[id]`, backend `/api/products/detail/:id`); `API_ENDPOINTS` también incluye rutas que no existen | Misma ruta en los tres niveles (sale con las rutas REST); opcionalmente un reenviador genérico del BFF guiado por una tabla |
+
 ### Estructura objetivo: por funcionalidad (feature-based)
 
 Cada dominio queda en una sola carpeta, igual que un módulo de Nest:
@@ -183,16 +212,21 @@ frontend/
 ├── features/
 │   ├── products/
 │   │   ├── components/           product-list, product-form, product-detail
-│   │   ├── products.api.ts       Llamadas del navegador al BFF
-│   │   ├── products.queries.ts   Hooks de React Query (useProducts, useCreateProduct, ...)
+│   │   ├── products.client.ts    Interfaz del dominio: hooks (useProducts, useProduct,
+│   │   │                         useSaveProduct, useDeleteProduct, useBrands, useCategories).
+│   │   │                         Dentro: URLs, filtros, query keys, invalidación, reglas
 │   │   ├── products.server.ts    Llamadas del BFF al backend (solo servidor)
-│   │   └── products.schemas.ts   Zod: formularios y validación de respuestas
-│   ├── users/  auth/  dashboard/
+│   │   └── products.schemas.ts   Zod: formularios y validación de respuestas, tipados
+│   │                             contra los tipos generados
+│   ├── users/  dashboard/
+│   ├── auth/                     Hook de sesión del cliente (login, logout, usuario actual)
 │   └── tickets/  knowledge/  communications/
-│       └── *.mock.ts             Datos simulados detrás de la misma interfaz *.api.ts
+│       ├── *.client.ts           Misma interfaz asíncrona que productos
+│       └── *.mock.ts             Adaptador en memoria; luego se reemplaza por el BFF
 ├── shared/
-│   ├── api/                      Cliente HTTP, helper del BFF, sesión, tipos generados
-│   ├── permissions.ts            Única fuente de permisos por rol
+│   ├── api/                      Cliente HTTP, helper del BFF, tipos generados
+│   ├── session/                  Módulo de sesión del servidor: verificar, refrescar, cookies
+│   ├── permissions.ts            Única política de permisos (rol × recurso × acción)
 │   └── lib/                      utils, tonos de color
 └── components/
     ├── ui/                       shadcn/ui (solo lo que se usa)
@@ -204,7 +238,10 @@ Reglas:
 - `app/` no contiene lógica: importa de `features/`.
 - Una feature no importa de otra; lo común va en `shared/`.
 - `*.server.ts` y `shared/api/session.ts` llevan `import "server-only"`.
-- Los componentes nunca llaman `fetch` ni `useEffect` para datos: usan los hooks de `*.queries.ts`.
+- Los componentes nunca llaman `fetch` ni `useEffect` para datos: usan los hooks de `*.client.ts`.
+- Un solo modo de error: los hooks siempre lanzan `ApiClientError`; nunca devuelven `null`, `false` ni `[]` para indicar un fallo.
+- Solo `shared/session/` conoce los nombres de las cookies y el flujo de refresh.
+- Cada módulo nuevo o reorganizado llega con tests de su interfaz en el mismo PR.
 
 ### Contrato único entre backend y frontend
 
@@ -230,7 +267,9 @@ Backend y BFF cambian en el mismo PR, para que la conexión entre ambos no quede
 ### Decisiones
 
 - Las páginas siguen siendo componentes de cliente con React Query: es una aplicación interna detrás de login, y Server Components no aporta lo suficiente para justificar reescribirlas.
-- Los módulos mock se dejan funcionando, pero aislados en `*.mock.ts`. Cuando exista el módulo real en el backend solo cambia `*.api.ts`.
+- Los módulos mock se dejan funcionando, pero aislados en `*.mock.ts` detrás de una interfaz asíncrona. Cuando exista el módulo real en el backend se cambia el adaptador, no los componentes.
+- El backend es la autoridad de validación de entrada. El BFF valida la forma de las respuestas, pero no agrega reglas de entrada propias.
+- Un solo vocabulario de roles en todo el sistema: el del backend (`ADMIN`, `SUPPORT`).
 
 ## 7. Preparación del VPS
 
@@ -262,25 +301,29 @@ Cada fase es un milestone; cada punto, un issue y una rama (`alejo/<tipo>/<tema>
 | Fase | Entregable | PRs previstos |
 |---|---|---|
 | **A. GitHub** | Project, labels, milestones, borrado de ramas, tipo de merge, secret scanning, Dependabot | `chore(github)`: Dependabot y plantillas de PR/issue |
-| **B. Calidad** | ESLint + Prettier en ambos proyectos y corrección del código existente; scripts unificados (`lint`, `format:check`, `typecheck`, `test`, `test:e2e`) | `chore(backend)`, `chore(frontend)`, `style` (formato masivo en un PR aparte, para no mezclarlo) |
-| **C. Arquitectura del frontend** | Sección 6: limpieza, API REST, estructura por features, contrato OpenAPI, React Query en todo, permisos únicos, mocks aislados | Ver el desglose abajo |
-| **D. Tests base** | Backend: auth (login, refresh con rotación y periodo de gracia, logout, throttling), users y health; e2e con Postgres. Frontend: sesión, BFF, `proxy.ts`, permisos y hooks de React Query | `test(backend)`, `test(frontend)` |
+| **B. Calidad** | ESLint + Prettier en ambos proyectos y corrección del código existente; scripts unificados (`lint`, `format:check`, `typecheck`, `test`, `test:e2e`); Vitest en el frontend y la configuración de Jest en el backend, para que la fase C pueda traer sus tests | `chore(backend)`, `chore(frontend)`, `style` (formato masivo en un PR aparte, para no mezclarlo) |
+| **C. Arquitectura del frontend** | Sección 6: bugs, limpieza, API REST, cliente por dominio, permisos únicos, contrato OpenAPI, módulo de sesión, mocks asíncronos | Ver el desglose abajo |
+| **D. Tests base** | Lo que la fase C no cubrió. Backend: auth (login, refresh con rotación y periodo de gracia, logout, throttling), users y health; e2e con Postgres. Frontend: BFF y `proxy.ts` | `test(backend)`, `test(frontend)` |
 | **E. CI** | `ci.yml` (incluye la verificación del contrato OpenAPI), CodeQL, chequeo de título del PR; luego el ruleset de `main` exigiendo `ci-ok` | `ci: ...` |
 | **F. VPS** | Preparación de la sección 7, subdominio, Caddy, compose de producción basado en imágenes, primer despliegue manual | `feat(deploy)`: compose de producción y `deploy.sh` |
 | **G. CD** | `deploy.yml` con GHCR, migración, healthcheck, smoke test, rollback automático y manual; respaldos | `ci(deploy)` |
 | **H. Verificación** | Desplegar un cambio real, forzar un fallo (healthcheck roto) y comprobar el rollback; documentar en el README | `docs` |
 
-Desglose de la fase C (un PR por punto, en este orden; cada uno se verifica contra el backend antes del merge):
+Desglose de la fase C, ordenado por importancia (un PR por punto; cada uno se verifica contra el backend antes del merge). Los números entre paréntesis remiten a la tabla de problemas de diseño de la sección 6:
 
-1. `chore(frontend)`: eliminar componentes de `components/ui` sin uso, hooks duplicados, el toast antiguo y `cypress/`.
-2. `refactor(api)`: rutas REST en backend y BFF en el mismo PR.
-3. `refactor(frontend)`: mover a `features/` y `shared/` sin cambiar comportamiento (solo movimientos e imports).
-4. `feat(api)`: generar `openapi.json` en el backend y los tipos en el frontend; tipar los schemas Zod contra ellos y eliminar las interfaces escritas a mano.
-5. `refactor(frontend)`: productos, usuarios y dashboard con React Query; quitar la carga con `useEffect`.
-6. `refactor(frontend)`: un solo módulo de permisos.
-7. `refactor(frontend)`: aislar los mocks en `*.mock.ts` detrás de `*.api.ts`.
+| # | PR | Contenido | Por qué en este lugar |
+|---|---|---|---|
+| C.1 | `fix`: bugs de la revisión | Precio 0 y descripción opcional en los schemas del BFF; error visible al fallar un borrado; 404 distinto de error en el detalle; permiso de conocimiento según la matriz (sin rol = sin permiso); mensaje propio para el 429 de login; roles del BFF solo en mayúscula | Son fallas visibles hoy y el arreglo es pequeño |
+| C.2 | `chore(frontend)`: limpieza | Componentes de `components/ui` sin uso, `hooks/use-toast` y `components/ui/use-toast` (idénticos y sin uso), toast antiguo, `cypress/`, `lib/queries/product.queries.ts`, `ProductSchema` y `mapBackendProductToFrontend` sin uso, imports muertos | Reduce lo que hay que mover en los pasos siguientes |
+| C.3 | `refactor(api)`: rutas REST | Rutas REST en backend y BFF en el mismo PR; la ruta del navegador, la del BFF y la del backend pasan a ser la misma, y se elimina `API_ENDPOINTS` (6, primera parte) | Los hooks de C.4 nacen con las rutas definitivas |
+| C.4 | `refactor(frontend)`: cliente de productos (1) | Crear `features/products` moviendo y profundizando a la vez: `products.client.ts` con hooks y un solo modo de error, sin `error-handler.ts` ni el segundo mapper; la regla de stock bajo y las opciones de categoría salen de los componentes. Luego usuarios y dashboard con el mismo patrón. Tests de los hooks contra un BFF simulado | Es el punto más cambiado del repo y la plantilla para el resto |
+| C.5 | `refactor(frontend)`: política de permisos (2) | Una función pura en `shared/permissions.ts`; se eliminan el `hasPermission` de `auth.service.ts`, los envoltorios heredados y los `role ===` sueltos. Tests de tabla y test en el backend que compara con `@Roles` | Lógica pequeña y pura; se puede hacer en paralelo con C.4 |
+| C.6 | `feat(api)`: contrato OpenAPI (3) | `openapi.json` en el backend, tipos generados en el frontend, schemas Zod tipados contra ellos, sin interfaces escritas a mano; un solo camino de alta de usuarios en el backend | Corrige en el origen la familia de bugs de C.1 |
+| C.7 | `refactor(frontend)`: módulo de sesión (4) | `shared/session/` en el servidor (verificar, refrescar, cookies) con adaptador de refresh; `proxy.ts`, layouts y `backend.ts` lo usan. En el cliente, un hook de sesión que reemplaza `auth.service`, `auth.queries` y `auth-context`. Un solo vocabulario de roles | Es el de mayor beneficio para los tests de `lib/server` y `proxy.ts`, pero toca más archivos |
+| C.8 | `refactor(frontend)`: mocks asíncronos (5) | `tickets`, `knowledge` y `communications` con la interfaz de C.4 y el mock como adaptador en `*.mock.ts`; colores y etiquetas a un helper de presentación; las reglas de negocio del mock se anotan como requisitos del backend | Debe estar antes de construir esos módulos en el backend |
+| C.9 | `refactor(frontend)`: reenviador del BFF (6, segunda parte, opcional) | Un reenviador genérico guiado por una tabla por recurso; login y logout quedan aparte | Solo si después de C.3 los handlers siguen siendo copias |
 
-Después de la fase H se retoma el trabajo funcional (tickets, comentarios, conocimiento, comunicaciones), ya con CI y CD protegiendo cada cambio. Gracias a la fase C, cada módulo real solo reemplaza su `*.api.ts`.
+Después de la fase H se retoma el trabajo funcional (tickets, comentarios, conocimiento, comunicaciones), ya con CI y CD protegiendo cada cambio. Gracias a la fase C, cada módulo real solo reemplaza su adaptador `*.mock.ts` por el del BFF.
 
 Orden y dependencias: A → B → C → D → E (los tests se escriben sobre la estructura final; el ruleset necesita que el check exista). F puede avanzar en paralelo con B–E. G necesita E y F.
 
