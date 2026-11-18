@@ -1,6 +1,10 @@
-# Plan de CI/CD y despliegue — LTGTSYSTEM
+# Plan de trabajo: arquitectura del frontend, CI/CD y despliegue — LTGTSYSTEM
 
-Objetivo: publicar el sistema en el VPS de Contabo (donde ya corre otra aplicación) con su propio dominio y HTTPS, y que todo cambio pase por un pipeline de calidad (CI) antes de entrar a `main` y desplegarse solo (CD), con rollback automático si falla.
+Objetivos:
+
+- Publicar el sistema en el VPS de Contabo (donde ya corre otra aplicación) con su propio dominio y HTTPS.
+- Que todo cambio pase por un pipeline de calidad (CI) antes de entrar a `main` y se despliegue solo (CD), con rollback automático si falla.
+- Reorganizar el frontend para que siga la misma lógica modular del backend antes de escribir sus tests.
 
 ## 1. Estado actual (evaluación)
 
@@ -93,6 +97,7 @@ Workflow `ci.yml`, en cada PR hacia `main` y en cada push a `main`. Jobs en para
 | `frontend-test` | Vitest para `lib/server` (sesión, BFF, validación con Zod) y `proxy.ts` | Falla un test o baja la cobertura |
 | `build` | `next build` y build de ambas imágenes Docker (`target: runner`), sin publicarlas | No compila o la imagen no se construye |
 | `security` | `pnpm audit --prod --audit-level=high`, dependency review (en PR), CodeQL (workflow aparte) | Dependencia con vulnerabilidad alta o crítica |
+| `contract` | Regenera `openapi.json` en el backend y los tipos del frontend (sección 6) | Lo generado difiere de lo commiteado: backend y frontend no coinciden |
 | `pr-title` | El título del PR sigue Conventional Commits | Título fuera de formato |
 
 Criterios de calidad:
@@ -141,7 +146,93 @@ Workflow `deploy.yml`, que se dispara cuando el CI pasa sobre `main` (`workflow_
 
 Las variables de la aplicación (`POSTGRES_*`, `JWT_ACCESS_SECRET`, etc.) viven solo en `/opt/ltgtsystem/.env` del VPS, con permisos `600`. No pasan por GitHub. Las imágenes no contienen secretos, por lo que pueden ser públicas en GHCR y el VPS las descarga sin credenciales.
 
-## 6. Preparación del VPS
+## 6. Arquitectura del frontend
+
+### Diseño del sistema (se mantiene)
+
+El sistema es cliente-servidor y se ejecuta con Docker en cualquier entorno:
+
+- Navegador → Next.js (presentación y BFF) → NestJS (negocio) → PostgreSQL.
+- El backend ya es un monolito modular por dominio (`products`, `users`, `auth`, ...), y cada módulo sigue el patrón controller → service → Prisma.
+
+Ese diseño es adecuado para el tamaño del proyecto y no cambia. Lo que falla es la **organización interna del frontend**: un mismo dominio está repartido por tipo de archivo y hay varios patrones conviviendo para resolver lo mismo.
+
+### Diagnóstico
+
+| Problema | Evidencia | Consecuencia |
+|---|---|---|
+| Un dominio repartido en 5 carpetas | Productos vive en `app/api/products`, `components/products`, `lib/features/products`, `lib/queries/product.queries.ts` y `lib/schemas/product.schema.ts` | Para cambiar una funcionalidad hay que recorrer todo el árbol; es fácil olvidar una parte |
+| Tipos definidos tres veces | DTO en el backend, schema Zod en `lib/schemas` e interfaces escritas a mano en `*.service.ts` | Se desincronizan sin aviso (pasó con `brandId` en la fase 2) |
+| Dos formas de pedir datos | `product.queries.ts` (React Query) existe pero ningún componente lo usa; productos, usuarios y el dashboard cargan con `useEffect` + `useState` | Sin caché ni reintentos, estados de carga y error repetidos a mano, recargas manuales tras cada cambio |
+| Rutas de la API con verbos | Backend y BFF usan `/products/create`, `/products/list`, `/users/getById/:id`, `/users/update/:id`, `/products/delete/:id` | Contrato inconsistente; el método HTTP ya expresa la acción |
+| Dos sistemas de permisos | `hasPermission` en `auth.service.ts` (6 usos) y otro `hasPermission` con hooks en `lib/shared/permissions.ts` (2 usos) | Reglas que pueden contradecirse |
+| Mocks mezclados con código real | `tickets`, `knowledge`, `communications` y `dashboard` guardan datos en memoria dentro de su `*.service.ts` | Reemplazarlos por el backend real obliga a reescribir los componentes |
+| Código sin uso | ~30 componentes de `components/ui` sin importar; `hooks/use-mobile` y `hooks/use-toast` duplicados en `components/ui`; toast antiguo junto a `sonner`; carpeta `cypress/` vacía | Ruido, más superficie para dependencias y lint |
+
+### Estructura objetivo: por funcionalidad (feature-based)
+
+Cada dominio queda en una sola carpeta, igual que un módulo de Nest:
+
+```
+frontend/
+├── app/                          Solo rutas: páginas delgadas y handlers del BFF
+│   ├── (app)/products/page.tsx   Renderiza <ProductsView /> de features/products
+│   └── api/products/
+│       ├── route.ts              GET lista, POST crea
+│       └── [id]/route.ts         GET, PATCH, DELETE
+├── features/
+│   ├── products/
+│   │   ├── components/           product-list, product-form, product-detail
+│   │   ├── products.api.ts       Llamadas del navegador al BFF
+│   │   ├── products.queries.ts   Hooks de React Query (useProducts, useCreateProduct, ...)
+│   │   ├── products.server.ts    Llamadas del BFF al backend (solo servidor)
+│   │   └── products.schemas.ts   Zod: formularios y validación de respuestas
+│   ├── users/  auth/  dashboard/
+│   └── tickets/  knowledge/  communications/
+│       └── *.mock.ts             Datos simulados detrás de la misma interfaz *.api.ts
+├── shared/
+│   ├── api/                      Cliente HTTP, helper del BFF, sesión, tipos generados
+│   ├── permissions.ts            Única fuente de permisos por rol
+│   └── lib/                      utils, tonos de color
+└── components/
+    ├── ui/                       shadcn/ui (solo lo que se usa)
+    └── layout/                   sidebar, error boundary
+```
+
+Reglas:
+
+- `app/` no contiene lógica: importa de `features/`.
+- Una feature no importa de otra; lo común va en `shared/`.
+- `*.server.ts` y `shared/api/session.ts` llevan `import "server-only"`.
+- Los componentes nunca llaman `fetch` ni `useEffect` para datos: usan los hooks de `*.queries.ts`.
+
+### Contrato único entre backend y frontend
+
+1. El backend genera `openapi.json` desde Swagger con un script, sin levantar el servidor. Para describir los DTOs sin repetir decoradores se usa el plugin de `@nestjs/swagger`.
+2. El frontend genera sus tipos con `openapi-typescript` (`shared/api/schema.d.ts`).
+3. Los schemas Zod se tipan contra esos tipos. Si el backend cambia un campo, el frontend deja de compilar.
+4. El CI regenera ambos archivos y falla si difieren de lo commiteado (`git diff --exit-code`).
+
+### API REST consistente
+
+| Antes | Después |
+|---|---|
+| `GET /products/list` | `GET /products` |
+| `POST /products/create` | `POST /products` |
+| `GET /products/detail/:id` | `GET /products/:id` |
+| `PATCH /products/update/:id` | `PATCH /products/:id` |
+| `DELETE /products/delete/:id` | `DELETE /products/:id` |
+| `GET /users/list`, `GET /users/getById/:id`, `POST /users/create`, `PATCH /users/update/:id` | `GET /users`, `GET /users/:id`, `POST /users`, `PATCH /users/:id` |
+| `POST /auth/register` | `POST /users` (solo admin; se elimina el duplicado si ya cubre el caso) |
+
+Backend y BFF cambian en el mismo PR, para que la conexión entre ambos no quede rota en ningún commit de `main`.
+
+### Decisiones
+
+- Las páginas siguen siendo componentes de cliente con React Query: es una aplicación interna detrás de login, y Server Components no aporta lo suficiente para justificar reescribirlas.
+- Los módulos mock se dejan funcionando, pero aislados en `*.mock.ts`. Cuando exista el módulo real en el backend solo cambia `*.api.ts`.
+
+## 7. Preparación del VPS
 
 Antes de empezar se necesita esta información (en el VPS, con un usuario con sudo):
 
@@ -164,7 +255,7 @@ Pasos (una sola vez):
 5. Primer despliegue manual con el mismo script, y seed inicial con `db:seed:prod` (una vez).
 6. Respaldo diario por cron: `pg_dump` comprimido con retención de 7 días. Más adelante conviene copiarlo fuera del VPS.
 
-## 7. Fases de trabajo
+## 8. Fases de trabajo
 
 Cada fase es un milestone; cada punto, un issue y una rama (`alejo/<tipo>/<tema>`) con su PR.
 
@@ -172,17 +263,28 @@ Cada fase es un milestone; cada punto, un issue y una rama (`alejo/<tipo>/<tema>
 |---|---|---|
 | **A. GitHub** | Project, labels, milestones, borrado de ramas, tipo de merge, secret scanning, Dependabot | `chore(github)`: Dependabot y plantillas de PR/issue |
 | **B. Calidad** | ESLint + Prettier en ambos proyectos y corrección del código existente; scripts unificados (`lint`, `format:check`, `typecheck`, `test`, `test:e2e`) | `chore(backend)`, `chore(frontend)`, `style` (formato masivo en un PR aparte, para no mezclarlo) |
-| **C. Tests base** | Backend: auth (login, refresh con rotación y periodo de gracia, logout, throttling), users y health; e2e con Postgres. Frontend: sesión, BFF y `proxy.ts` | `test(backend)`, `test(frontend)` |
-| **D. CI** | `ci.yml`, CodeQL, chequeo de título del PR; luego el ruleset de `main` exigiendo `ci-ok` | `ci: ...` |
-| **E. VPS** | Preparación de la sección 6, subdominio, Caddy, compose de producción basado en imágenes, primer despliegue manual | `feat(deploy)`: compose de producción y `deploy.sh` |
-| **F. CD** | `deploy.yml` con GHCR, migración, healthcheck, smoke test, rollback automático y manual; respaldos | `ci(deploy)` |
-| **G. Verificación** | Desplegar un cambio real, forzar un fallo (healthcheck roto) y comprobar el rollback; documentar en el README | `docs` |
+| **C. Arquitectura del frontend** | Sección 6: limpieza, API REST, estructura por features, contrato OpenAPI, React Query en todo, permisos únicos, mocks aislados | Ver el desglose abajo |
+| **D. Tests base** | Backend: auth (login, refresh con rotación y periodo de gracia, logout, throttling), users y health; e2e con Postgres. Frontend: sesión, BFF, `proxy.ts`, permisos y hooks de React Query | `test(backend)`, `test(frontend)` |
+| **E. CI** | `ci.yml` (incluye la verificación del contrato OpenAPI), CodeQL, chequeo de título del PR; luego el ruleset de `main` exigiendo `ci-ok` | `ci: ...` |
+| **F. VPS** | Preparación de la sección 7, subdominio, Caddy, compose de producción basado en imágenes, primer despliegue manual | `feat(deploy)`: compose de producción y `deploy.sh` |
+| **G. CD** | `deploy.yml` con GHCR, migración, healthcheck, smoke test, rollback automático y manual; respaldos | `ci(deploy)` |
+| **H. Verificación** | Desplegar un cambio real, forzar un fallo (healthcheck roto) y comprobar el rollback; documentar en el README | `docs` |
 
-Después de la fase G se retoma el trabajo funcional (tickets, comentarios, conocimiento, comunicaciones), ya con CI y CD protegiendo cada cambio.
+Desglose de la fase C (un PR por punto, en este orden; cada uno se verifica contra el backend antes del merge):
 
-Orden y dependencias: A → B → C → D (el ruleset necesita que el check exista). E puede avanzar en paralelo con B–D. F necesita D y E.
+1. `chore(frontend)`: eliminar componentes de `components/ui` sin uso, hooks duplicados, el toast antiguo y `cypress/`.
+2. `refactor(api)`: rutas REST en backend y BFF en el mismo PR.
+3. `refactor(frontend)`: mover a `features/` y `shared/` sin cambiar comportamiento (solo movimientos e imports).
+4. `feat(api)`: generar `openapi.json` en el backend y los tipos en el frontend; tipar los schemas Zod contra ellos y eliminar las interfaces escritas a mano.
+5. `refactor(frontend)`: productos, usuarios y dashboard con React Query; quitar la carga con `useEffect`.
+6. `refactor(frontend)`: un solo módulo de permisos.
+7. `refactor(frontend)`: aislar los mocks en `*.mock.ts` detrás de `*.api.ts`.
 
-## 8. Riesgos y decisiones
+Después de la fase H se retoma el trabajo funcional (tickets, comentarios, conocimiento, comunicaciones), ya con CI y CD protegiendo cada cambio. Gracias a la fase C, cada módulo real solo reemplaza su `*.api.ts`.
+
+Orden y dependencias: A → B → C → D → E (los tests se escriben sobre la estructura final; el ruleset necesita que el check exista). F puede avanzar en paralelo con B–E. G necesita E y F.
+
+## 9. Riesgos y decisiones
 
 | Riesgo | Mitigación |
 |---|---|
