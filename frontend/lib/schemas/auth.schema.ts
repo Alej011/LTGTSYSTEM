@@ -6,9 +6,9 @@ import { z } from "zod"
 import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
 
 /**
- * Backend role enum (as received from API)
+ * Backend role enum: same values as Prisma Role, the backend rejects any other casing
  */
-export const BackendRoleSchema = z.enum(["ADMIN", "SUPPORT", "admin", "support", "Admin", "Support"])
+export const BackendRoleSchema = z.enum(["ADMIN", "SUPPORT"])
 export type BackendRole = z.infer<typeof BackendRoleSchema>
 
 /**
@@ -17,19 +17,13 @@ export type BackendRole = z.infer<typeof BackendRoleSchema>
 export const FrontendRoleSchema = z.enum(["admin", "empleado"])
 export type FrontendRole = z.infer<typeof FrontendRoleSchema>
 
-/**
- * Role mapper function - case insensitive
- */
+const BACKEND_TO_FRONTEND_ROLE: Record<BackendRole, FrontendRole> = {
+  ADMIN: "admin",
+  SUPPORT: "empleado",
+}
+
 export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole {
-  // Normalize to uppercase for mapping
-  const normalizedRole = backendRole.toUpperCase()
-
-  const roleMap: Partial<Record<string, FrontendRole>> = {
-    ADMIN: "admin",
-    SUPPORT: "empleado",
-  }
-
-  return roleMap[normalizedRole] ?? "empleado" // Default to empleado if unknown
+  return BACKEND_TO_FRONTEND_ROLE[backendRole]
 }
 
 /**
