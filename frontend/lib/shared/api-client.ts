@@ -15,6 +15,15 @@ import { API_TIMEOUT } from './api-config';
 /**
  * Clase para errores de API mejorada
  */
+// diccionary of error messages for different status codes
+const ERROR_MESSAGES: Record<number, string> = {
+  0: 'No se pudo conectar con el servidor. Verifica tu conexión.',
+  401: 'Sesión expirada. Por favor inicia sesión nuevamente.',
+  403: 'No tienes permisos para realizar esta acción.',
+  404: 'El recurso solicitado no existe.',
+  408: 'La petición tardó demasiado. Verifica tu conexión.',
+  429: 'Demasiados intentos. Espera un minuto e intenta de nuevo.',
+};
 export class ApiClientError extends Error {
   statusCode: number;
   error?: string;
@@ -34,31 +43,15 @@ export class ApiClientError extends Error {
    * Get user-friendly error message
    */
   getUserMessage(): string {
-    if (this.statusCode === 401) {
-      return 'Sesión expirada. Por favor inicia sesión nuevamente.';
+    if(this.isValidationError()){
+      return  `Error de validacion: ${this.message}`;
     }
-    if (this.statusCode === 403) {
-      return 'No tienes permisos para realizar esta acción.';
-    }
-    if (this.statusCode === 404) {
-      return 'El recurso solicitado no existe.';
-    }
-    if (this.statusCode === 429) {
-      return 'Demasiados intentos. Espera un minuto e intenta de nuevo.';
-    }
-    if (this.statusCode === 422 || this.statusCode === 400) {
-      return `Error de validación: ${this.message}`;
-    }
-    if (this.statusCode >= 500) {
+
+    if (this.isServerError()){
       return 'Error del servidor. Por favor intenta nuevamente.';
     }
-    if (this.statusCode === 408) {
-      return 'La petición tardó demasiado. Verifica tu conexión.';
-    }
-    if (this.statusCode === 0) {
-      return 'No se pudo conectar con el servidor. Verifica tu conexión.';
-    }
-    return this.message || 'Ocurrió un error inesperado.';
+    
+    return ERROR_MESSAGES[this.statusCode] || this.message || 'Error desconocido';
   }
 
   /**
