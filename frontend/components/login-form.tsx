@@ -10,8 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
+import { getLoginErrorMessage } from "@/lib/features/auth/auth.service"
 import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
-import { ApiClientError } from "@/lib/shared/api-client"
 
 // Solo rutas internas: evita redirecciones abiertas a otros dominios
 function safeRedirect(target: string | null): string {
@@ -55,21 +55,11 @@ export function LoginForm() {
       return
     }
 
-    // Attempt login
     try {
-      const success = await login(email, password)
-      if (success) {
-        // Redirect to dashboard or original destination
-        router.push(redirectTo)
-      } else {
-        setError("Credenciales inválidas. Por favor intente nuevamente.")
-      }
+      await login(email, password)
+      router.push(redirectTo)
     } catch (err) {
-      if (err instanceof ApiClientError) {
-        setError(err.getUserMessage())
-      } else {
-        setError("Error inesperado. Por favor intente nuevamente.")
-      }
+      setError(getLoginErrorMessage(err))
     }
   }
 
