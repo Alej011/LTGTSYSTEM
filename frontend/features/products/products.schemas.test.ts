@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  BackendProductSchema,
   CreateProductRequestSchema,
   PaginatedProductsSchema,
+  ProductSchema,
   UpdateProductRequestSchema,
-} from './product.schema';
+} from './products.schemas';
 
 const backendProduct = {
   id: 'clprod1',
@@ -24,9 +24,9 @@ const backendProduct = {
 
 const meta = { page: 1, limit: 20, total: 1, totalPages: 1, hasPrevPage: false, hasNextPage: false };
 
-describe('BackendProductSchema', () => {
+describe('ProductSchema', () => {
   it('accepts a free product with an empty description', () => {
-    expect(BackendProductSchema.safeParse(backendProduct).success).toBe(true);
+    expect(ProductSchema.safeParse(backendProduct).success).toBe(true);
   });
 
   it('keeps the whole list valid when one product costs 0', () => {

@@ -1,7 +1,7 @@
+import { fetchStockSummary } from '@/features/products/products.client';
 import type { UserRole } from '@/lib/features/auth/auth.service';
 import { getCommunications, getUnreadCount } from '@/lib/features/communications/communications.service';
 import { getArticles } from '@/lib/features/knowledge/knowledge.service';
-import { getProducts } from '@/lib/features/products/products.service';
 import { getTickets } from '@/lib/features/tickets/tickets.service';
 
 export interface DashboardStats {
@@ -23,18 +23,12 @@ export interface RecentActivity {
   priority?: string;
 }
 
-const LOW_STOCK_THRESHOLD = 5;
-
 export const getDashboardStats = async (
   userId: string,
   userRole: UserRole,
   userDepartment: string,
 ): Promise<DashboardStats> => {
-  // Solo se necesitan los totales: limit 1 evita traer el catálogo completo
-  const [allProducts, lowStock] = await Promise.all([
-    getProducts({ limit: 1 }),
-    getProducts({ limit: 1, maxStock: LOW_STOCK_THRESHOLD }),
-  ]);
+  const stock = await fetchStockSummary();
 
   const tickets = getTickets();
   const articles = getArticles('published');
@@ -44,8 +38,8 @@ export const getDashboardStats = async (
   const myTickets = tickets.filter((t) => t.createdBy === userId || t.assignedTo === userId).length;
 
   return {
-    totalProducts: allProducts.meta.total,
-    lowStockProducts: lowStock.meta.total,
+    totalProducts: stock.total,
+    lowStockProducts: stock.lowStock,
     openTickets,
     myTickets,
     knowledgeArticles: articles.length,

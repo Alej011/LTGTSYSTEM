@@ -1,7 +1,7 @@
 'use client';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  type Brand,
-  type Category,
-  createProduct,
-  getBrands,
-  getCategories,
-  type Product,
-  updateProduct,
-} from '@/lib/features/products/products.service';
+import { ApiClientError } from '@/lib/shared/api-client';
+
+import { type Product, type ProductStatus, useBrands, useCategories, useSaveProduct } from '../products.client';
+import { PRODUCT_STATUSES, productStatusLabel } from './product-badges';
 
 interface ProductFormProps {
   product?: Product;
@@ -26,72 +21,44 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
+// El formulario elige una sola categoría; el backend recibe una lista
+function initialFormState(product?: Product) {
+  return {
+    name: product?.name ?? '',
+    description: product?.description ?? '',
+    brandId: product?.brandId ?? '',
+    sku: product?.sku ?? '',
+    stock: product?.stock ?? 0,
+    price: product?.price ?? 0,
+    categoryId: product?.categories[0]?.id ?? '',
+    status: product?.status ?? 'active',
+  };
+}
+
+type FormState = ReturnType<typeof initialFormState>;
+
+// Quien lo usa debe darle un key por producto para reiniciar el estado al cambiar de producto
 export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
-  const initialFormState = (current?: Product) => ({
-    name: current?.name || '',
-    description: current?.description || '',
-    brandId: current?.brandId || current?.brand?.id || '',
-    sku: current?.sku || '',
-    stock: current?.stock || 0,
-    price: current?.price || 0,
-    // Guardamos el ID de la categoría, no el nombre
-    categoryId: current?.categories[0]?.id || '',
-    status: current?.status || ('active' as const),
-  });
+  const [formData, setFormData] = useState(() => initialFormState(product));
+  const brands = useBrands();
+  const categories = useCategories();
+  const saveProduct = useSaveProduct();
 
-  const [formData, setFormData] = useState(initialFormState(product));
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const loadError = brands.isError || categories.isError ? 'Error al cargar marcas y categorías' : '';
+  const saveError = saveProduct.isError
+    ? saveProduct.error instanceof ApiClientError
+      ? saveProduct.error.getUserMessage()
+      : 'Error al guardar el producto. Intente nuevamente.'
+    : '';
+  const error = saveError || loadError;
 
-  useEffect(() => {
-    setFormData(initialFormState(product));
-  }, [product]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [brandsData, categoriesData] = await Promise.all([getBrands(), getCategories()]);
-        setBrands(brandsData);
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Error cargando datos:', error);
-        setError('Error al cargar marcas y categorías');
-      }
-    };
-    void loadData();
-  }, []);
-
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      if (product) {
-        // EDITAR:
-        const { categoryId, ...restData } = formData;
-        await updateProduct(product.id, {
-          ...restData,
-          categoryIds: [categoryId],
-        });
-      } else {
-        const { categoryId, ...restData } = formData;
-        await createProduct({
-          ...restData,
-          categoryIds: [categoryId], // El backend espera un array de IDs
-        });
-      }
-      onSuccess();
-    } catch {
-      setError('Error al guardar el producto. Intente nuevamente.');
-    } finally {
-      setIsLoading(false);
-    }
+    const { categoryId, ...rest } = formData;
+    saveProduct.mutate({ id: product?.id, input: { ...rest, categoryIds: [categoryId] } }, { onSuccess });
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -104,7 +71,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del Producto</Label>
@@ -143,11 +110,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             <div className="space-y-2">
               <Label htmlFor="brand">Marca</Label>
               <Select value={formData.brandId} onValueChange={(value) => handleInputChange('brandId', value)}>
-                <SelectTrigger>
+                <SelectTrigger id="brand">
                   <SelectValue placeholder="Seleccionar marca" />
                 </SelectTrigger>
                 <SelectContent>
-                  {brands.map((brand) => (
+                  {brands.data?.map((brand) => (
                     <SelectItem key={brand.id} value={brand.id}>
                       {brand.name}
                     </SelectItem>
@@ -158,11 +125,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             <div className="space-y-2">
               <Label htmlFor="category">Categoría</Label>
               <Select value={formData.categoryId} onValueChange={(value) => handleInputChange('categoryId', value)}>
-                <SelectTrigger>
+                <SelectTrigger id="category">
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
+                  {categories.data?.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
                     </SelectItem>
@@ -198,14 +165,19 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Estado</Label>
-              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                <SelectTrigger>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleInputChange('status', value as ProductStatus)}
+              >
+                <SelectTrigger id="status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="inactive">Inactivo</SelectItem>
-                  <SelectItem value="discontinued">Descontinuado</SelectItem>
+                  {PRODUCT_STATUSES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {productStatusLabel(value)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -222,8 +194,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a la Lista
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={saveProduct.isPending}>
+              {saveProduct.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Guardando...

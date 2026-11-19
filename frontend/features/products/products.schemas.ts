@@ -3,7 +3,7 @@
  */
 import { z } from 'zod';
 
-import { PaginationMetadataSchema, UUIDSchema } from './common.schema';
+import { PaginationMetadataSchema, UUIDSchema } from '@/lib/schemas/common.schema';
 
 /**
  * Product status enum
@@ -38,9 +38,9 @@ export const CategorySchema = z.object({
 });
 
 /**
- * Backend product response schema (as received from API with CUIDs)
+ * Product as the backend returns it; the BFF validates every response with it
  */
-export const BackendProductSchema = z.object({
+export const ProductSchema = z.object({
   id: z.string().min(1), // CUID from backend
   name: z.string().min(1),
   description: z.string(),
@@ -67,7 +67,7 @@ export const BackendProductSchema = z.object({
  * Paginated products response
  */
 export const PaginatedProductsSchema = z.object({
-  data: z.array(BackendProductSchema),
+  data: z.array(ProductSchema),
   meta: PaginationMetadataSchema,
 });
 

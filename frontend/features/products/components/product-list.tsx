@@ -1,7 +1,7 @@
 'use client';
 
 import { Edit, Eye, Package, Plus, Search, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -21,17 +21,20 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/auth-context';
-import {
-  deleteProduct,
-  getProducts,
-  type PaginationMetadata,
-  type Product,
-} from '@/lib/features/products/products.service';
 import { ApiClientError } from '@/lib/shared/api-client';
 import { getResourcePermissions } from '@/lib/shared/permissions';
-import { TONE_CLASSES } from '@/lib/shared/tones';
 
+import { type Product, type ProductStatus, useCategories, useDeleteProduct, useProducts } from '../products.client';
+import { PRODUCT_STATUSES, ProductStatusBadge, productStatusLabel, StockBadge } from './product-badges';
 import { ProductDetailModal } from './product-detail-modal';
+
+const PAGE_SIZE = 20;
+const ALL = 'all';
+const COLUMNS = 8;
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiClientError ? error.getUserMessage() : fallback;
+}
 
 interface ProductListProps {
   onEdit: (product: Product) => void;
@@ -41,133 +44,41 @@ interface ProductListProps {
 export function ProductList({ onEdit, onAdd }: ProductListProps) {
   const { user } = useAuth();
   const permissions = getResourcePermissions(user?.role, 'products');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [pagination, setPagination] = useState<PaginationMetadata | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState(ALL);
+  const [status, setStatus] = useState<ProductStatus | typeof ALL>(ALL);
+  const [page, setPage] = useState(1);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const [deleteError, setDeleteError] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [detailProductId, setDetailProductId] = useState<string | null>(null);
 
-  // Cargar productos cuando cambien filtros o página
-  useEffect(() => {
-    void loadProducts();
-  }, [currentPage, searchTerm, categoryFilter, statusFilter]);
+  const products = useProducts({
+    search: search || undefined,
+    category: category === ALL ? undefined : category,
+    status: status === ALL ? undefined : status,
+    page,
+    limit: PAGE_SIZE,
+  });
+  const categories = useCategories();
+  const deleteProduct = useDeleteProduct();
 
-  const loadProducts = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getProducts({
-        search: searchTerm || undefined,
-        category: categoryFilter !== 'all' ? categoryFilter : undefined,
-        status: statusFilter !== 'all' ? (statusFilter as Product['status']) : undefined,
-        page: currentPage,
-        limit: 20,
-      });
-      setProducts(response.data);
-      setPagination(response.meta);
-    } catch (error) {
-      console.error('Error cargando productos:', error);
-      // TODO: Mostrar mensaje de error al usuario
-    } finally {
-      setIsLoading(false);
-    }
+  const pagination = products.data?.meta;
+  const rows = products.data?.data ?? [];
+
+  // Cambiar un filtro vuelve a la primera página
+  const changeFilter = (apply: () => void) => {
+    apply();
+    setPage(1);
   };
 
-  const handleDelete = async () => {
+  const closeDeleteDialog = () => {
+    setProductToDelete(null);
+    deleteProduct.reset();
+  };
+
+  const confirmDelete = () => {
     if (!productToDelete) return;
-
-    setDeleteError('');
-    setIsDeleting(true);
-    try {
-      await deleteProduct(productToDelete.id);
-      void loadProducts();
-      setDeleteDialogOpen(false);
-      setProductToDelete(null);
-    } catch (error) {
-      setDeleteError(
-        error instanceof ApiClientError
-          ? error.getUserMessage()
-          : 'No se pudo eliminar el producto. Intente nuevamente.',
-      );
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleDeleteDialogChange = (open: boolean) => {
-    setDeleteDialogOpen(open);
-    if (!open) setDeleteError('');
-  };
-
-  const getStatusBadge = (status: string) => {
-    const tones: Partial<Record<string, string>> = {
-      active: TONE_CLASSES.success,
-      inactive: TONE_CLASSES.neutral,
-      discontinued: TONE_CLASSES.danger,
-    };
-
-    const labels = {
-      active: 'Activo',
-      inactive: 'Inactivo',
-      discontinued: 'Descontinuado',
-    };
-
-    return (
-      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
-        {labels[status as keyof typeof labels] || status}
-      </Badge>
-    );
-  };
-
-  const getStockBadge = (stock: number) => {
-    if (stock === 0) {
-      return (
-        <Badge variant="outline" className={TONE_CLASSES.danger}>
-          Sin stock
-        </Badge>
-      );
-    } else if (stock <= 5) {
-      return (
-        <Badge variant="outline" className={TONE_CLASSES.warning}>
-          Stock bajo
-        </Badge>
-      );
-    }
-    return <Badge variant="outline">{stock} unidades</Badge>;
-  };
-
-  // Obtener todas las categorías únicas de los productos actuales
-  const categories = [...new Set(products.flatMap((p) => p.categories.map((c) => c.name)))];
-
-  // Calcular número de columnas dinámicamente (siempre incluye Acciones)
-  const totalColumns = 8;
-
-  // Determinar si mostrar columna de acciones
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1); // Resetear a página 1 al buscar
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
-    setCurrentPage(1); // Resetear a página 1 al filtrar
-  };
-
-  const handleStatusChange = (value: string) => {
-    setStatusFilter(value);
-    setCurrentPage(1); // Resetear a página 1 al filtrar
+    deleteProduct.mutate(productToDelete.id, { onSuccess: closeDeleteDialog });
   };
 
   return (
@@ -197,34 +108,39 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Buscar por nombre, SKU o marca..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
+                  value={search}
+                  onChange={(e) => changeFilter(() => setSearch(e.target.value))}
                   className="pl-10"
                 />
               </div>
             </div>
-            <Select value={categoryFilter} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-full md:w-48">
+            <Select value={category} onValueChange={(value) => changeFilter(() => setCategory(value))}>
+              <SelectTrigger className="w-full md:w-48" aria-label="Categoría">
                 <SelectValue placeholder="Todas las categorías" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas las categorías</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                <SelectItem value={ALL}>Todas las categorías</SelectItem>
+                {categories.data?.map((item) => (
+                  <SelectItem key={item.id} value={item.name}>
+                    {item.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-full md:w-40">
+            <Select
+              value={status}
+              onValueChange={(value) => changeFilter(() => setStatus(value as ProductStatus | typeof ALL))}
+            >
+              <SelectTrigger className="w-full md:w-40" aria-label="Estado">
                 <SelectValue placeholder="Todos los estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="inactive">Inactivo</SelectItem>
-                <SelectItem value="discontinued">Descontinuado</SelectItem>
+                <SelectItem value={ALL}>Todos los estados</SelectItem>
+                {PRODUCT_STATUSES.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {productStatusLabel(value)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -244,23 +160,29 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading ? (
+                {products.isPending ? (
                   <TableRow>
-                    <TableCell colSpan={totalColumns} className="text-center py-8">
+                    <TableCell colSpan={COLUMNS} className="text-center py-8">
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
                         <span className="text-muted-foreground">Cargando productos...</span>
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : products.length === 0 ? (
+                ) : products.isError ? (
                   <TableRow>
-                    <TableCell colSpan={totalColumns} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={COLUMNS} role="alert" className="text-center py-8 text-destructive">
+                      {errorMessage(products.error, 'No se pudieron cargar los productos')}
+                    </TableCell>
+                  </TableRow>
+                ) : rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={COLUMNS} className="text-center py-8 text-muted-foreground">
                       No se encontraron productos
                     </TableCell>
                   </TableRow>
                 ) : (
-                  products.map((product) => (
+                  rows.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
                         <div>
@@ -268,37 +190,39 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                           <div className="text-sm text-muted-foreground truncate max-w-xs">{product.description}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{product.brand?.name}</TableCell>
+                      <TableCell>{product.brand.name}</TableCell>
                       <TableCell className="font-mono text-sm">{product.sku}</TableCell>
                       <TableCell className="text-center">
-                        <div className="flex  justify-center gap-2">
-                          {product.categories.map((cat) => (
-                            <Badge key={cat.id} variant="outline" className="text-xs">
-                              {cat.name}
+                        <div className="flex justify-center gap-2">
+                          {product.categories.map((item) => (
+                            <Badge key={item.id} variant="outline" className="text-xs">
+                              {item.name}
                             </Badge>
                           ))}
                         </div>
                       </TableCell>
                       <TableCell>Q{product.price.toFixed(2)}</TableCell>
-                      <TableCell>{getStockBadge(product.stock)}</TableCell>
-                      <TableCell>{getStatusBadge(product.status)}</TableCell>
+                      <TableCell>
+                        <StockBadge stock={product.stock} />
+                      </TableCell>
+                      <TableCell>
+                        <ProductStatusBadge status={product.status} />
+                      </TableCell>
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-2">
                           {permissions.canViewDetails && !permissions.canEdit && !permissions.canDelete && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedProductId(product.id);
-                                setDetailModalOpen(true);
-                              }}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => setDetailProductId(product.id)}>
                               <Eye className="h-4 w-4 mr-1" />
                               Ver Detalles
                             </Button>
                           )}
                           {permissions.canEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              aria-label={`Editar ${product.name}`}
+                              onClick={() => onEdit(product)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                           )}
@@ -307,10 +231,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                               variant="outline"
                               size="sm"
                               aria-label={`Eliminar ${product.name}`}
-                              onClick={() => {
-                                setProductToDelete(product);
-                                setDeleteDialogOpen(true);
-                              }}
+                              onClick={() => setProductToDelete(product)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -324,7 +245,6 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
             </Table>
           </div>
 
-          {/* Paginación */}
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-between pt-4">
               <div className="text-sm text-muted-foreground">
@@ -335,8 +255,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handlePageChange(pagination.page - 1)}
-                  disabled={!pagination.hasPrevPage || isLoading}
+                  onClick={() => setPage(pagination.page - 1)}
+                  disabled={!pagination.hasPrevPage || products.isFetching}
                 >
                   Anterior
                 </Button>
@@ -346,8 +266,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handlePageChange(pagination.page + 1)}
-                  disabled={!pagination.hasNextPage || isLoading}
+                  onClick={() => setPage(pagination.page + 1)}
+                  disabled={!pagination.hasNextPage || products.isFetching}
                 >
                   Siguiente
                 </Button>
@@ -357,7 +277,12 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
         </CardContent>
       </Card>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={handleDeleteDialogChange}>
+      <AlertDialog
+        open={productToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) closeDeleteDialog();
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
@@ -366,29 +291,37 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
               sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {deleteError && (
+          {deleteProduct.isError && (
             <Alert variant="destructive">
-              <AlertDescription>{deleteError}</AlertDescription>
+              <AlertDescription>
+                {errorMessage(deleteProduct.error, 'No se pudo eliminar el producto. Intente nuevamente.')}
+              </AlertDescription>
             </Alert>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteProduct.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 // El diálogo solo se cierra si el borrado funciona
                 e.preventDefault();
-                void handleDelete();
+                confirmDelete();
               }}
-              disabled={isDeleting}
+              disabled={deleteProduct.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              {deleteProduct.isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <ProductDetailModal productId={selectedProductId} open={detailModalOpen} onOpenChange={setDetailModalOpen} />
+      <ProductDetailModal
+        productId={detailProductId}
+        open={detailProductId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDetailProductId(null);
+        }}
+      />
     </div>
   );
 }
