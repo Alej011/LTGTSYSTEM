@@ -34,7 +34,7 @@ export function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
     setValidationErrors({})
@@ -86,7 +86,7 @@ export function LoginForm() {
           <CardDescription>Sistema de Gestión Empresarial</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>

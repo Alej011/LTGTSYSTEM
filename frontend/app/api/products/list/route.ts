@@ -18,7 +18,7 @@ export function GET(request: NextRequest) {
   }
 
   const query = new URLSearchParams(
-    Object.entries(filters.data).flatMap(([key, value]) => (value === undefined ? [] : [[key, String(value)]])),
+    Object.entries(filters.data).map(([key, value]) => [key, String(value)]),
   ).toString()
 
   return proxyToBackend({

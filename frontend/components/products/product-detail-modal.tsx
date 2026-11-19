@@ -26,7 +26,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
 
   useEffect(() => {
     if (productId && open) {
-      loadProductDetails()
+      void loadProductDetails()
     }
   }, [productId, open])
 
@@ -45,7 +45,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
   }
 
   const getStatusBadge = (status: string) => {
-    const tones = {
+    const tones: Partial<Record<string, string>> = {
       active: TONE_CLASSES.success,
       inactive: TONE_CLASSES.neutral,
       discontinued: TONE_CLASSES.danger,
@@ -58,7 +58,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
     }
 
     return (
-      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
+      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )

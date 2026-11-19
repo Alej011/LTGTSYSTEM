@@ -51,7 +51,7 @@ export function ProductForm({
     stock: current?.stock || 0,
     price: current?.price || 0,
     // Guardamos el ID de la categoría, no el nombre
-    categoryId: current?.categories?.[0]?.id || "",
+    categoryId: current?.categories[0]?.id || "",
     status: current?.status || ("active" as const),
   });
 
@@ -79,10 +79,10 @@ export function ProductForm({
         setError("Error al cargar marcas y categorías");
       }
     };
-    loadData();
+    void loadData();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -103,7 +103,7 @@ export function ProductForm({
         });
       }
       onSuccess();
-    } catch (err) {
+    } catch {
       setError("Error al guardar el producto. Intente nuevamente.");
     } finally {
       setIsLoading(false);
@@ -125,7 +125,7 @@ export function ProductForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del Producto</Label>

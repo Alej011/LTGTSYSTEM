@@ -24,7 +24,7 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
   useEffect(() => {
     // Mark as read when viewing
     if (user) {
-      markAsRead(communication.id, user.id)
+      void markAsRead(communication.id, user.id)
     }
   }, [communication.id, user])
 

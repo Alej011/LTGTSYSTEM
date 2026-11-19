@@ -60,12 +60,12 @@ export const logout = async (): Promise<void> => {
 }
 
 export const getUserPermissions = (role: UserRole) => {
-  const permissions = {
+  const permissions: Partial<Record<string, string[]>> = {
     admin: ["all"],
     empleado: ["tickets", "knowledge", "products", "communications"],
   }
 
-  return permissions[role] || []
+  return permissions[role] ?? []
 }
 
 export const hasPermission = (userRole: UserRole, permission: string): boolean => {

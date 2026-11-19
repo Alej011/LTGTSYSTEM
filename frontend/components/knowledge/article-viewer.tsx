@@ -27,7 +27,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
 
   useEffect(() => {
     // Increment view count when article is opened
-    incrementViews(article.id)
+    void incrementViews(article.id)
   }, [article.id])
 
   const handleRate = async (isHelpful: boolean) => {
@@ -99,7 +99,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
                 <div className="flex gap-4">
                   <Button
                     variant="outline"
-                    onClick={() => handleRate(true)}
+                    onClick={() => void handleRate(true)}
                     disabled={isRating}
                     className="flex items-center gap-2"
                   >
@@ -108,7 +108,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => handleRate(false)}
+                    onClick={() => void handleRate(false)}
                     disabled={isRating}
                     className="flex items-center gap-2"
                   >

@@ -28,7 +28,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
@@ -56,8 +56,8 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
         })
       }
       onSuccess()
-    } catch (err: any) {
-      const errorMessage = err?.message || "Error al guardar el usuario. Intente nuevamente."
+    } catch (err) {
+      const errorMessage = (err instanceof Error && err.message) || "Error al guardar el usuario. Intente nuevamente."
       setError(errorMessage)
     } finally {
       setIsLoading(false)
@@ -77,7 +77,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre Completo</Label>

@@ -203,7 +203,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   placeholder="Escribe tu comentario..."
                   rows={3}
                 />
-                <Button onClick={handleAddComment} disabled={!newComment.trim() || isLoading}>
+                <Button onClick={() => void handleAddComment()} disabled={!newComment.trim() || isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -298,7 +298,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   </div>
                 )}
 
-                <Button onClick={handleUpdateTicket} disabled={isUpdating} className="w-full">
+                <Button onClick={() => void handleUpdateTicket()} disabled={isUpdating} className="w-full">
                   {isUpdating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -309,7 +309,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   )}
                 </Button>
 
-                {!ticket.assignedTo && user?.role === "empleado" && (
+                {!ticket.assignedTo && user.role === "empleado" && (
                   <Alert>
                     <AlertDescription>
                       Al actualizar este ticket, se te asignará automáticamente como responsable.

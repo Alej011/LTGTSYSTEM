@@ -86,7 +86,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
   }
 
   const getStatusBadge = (status: string) => {
-    const tones = {
+    const tones: Partial<Record<string, string>> = {
       draft: TONE_CLASSES.warning,
       published: TONE_CLASSES.success,
       archived: TONE_CLASSES.neutral,
@@ -99,7 +99,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
     }
 
     return (
-      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
+      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )
@@ -176,7 +176,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                     className={`cursor-pointer hover:shadow-md transition-shadow ${
                       isUnread ? "border-primary bg-primary/5" : ""
                     }`}
-                    onClick={() => handleView(communication)}
+                    onClick={() => void handleView(communication)}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between gap-4">
@@ -225,7 +225,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleView(communication)
+                              void handleView(communication)
                             }}
                           >
                             <Eye className="h-4 w-4" />

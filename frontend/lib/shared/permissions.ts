@@ -79,7 +79,7 @@ export function hasPermission(
 ): boolean {
   if (!role) return false
 
-  const allowedRoles = PERMISSION_MATRIX[resource]?.[action]
+  const allowedRoles = PERMISSION_MATRIX[resource][action]
   if (!allowedRoles) return false
 
   return allowedRoles.includes(role)

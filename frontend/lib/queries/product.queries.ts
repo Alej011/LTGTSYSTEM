@@ -86,7 +86,7 @@ export function useCreateProduct() {
     mutationFn: createProduct,
     onSuccess: () => {
       // Invalidate and refetch product lists
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     },
   })
 }
@@ -106,8 +106,8 @@ export function useUpdateProduct() {
       updateProduct(id, data),
     onSuccess: (_, variables) => {
       // Invalidate specific product and lists
-      queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) })
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     },
   })
 }
@@ -129,7 +129,7 @@ export function useDeleteProduct() {
     onSuccess: (_, productId) => {
       // Remove from cache and invalidate lists
       queryClient.removeQueries({ queryKey: productKeys.detail(productId) })
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     },
   })
 }

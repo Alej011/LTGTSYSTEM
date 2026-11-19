@@ -23,7 +23,7 @@ export type BackendUserListItem = z.infer<typeof BackendUserListItemSchema>
  */
 export const UserListItemSchema = z.object({
   id: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().min(1),
   role: FrontendRoleSchema, // admin or empleado
 })

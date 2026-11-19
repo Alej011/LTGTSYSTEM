@@ -36,14 +36,14 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
     summary: article?.summary || "",
     content: article?.content || "",
     category: article?.category || ("" as ArticleCategory),
-    status: article?.status || ("draft" as ArticleStatus),
+    status: article?.status || "draft",
     tags: article?.tags || [],
   })
   const [newTag, setNewTag] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!user) return
 
@@ -61,7 +61,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
         })
       }
       onSuccess()
-    } catch (err) {
+    } catch {
       setError("Error al guardar el artículo. Intente nuevamente.")
     } finally {
       setIsLoading(false)
@@ -106,7 +106,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="space-y-2">
@@ -191,7 +191,12 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     placeholder="Nueva etiqueta"
-                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                    onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      addTag()
+                    }
+                  }}
                   />
                   <Button type="button" onClick={addTag} size="sm">
                     Agregar

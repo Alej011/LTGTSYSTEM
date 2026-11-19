@@ -102,7 +102,7 @@ export function mapBackendProductToFrontend(backendProduct: BackendProduct): Pro
     name: backendProduct.name,
     description: backendProduct.description,
     sku: backendProduct.sku,
-    price: Number(backendProduct.price),
+    price: backendProduct.price,
     stock: backendProduct.stock,
     status: backendProduct.status,
     brandId: backendProduct.brandId,
@@ -113,7 +113,7 @@ export function mapBackendProductToFrontend(backendProduct: BackendProduct): Pro
       createdAt: backendProduct.createdAt, // Keep as ISO string
       updatedAt: backendProduct.updatedAt, // Keep as ISO string
     },
-    categories: backendProduct.categories || [],
+    categories: backendProduct.categories,
     createdAt: backendProduct.createdAt, // Keep as ISO string
     updatedAt: backendProduct.updatedAt, // Keep as ISO string
   }

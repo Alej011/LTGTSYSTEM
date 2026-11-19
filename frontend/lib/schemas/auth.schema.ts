@@ -24,12 +24,12 @@ export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole
   // Normalize to uppercase for mapping
   const normalizedRole = backendRole.toUpperCase()
 
-  const roleMap: Record<string, FrontendRole> = {
+  const roleMap: Partial<Record<string, FrontendRole>> = {
     ADMIN: "admin",
     SUPPORT: "empleado",
   }
 
-  return roleMap[normalizedRole] || "empleado" // Default to empleado if unknown
+  return roleMap[normalizedRole] ?? "empleado" // Default to empleado if unknown
 }
 
 /**

@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
   type ArticleCategory,
+  type ArticleStatus,
   getArticles,
   getCategoryLabel,
   getStatusLabel,
@@ -56,15 +57,15 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    const tones = {
+  const getStatusBadge = (status: ArticleStatus) => {
+    const tones: Partial<Record<string, string>> = {
       draft: TONE_CLASSES.warning,
       published: TONE_CLASSES.success,
       archived: TONE_CLASSES.neutral,
     }
 
     return (
-      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>{getStatusLabel(status as any)}</Badge>
+      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>{getStatusLabel(status)}</Badge>
     )
   }
 

@@ -30,7 +30,7 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!user) return
 
@@ -44,7 +44,7 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
         createdByName: user.name,
       })
       onSuccess()
-    } catch (err) {
+    } catch {
       setError("Error al crear el ticket. Intente nuevamente.")
     } finally {
       setIsLoading(false)
@@ -70,7 +70,7 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Título del Problema</Label>
             <Input

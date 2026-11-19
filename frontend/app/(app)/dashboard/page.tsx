@@ -37,7 +37,7 @@ export default function DashboardPage() {
       }
     }
 
-    loadDashboardData()
+    void loadDashboardData()
   }, [user])
 
   if (!user) return null
@@ -53,11 +53,11 @@ export default function DashboardPage() {
   }
 
   const getRoleBadgeColor = (role: string) => {
-    const colors = {
+    const colors: Partial<Record<string, string>> = {
       admin: TONE_CLASSES.primary,
       empleado: TONE_CLASSES.info,
     }
-    return colors[role as keyof typeof colors] || colors.empleado
+    return colors[role] ?? TONE_CLASSES.info
   }
 
   const getRoleLabel = (role: string) => {

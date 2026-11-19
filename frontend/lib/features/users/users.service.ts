@@ -1,5 +1,4 @@
 import { apiClient, ApiClientError } from "@/lib/shared/api-client";
-import { API_ENDPOINTS } from "@/lib/shared/api-config";
 
 // Re-export types from schemas
 export type {

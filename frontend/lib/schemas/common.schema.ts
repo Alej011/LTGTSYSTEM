@@ -6,7 +6,7 @@ import { z } from "zod"
 /**
  * API Response wrapper
  */
-export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+export const ApiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
   z.object({
     data: dataSchema.optional(),
     message: z.string().optional(),
@@ -31,7 +31,7 @@ export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>
 /**
  * Paginated response wrapper
  */
-export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+export const PaginatedResponseSchema = <T extends z.ZodType>(itemSchema: T) =>
   z.object({
     data: z.array(itemSchema),
     meta: PaginationMetadataSchema,
@@ -63,7 +63,7 @@ export const UUIDSchema = z.string().min(1)
 /**
  * Email validation
  */
-export const EmailSchema = z.string().email("Email inválido")
+export const EmailSchema = z.email("Email inválido")
 
 /**
  * Password validation (min 6 characters)
