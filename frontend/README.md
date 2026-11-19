@@ -59,7 +59,9 @@ lib/
 └── shared/
     ├── api-client.ts        # Cliente HTTP hacia el BFF (timeout, errores tipados, 401 → login)
     ├── api-config.ts        # URL del backend y timeout
-    ├── permissions.ts       # Matriz de permisos por rol (fuente única)
+    ├── permissions.ts       # Política única: can(rol, recurso, acción) y canOpenPage; la usan proxy.ts y los layouts
+    ├── use-can.ts           # can() con el rol del usuario actual, para los componentes
+    ├── roles.ts             # Roles del backend (ADMIN, SUPPORT)
     └── tones.ts             # Clases de badge por significado (info, success, warning, danger...)
 lib/server/                  # Solo servidor (import "server-only")
 ├── backend.ts               # Helper de las rutas BFF: cookie → Bearer, IP, timeout, validación Zod
@@ -97,7 +99,7 @@ Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt00000
 2. Ruta BFF en `app/api/<dominio>/.../route.ts`, con la misma ruta que el backend, usando `proxyToBackend` (o `callBackend` si necesitas manipular la respuesta) de `lib/server/backend.ts`. Si la respuesta del backend no cumple el esquema, el BFF responde `502` en lugar de reenviar datos sin validar.
 3. Hook en `features/<dominio>/<dominio>.client.ts`: los componentes no conocen URLs ni query keys, y toda falla llega como `ApiClientError`. Las mutaciones invalidan las queries que dependen de ellas.
 4. Test del hook contra el BFF simulado de `test/mock-bff.ts`.
-5. Si requiere permisos, regístralo en `lib/shared/permissions.ts`.
+5. Si requiere permisos, regístralo en `lib/shared/permissions.ts` y úsalo con `useCan()`; no compares roles en los componentes. `backend/src/permissions.spec.ts` falla si la política no coincide con los `@Roles` del backend.
 
 ## Desarrollo local
 
