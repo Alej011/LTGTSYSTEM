@@ -10,7 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createUser, updateUser, type User } from '@/lib/features/users/users.service';
+import type { BackendRole } from '@/lib/schemas/auth.schema';
+import { PasswordSchema } from '@/lib/schemas/common.schema';
+import { ApiClientError } from '@/lib/shared/api-client';
+
+import { backendRoleOf, type User, useSaveUser } from '../users.client';
 
 interface UserFormProps {
   user?: User;
@@ -18,53 +22,48 @@ interface UserFormProps {
   onCancel: () => void;
 }
 
-export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+function initialFormState(user?: User) {
+  return {
+    name: user?.name ?? '',
+    email: user?.email ?? '',
     password: '',
-    role: user?.role === 'admin' ? 'ADMIN' : 'SUPPORT',
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+    role: user ? backendRoleOf(user.role) : ('SUPPORT' as BackendRole),
+  };
+}
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+type FormState = ReturnType<typeof initialFormState>;
+
+// Quien lo usa debe darle un key por usuario para reiniciar el estado al cambiar de usuario
+export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
+  const [formData, setFormData] = useState(() => initialFormState(user));
+  const [passwordError, setPasswordError] = useState('');
+  const saveUser = useSaveUser();
+
+  const saveError = saveUser.isError
+    ? saveUser.error instanceof ApiClientError
+      ? saveUser.error.getUserMessage()
+      : 'Error al guardar el usuario. Intenta nuevamente.'
+    : '';
+  const error = passwordError || saveError;
+
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    const { name, email, password, role } = formData;
 
-    try {
-      if (user) {
-        // EDITAR: Solo nombre y rol
-        await updateUser(user.id, {
-          name: formData.name,
-          role: formData.role as 'ADMIN' | 'SUPPORT',
-        });
-      } else {
-        // CREAR: Validar que tenga contraseña
-        if (!formData.password || formData.password.length < 6) {
-          setError('La contraseña debe tener al menos 6 caracteres');
-          setIsLoading(false);
-          return;
-        }
-
-        await createUser({
-          email: formData.email,
-          name: formData.name,
-          password: formData.password,
-          role: formData.role as 'ADMIN' | 'SUPPORT',
-        });
-      }
-      onSuccess();
-    } catch (err) {
-      const errorMessage = (err instanceof Error && err.message) || 'Error al guardar el usuario. Intente nuevamente.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+    if (user) {
+      // Editar solo cambia nombre y rol
+      saveUser.mutate({ id: user.id, changes: { name, role } }, { onSuccess });
+      return;
     }
+
+    const passwordCheck = PasswordSchema.safeParse(password);
+    setPasswordError(passwordCheck.success ? '' : (passwordCheck.error.issues[0]?.message ?? ''));
+    if (!passwordCheck.success) return;
+
+    saveUser.mutate({ input: { email, name, password, role } }, { onSuccess });
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -77,7 +76,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre Completo</Label>
@@ -121,8 +120,8 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="role">Rol</Label>
-            <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-              <SelectTrigger>
+            <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value as BackendRole)}>
+              <SelectTrigger id="role">
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
               <SelectContent>
@@ -143,8 +142,8 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a la Lista
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={saveUser.isPending}>
+              {saveUser.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Guardando...

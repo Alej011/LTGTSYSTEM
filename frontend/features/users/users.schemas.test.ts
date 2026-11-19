@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapBackendRoleToFrontend } from './auth.schema';
-import { CreateUserRequestSchema, UpdateUserRequestSchema } from './user.schema';
+import { mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
+
+import { CreateUserRequestSchema, UpdateUserRequestSchema } from './users.schemas';
 
 const newUser = { email: 'soporte@ltgt.com', name: 'Soporte', password: 'secret123' };
 

@@ -2,7 +2,7 @@ import {
   BackendUserListItemSchema,
   mapBackendUserListItemToFrontend,
   UpdateUserRequestSchema,
-} from '@/lib/schemas/user.schema';
+} from '@/features/users/users.schemas';
 import { parseBody, proxyToBackend } from '@/lib/server/backend';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {

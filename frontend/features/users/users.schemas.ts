@@ -3,8 +3,8 @@
  */
 import { z } from 'zod';
 
-import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from './auth.schema';
-import { EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
+import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
+import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
 
 /**
  * Backend user response schema (GET /api/users)
