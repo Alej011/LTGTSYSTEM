@@ -1,9 +1,9 @@
 "use client"
 
+import { Box, Calendar, DollarSign, Hash,Package, Tag } from "lucide-react"
 import { useEffect, useState } from "react"
-import { type Product, getProductById } from "@/lib/features/products/products.service"
+
 import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Package, Tag, DollarSign, Box, Calendar, Hash } from "lucide-react"
+import { getProductById,type Product } from "@/lib/features/products/products.service"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ProductDetailModalProps {
   productId: string | null
@@ -25,7 +26,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
 
   useEffect(() => {
     if (productId && open) {
-      loadProductDetails()
+      void loadProductDetails()
     }
   }, [productId, open])
 
@@ -44,7 +45,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
   }
 
   const getStatusBadge = (status: string) => {
-    const tones = {
+    const tones: Partial<Record<string, string>> = {
       active: TONE_CLASSES.success,
       inactive: TONE_CLASSES.neutral,
       discontinued: TONE_CLASSES.danger,
@@ -57,7 +58,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
     }
 
     return (
-      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
+      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )

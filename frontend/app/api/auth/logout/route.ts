@@ -1,8 +1,9 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
+
 import { callBackend } from "@/lib/server/backend"
-import { REFRESH_COOKIE, clearSessionCookies } from "@/lib/server/session"
+import { clearSessionCookies,REFRESH_COOKIE } from "@/lib/server/session"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function POST() {
   const refreshToken = (await cookies()).get(REFRESH_COOKIE)?.value

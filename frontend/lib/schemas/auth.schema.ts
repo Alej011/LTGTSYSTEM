@@ -2,7 +2,8 @@
  * Authentication and User schemas with Zod validation
  */
 import { z } from "zod"
-import { EmailSchema, PasswordSchema, DateStringSchema, UUIDSchema } from "./common.schema"
+
+import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
 
 /**
  * Backend role enum (as received from API)
@@ -23,12 +24,12 @@ export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole
   // Normalize to uppercase for mapping
   const normalizedRole = backendRole.toUpperCase()
 
-  const roleMap: Record<string, FrontendRole> = {
+  const roleMap: Partial<Record<string, FrontendRole>> = {
     ADMIN: "admin",
     SUPPORT: "empleado",
   }
 
-  return roleMap[normalizedRole] || "empleado" // Default to empleado if unknown
+  return roleMap[normalizedRole] ?? "empleado" // Default to empleado if unknown
 }
 
 /**

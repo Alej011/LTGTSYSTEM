@@ -1,16 +1,17 @@
 "use client"
 
-import { useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { type Communication, getTypeLabel, getTypeColor, markAsRead } from "@/lib/features/communications/communications.service"
-import { useAuth } from "@/contexts/auth-context"
-import { ArrowLeft, Clock, User, Users, Pin, Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { ArrowLeft, Calendar,Clock, Pin, User, Users } from "lucide-react"
+import { useEffect } from "react"
 import ReactMarkdown from "react-markdown"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/contexts/auth-context"
+import { type Communication, getTypeColor, getTypeLabel, markAsRead } from "@/lib/features/communications/communications.service"
 
 interface CommunicationViewerProps {
   communication: Communication
@@ -23,7 +24,7 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
   useEffect(() => {
     // Mark as read when viewing
     if (user) {
-      markAsRead(communication.id, user.id)
+      void markAsRead(communication.id, user.id)
     }
   }, [communication.id, user])
 

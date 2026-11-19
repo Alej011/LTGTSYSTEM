@@ -1,11 +1,14 @@
-import type React from "react"
+import "./globals.css"
+
 import type { Metadata } from "next"
+import type React from "react"
 import { Suspense } from "react"
-import { Providers } from "./providers"
-import { AuthProvider } from "@/contexts/auth-context"
+
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
-import "./globals.css"
+import { AuthProvider } from "@/contexts/auth-context"
+
+import { Providers } from "./providers"
 
 export const metadata: Metadata = {
   title: "LTGT S.A. - Sistema de Gestión",

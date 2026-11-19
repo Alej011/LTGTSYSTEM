@@ -1,28 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { format,formatDistanceToNow } from "date-fns"
+import { es } from "date-fns/locale"
+import { ArrowLeft, CheckCircle, Clock, Loader2,MessageSquare, User } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/contexts/auth-context"
 import {
+  addComment,
+  getCategoryLabel,
+  getPriorityColor,
+  getStatusColor,
+  getTicketComments,
   type Ticket,
   type TicketComment,
   type TicketStatus,
-  getTicketComments,
-  addComment,
   updateTicket,
-  getPriorityColor,
-  getStatusColor,
-  getCategoryLabel,
 } from "@/lib/features/tickets/tickets.service"
-import { useAuth } from "@/contexts/auth-context"
-import { ArrowLeft, Clock, User, MessageSquare, CheckCircle, Loader2 } from "lucide-react"
-import { formatDistanceToNow, format } from "date-fns"
-import { es } from "date-fns/locale"
 
 interface TicketDetailProps {
   ticket: Ticket
@@ -202,7 +203,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   placeholder="Escribe tu comentario..."
                   rows={3}
                 />
-                <Button onClick={handleAddComment} disabled={!newComment.trim() || isLoading}>
+                <Button onClick={() => void handleAddComment()} disabled={!newComment.trim() || isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -297,7 +298,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   </div>
                 )}
 
-                <Button onClick={handleUpdateTicket} disabled={isUpdating} className="w-full">
+                <Button onClick={() => void handleUpdateTicket()} disabled={isUpdating} className="w-full">
                   {isUpdating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -308,7 +309,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   )}
                 </Button>
 
-                {!ticket.assignedTo && user?.role === "empleado" && (
+                {!ticket.assignedTo && user.role === "empleado" && (
                   <Alert>
                     <AlertDescription>
                       Al actualizar este ticket, se te asignará automáticamente como responsable.

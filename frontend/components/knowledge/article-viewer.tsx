@@ -1,18 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type KnowledgeArticle, incrementViews, rateArticle, getCategoryLabel } from "@/lib/features/knowledge/knowledge.service"
-import { useAuth } from "@/contexts/auth-context"
-import { ArrowLeft, ThumbsUp, ThumbsDown, Eye, Clock, User, Tag } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { ArrowLeft, Clock, Eye, Tag,ThumbsDown, ThumbsUp, User } from "lucide-react"
+import { useEffect,useState } from "react"
 import ReactMarkdown from "react-markdown"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/contexts/auth-context"
+import { getCategoryLabel,incrementViews, type KnowledgeArticle, rateArticle } from "@/lib/features/knowledge/knowledge.service"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ArticleViewerProps {
   article: KnowledgeArticle
@@ -26,7 +27,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
 
   useEffect(() => {
     // Increment view count when article is opened
-    incrementViews(article.id)
+    void incrementViews(article.id)
   }, [article.id])
 
   const handleRate = async (isHelpful: boolean) => {
@@ -98,7 +99,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
                 <div className="flex gap-4">
                   <Button
                     variant="outline"
-                    onClick={() => handleRate(true)}
+                    onClick={() => void handleRate(true)}
                     disabled={isRating}
                     className="flex items-center gap-2"
                   >
@@ -107,7 +108,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => handleRate(false)}
+                    onClick={() => void handleRate(false)}
                     disabled={isRating}
                     className="flex items-center gap-2"
                   >

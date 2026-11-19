@@ -1,19 +1,20 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import {
-  Package,
-  Headphones,
-  BookOpen,
-  MessageSquare,
-  Users,
   AlertCircle,
   ArrowRight,
+  BookOpen,
+  Headphones,
+  MessageSquare,
+  Package,
   Plus,
   Search,
+  Users,
 } from "lucide-react"
 import Link from "next/link"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { UserRole } from "@/lib/features/auth/auth.service"
 
 interface QuickActionsProps {
@@ -22,7 +23,7 @@ interface QuickActionsProps {
 
 export function QuickActions({ userRole }: QuickActionsProps) {
   const getIcon = (iconName: string) => {
-    const icons = {
+    const icons: Partial<Record<string, typeof Package>> = {
       Package,
       Headphones,
       BookOpen,
@@ -30,7 +31,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       Users,
       AlertCircle,
     }
-    const IconComponent = icons[iconName as keyof typeof icons] || Package
+    const IconComponent = icons[iconName] ?? Package
     return <IconComponent className="h-5 w-5" />
   }
 

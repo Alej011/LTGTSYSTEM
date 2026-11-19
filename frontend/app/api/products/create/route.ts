@@ -1,6 +1,6 @@
 import { BackendProductSchema, CreateProductRequestSchema } from "@/lib/schemas/product.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { parseBody, proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function POST(request: Request) {
   const body = await parseBody(request, CreateProductRequestSchema, "Datos del producto inválidos")

@@ -9,10 +9,11 @@
  */
 
 import { z } from "zod"
+
 import { API_TIMEOUT } from "./api-config"
 
 // Tipos de respuesta de la API
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string
@@ -103,7 +104,17 @@ export class ApiClientError extends Error {
 function handleExpiredSession(endpoint: string): void {
   if (typeof window === "undefined" || endpoint.startsWith("/api/auth/")) return
   const redirect = encodeURIComponent(window.location.pathname)
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload clears client state
   window.location.assign(`/?redirect=${redirect}`)
+}
+
+// El cuerpo de error puede traer message como texto o como lista (validación de Nest)
+function errorField(data: unknown, key: "message" | "error"): string | undefined {
+  if (typeof data !== "object" || data === null) return undefined
+  const value = (data as Record<string, unknown>)[key]
+  if (typeof value === "string") return value
+  if (Array.isArray(value)) return value.join(", ")
+  return undefined
 }
 
 /**
@@ -111,13 +122,13 @@ function handleExpiredSession(endpoint: string): void {
  */
 interface RequestConfig extends RequestInit {
   timeout?: number
-  schema?: z.ZodType<any> // Optional Zod schema for response validation
+  schema?: z.ZodType // Optional Zod schema for response validation
 }
 
 /**
  * Realiza una petición HTTP con configuración centralizada
  */
-async function request<T = any>(endpoint: string, config: RequestConfig = {}): Promise<T> {
+async function request<T = unknown>(endpoint: string, config: RequestConfig = {}): Promise<T> {
   const {
     timeout = API_TIMEOUT,
     headers: customHeaders = {},
@@ -154,7 +165,7 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
     clearTimeout(timeoutId)
 
     // Parsear respuesta
-    let data: any
+    let data: unknown
     const contentType = response.headers.get("content-type")
     if (contentType && contentType.includes("application/json")) {
       data = await response.json()
@@ -165,8 +176,8 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
     // Manejar errores HTTP
     if (!response.ok) {
       if (response.status === 401) handleExpiredSession(endpoint)
-      const errorMessage = data?.message || data?.error || "Error en la petición"
-      throw new ApiClientError(errorMessage, response.status, data?.error)
+      const errorMessage = errorField(data, "message") || errorField(data, "error") || "Error en la petición"
+      throw new ApiClientError(errorMessage, response.status, errorField(data, "error"))
     }
 
     // Validar respuesta con Zod si se proporciona schema
@@ -196,11 +207,11 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
     }
 
     return data as T
-  } catch (error: any) {
+  } catch (error) {
     clearTimeout(timeoutId)
 
     // Error de timeout
-    if (error.name === "AbortError") {
+    if (error instanceof Error && error.name === "AbortError") {
       throw new ApiClientError("Timeout: La petición tardó demasiado", 408)
     }
 
@@ -215,7 +226,7 @@ async function request<T = any>(endpoint: string, config: RequestConfig = {}): P
     }
 
     // Error desconocido
-    throw new ApiClientError(error.message || "Error desconocido", 500)
+    throw new ApiClientError((error instanceof Error && error.message) || "Error desconocido", 500)
   }
 }
 
@@ -230,7 +241,7 @@ export const apiClient = {
    * @example
    * const users = await apiClient.get('/api/users', { schema: UsersSchema })
    */
-  get: <T = any>(endpoint: string, config?: RequestConfig) => {
+  get: <T = unknown>(endpoint: string, config?: RequestConfig) => {
     return request<T>(endpoint, { ...config, method: "GET" })
   },
 
@@ -242,7 +253,7 @@ export const apiClient = {
    * @example
    * const user = await apiClient.post('/api/users', userData, { schema: UserSchema })
    */
-  post: <T = any>(endpoint: string, data?: any, config?: RequestConfig) => {
+  post: <T = unknown>(endpoint: string, data?: unknown, config?: RequestConfig) => {
     return request<T>(endpoint, {
       ...config,
       method: "POST",
@@ -256,7 +267,7 @@ export const apiClient = {
    * @param data - Request body
    * @param config - Request configuration including optional Zod schema
    */
-  put: <T = any>(endpoint: string, data?: any, config?: RequestConfig) => {
+  put: <T = unknown>(endpoint: string, data?: unknown, config?: RequestConfig) => {
     return request<T>(endpoint, {
       ...config,
       method: "PUT",
@@ -270,7 +281,7 @@ export const apiClient = {
    * @param data - Request body (partial update)
    * @param config - Request configuration including optional Zod schema
    */
-  patch: <T = any>(endpoint: string, data?: any, config?: RequestConfig) => {
+  patch: <T = unknown>(endpoint: string, data?: unknown, config?: RequestConfig) => {
     return request<T>(endpoint, {
       ...config,
       method: "PATCH",
@@ -283,7 +294,7 @@ export const apiClient = {
    * @param endpoint - API endpoint
    * @param config - Request configuration including optional Zod schema
    */
-  delete: <T = any>(endpoint: string, config?: RequestConfig) => {
+  delete: <T = unknown>(endpoint: string, config?: RequestConfig) => {
     return request<T>(endpoint, { ...config, method: "DELETE" })
   },
 }

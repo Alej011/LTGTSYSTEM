@@ -324,14 +324,15 @@ export const updateArticle = async (
   return mockArticles[index]
 }
 
-export const incrementViews = async (id: string): Promise<void> => {
+export const incrementViews = (id: string): Promise<void> => {
   const article = mockArticles.find((a) => a.id === id)
   if (article) {
     article.views += 1
   }
+  return Promise.resolve()
 }
 
-export const rateArticle = async (articleId: string, userId: string, isHelpful: boolean): Promise<void> => {
+export const rateArticle = (articleId: string, userId: string, isHelpful: boolean): Promise<void> => {
   // Remove existing rating from this user
   const existingRatingIndex = mockRatings.findIndex((r) => r.articleId === articleId && r.userId === userId)
   if (existingRatingIndex !== -1) {
@@ -367,6 +368,7 @@ export const rateArticle = async (articleId: string, userId: string, isHelpful: 
       article.notHelpful += 1
     }
   }
+  return Promise.resolve()
 }
 
 export const getCategoryLabel = (category: ArticleCategory): string => {

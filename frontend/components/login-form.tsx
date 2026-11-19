@@ -1,16 +1,17 @@
 "use client"
+import { Building2, Eye, EyeOff,Loader2 } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
 import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
 import { ApiClientError } from "@/lib/shared/api-client"
-import { Building2, Loader2, Eye, EyeOff } from "lucide-react"
 
 // Solo rutas internas: evita redirecciones abiertas a otros dominios
 function safeRedirect(target: string | null): string {
@@ -33,7 +34,7 @@ export function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
     setValidationErrors({})
@@ -85,7 +86,7 @@ export function LoginForm() {
           <CardDescription>Sistema de Gestión Empresarial</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>

@@ -2,8 +2,9 @@
  * User schemas with Zod validation
  */
 import { z } from "zod"
-import { EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
+
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from "./auth.schema"
+import { EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
 
 /**
  * Backend user response schema (from /api/users/list)
@@ -22,7 +23,7 @@ export type BackendUserListItem = z.infer<typeof BackendUserListItemSchema>
  */
 export const UserListItemSchema = z.object({
   id: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().min(1),
   role: FrontendRoleSchema, // admin or empleado
 })

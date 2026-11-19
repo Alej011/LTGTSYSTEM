@@ -1,4 +1,3 @@
-import { error } from "console";
 import { ApiClientError } from "./api-client";
 
 /**

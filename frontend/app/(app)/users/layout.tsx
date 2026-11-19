@@ -1,6 +1,7 @@
-import type { ReactNode } from "react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import type { ReactNode } from "react"
+
 import { ACCESS_COOKIE, verifyAccessToken } from "@/lib/server/session"
 
 export default async function UsersLayout({ children }: { children: ReactNode }) {

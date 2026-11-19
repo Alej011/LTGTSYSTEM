@@ -1,6 +1,6 @@
-import { UsersListResponseSchema, mapBackendUserListItemToFrontend } from "@/lib/schemas/user.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
+import { mapBackendUserListItemToFrontend,UsersListResponseSchema } from "@/lib/schemas/user.schema"
 import { proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export function GET() {
   return proxyToBackend({

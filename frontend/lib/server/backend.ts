@@ -1,8 +1,11 @@
 import "server-only"
+
 import { cookies, headers } from "next/headers"
 import { NextResponse } from "next/server"
 import type { z } from "zod"
+
 import { API_BASE_URL, API_TIMEOUT } from "@/lib/shared/api-config"
+
 import { ACCESS_COOKIE, getClientIp } from "./session"
 
 type BackendErrorBody = { message?: string | string[]; error?: string }
@@ -24,7 +27,7 @@ export async function parseBody<S extends z.ZodType>(
   message: string,
   { partial = false }: { partial?: boolean } = {},
 ): Promise<{ data: z.infer<S>; response?: never } | { data?: never; response: NextResponse }> {
-  const raw = await request.json().catch(() => undefined)
+  const raw: unknown = await request.json().catch(() => undefined)
   const result = schema.safeParse(partial ? dropNullish(raw) : raw)
   if (!result.success) {
     return { response: errorResponse(400, message, "VALIDATION_ERROR", result.error.issues) }

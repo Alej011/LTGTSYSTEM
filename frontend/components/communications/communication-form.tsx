@@ -1,26 +1,26 @@
 "use client"
 
+import { Calendar,Loader2, MessageSquare } from "lucide-react"
 import type React from "react"
-
 import { useState } from "react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/contexts/auth-context"
 import {
   type Communication,
-  type CommunicationType,
   type CommunicationStatus,
+  type CommunicationType,
   createCommunication,
-  updateCommunication,
   getTypeLabel,
+  updateCommunication,
 } from "@/lib/features/communications/communications.service"
-import { useAuth } from "@/contexts/auth-context"
-import { Loader2, MessageSquare, Calendar } from "lucide-react"
 
 interface CommunicationFormProps {
   communication?: Communication
@@ -33,8 +33,8 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
   const [formData, setFormData] = useState({
     title: communication?.title || "",
     content: communication?.content || "",
-    type: communication?.type || ("general" as CommunicationType),
-    status: communication?.status || ("draft" as CommunicationStatus),
+    type: communication?.type || "general",
+    status: communication?.status || "draft",
     targetDepartments: communication?.targetDepartments || ["Todos"],
     targetRoles: communication?.targetRoles || [],
     isPinned: communication?.isPinned || false,
@@ -43,7 +43,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!user) return
 
@@ -65,14 +65,14 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
         await createCommunication(commData)
       }
       onSuccess()
-    } catch (err) {
+    } catch {
       setError("Error al guardar la comunicación. Intente nuevamente.")
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <K extends keyof typeof formData>(field: K, value: (typeof formData)[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -127,7 +127,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="space-y-2">
@@ -161,7 +161,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Tipo de Comunicación</Label>
-                <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
+                <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value as CommunicationType)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -177,7 +177,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
 
               <div className="space-y-2">
                 <Label htmlFor="status">Estado</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value as CommunicationStatus)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -211,7 +211,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                 <Checkbox
                   id="isPinned"
                   checked={formData.isPinned}
-                  onCheckedChange={(checked) => handleInputChange("isPinned", checked)}
+                  onCheckedChange={(checked) => handleInputChange("isPinned", checked === true)}
                 />
                 <Label htmlFor="isPinned">Fijar comunicación</Label>
               </div>

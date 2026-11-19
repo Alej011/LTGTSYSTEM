@@ -4,8 +4,9 @@
  * Error Boundary Component
  * Catches React errors and displays a fallback UI
  */
-import { Component, type ReactNode } from "react"
 import { AlertCircle } from "lucide-react"
+import { Component, type ErrorInfo, type ReactNode } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -30,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to console in development
     if (process.env.NODE_ENV === "development") {
       console.error("ErrorBoundary caught an error:", error, errorInfo)
@@ -41,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     this.setState({
       error,
-      errorInfo: errorInfo.componentStack,
+      errorInfo: errorInfo.componentStack ?? undefined,
     })
   }
 

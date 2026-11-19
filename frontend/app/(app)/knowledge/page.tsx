@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { ArticleList } from "@/components/knowledge/article-list"
+
 import { ArticleForm } from "@/components/knowledge/article-form"
+import { ArticleList } from "@/components/knowledge/article-list"
 import { ArticleViewer } from "@/components/knowledge/article-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { KnowledgeArticle } from "@/lib/features/knowledge/knowledge.service"
 import { useAuth } from "@/contexts/auth-context"
 import { hasPermission } from "@/lib/features/auth/auth.service"
+import type { KnowledgeArticle } from "@/lib/features/knowledge/knowledge.service"
 
 type View = "browse" | "manage" | "form" | "view"
 

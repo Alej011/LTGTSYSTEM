@@ -1,26 +1,27 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  type Ticket,
-  type TicketStatus,
-  type TicketPriority,
-  getTickets,
-  getPriorityColor,
-  getStatusColor,
-  getCategoryLabel,
-} from "@/lib/features/tickets/tickets.service"
-import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
-import { Search, Plus, Eye, Headphones, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import { Clock,Eye, Headphones, Plus, Search } from "lucide-react"
+import { useEffect,useState } from "react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useAuth } from "@/contexts/auth-context"
+import { hasPermission } from "@/lib/features/auth/auth.service"
+import {
+  getCategoryLabel,
+  getPriorityColor,
+  getStatusColor,
+  getTickets,
+  type Ticket,
+  type TicketPriority,
+  type TicketStatus,
+} from "@/lib/features/tickets/tickets.service"
 
 interface TicketListProps {
   onView: (ticket: Ticket) => void

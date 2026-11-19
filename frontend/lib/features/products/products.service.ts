@@ -1,6 +1,5 @@
 import { apiClient, ApiClientError } from "@/lib/shared/api-client";
 import { handleApiError } from "@/lib/shared/error-handler";
-import { API_ENDPOINTS } from "@/lib/shared/api-config";
 
 export interface Brand {
   id: string;
@@ -66,7 +65,7 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
     name: backendProduct.name,
     description: backendProduct.description,
     sku: backendProduct.sku,
-    price: Number(backendProduct.price),
+    price: backendProduct.price,
     stock: backendProduct.stock,
     status: backendProduct.status,
     brandId: backendProduct.brandId,
@@ -77,7 +76,7 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
       createdAt: backendProduct.createdAt, 
       updatedAt: backendProduct.updatedAt, 
     },
-    categories: backendProduct.categories || [],
+    categories: backendProduct.categories,
     createdAt: backendProduct.createdAt,
     updatedAt: backendProduct.updatedAt, 
   };

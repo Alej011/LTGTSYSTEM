@@ -1,6 +1,6 @@
 import { BackendUserListItemSchema, mapBackendUserListItemToFrontend } from "@/lib/schemas/user.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

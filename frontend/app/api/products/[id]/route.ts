@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
+
 import { BackendProductSchema, UpdateProductRequestSchema } from "@/lib/schemas/product.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { callBackend, parseBody, proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 type Context = { params: Promise<{ id: string }> }
 

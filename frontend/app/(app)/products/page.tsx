@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { ProductList } from "@/components/products/product-list"
+
 import { ProductForm } from "@/components/products/product-form"
+import { ProductList } from "@/components/products/product-list"
 import type { Product } from "@/lib/features/products/products.service"
 
 export default function ProductsPage() {

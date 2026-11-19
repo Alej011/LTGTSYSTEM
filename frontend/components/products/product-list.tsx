@@ -1,15 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Product, type PaginationMetadata, getProducts, deleteProduct } from "@/lib/features/products/products.service"
-import { Search, Plus, Edit, Trash2, Package, Eye } from "lucide-react"
+import { Edit, Eye,Package, Plus, Search, Trash2 } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,8 +13,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/contexts/auth-context"
-import { useProductPermissions } from "@/lib/shared/permissions"
+import { deleteProduct,getProducts, type PaginationMetadata, type Product } from "@/lib/features/products/products.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
+import { TONE_CLASSES } from "@/lib/shared/tones"
+
 import { ProductDetailModal } from "./product-detail-modal"
 
 interface ProductListProps {
@@ -31,7 +33,7 @@ interface ProductListProps {
 
 export function ProductList({ onEdit, onAdd }: ProductListProps) {
   const { user } = useAuth()
-  const permissions = useProductPermissions(user?.role)
+  const permissions = getResourcePermissions(user?.role, "products")
   const [products, setProducts] = useState<Product[]>([])
   const [pagination, setPagination] = useState<PaginationMetadata | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -46,7 +48,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
 
   // Cargar productos cuando cambien filtros o página
   useEffect(() => {
-    loadProducts()
+    void loadProducts()
   }, [currentPage, searchTerm, categoryFilter, statusFilter])
 
   const loadProducts = async () => {
@@ -55,7 +57,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
       const response = await getProducts({
         search: searchTerm || undefined,
         category: categoryFilter !== "all" ? categoryFilter : undefined,
-        status: statusFilter !== "all" ? (statusFilter as any) : undefined,
+        status: statusFilter !== "all" ? (statusFilter as Product["status"]) : undefined,
         page: currentPage,
         limit: 20,
       })
@@ -74,7 +76,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
 
     try {
       await deleteProduct(productToDelete.id)
-      loadProducts()
+      void loadProducts()
       setDeleteDialogOpen(false)
       setProductToDelete(null)
     } catch (error) {
@@ -83,7 +85,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   }
 
   const getStatusBadge = (status: string) => {
-    const tones = {
+    const tones: Partial<Record<string, string>> = {
       active: TONE_CLASSES.success,
       inactive: TONE_CLASSES.neutral,
       discontinued: TONE_CLASSES.danger,
@@ -96,7 +98,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
     }
 
     return (
-      <Badge variant="outline" className={tones[status as keyof typeof tones] ?? TONE_CLASSES.neutral}>
+      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     )
@@ -118,7 +120,6 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   const totalColumns = 8
 
   // Determinar si mostrar columna de acciones
-  const showActions = permissions.canEdit || permissions.canDelete || permissions.canViewDetails
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
@@ -337,7 +338,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={() => void handleDelete()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar

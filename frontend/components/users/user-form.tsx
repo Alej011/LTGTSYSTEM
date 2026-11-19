@@ -1,15 +1,16 @@
 "use client"
 
+import { ArrowLeft,Loader2 } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type User, createUser, updateUser } from "@/lib/features/users/users.service"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { createUser, updateUser,type User } from "@/lib/features/users/users.service"
 
 interface UserFormProps {
   user?: User
@@ -27,7 +28,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
@@ -55,8 +56,8 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
         })
       }
       onSuccess()
-    } catch (err: any) {
-      const errorMessage = err?.message || "Error al guardar el usuario. Intente nuevamente."
+    } catch (err) {
+      const errorMessage = (err instanceof Error && err.message) || "Error al guardar el usuario. Intente nuevamente."
       setError(errorMessage)
     } finally {
       setIsLoading(false)
@@ -76,7 +77,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre Completo</Label>

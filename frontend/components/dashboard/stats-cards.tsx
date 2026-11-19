@@ -1,7 +1,8 @@
 "use client"
 
+import { AlertTriangle, BookOpen, CheckCircle,Headphones, MessageSquare, Package } from "lucide-react"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, Headphones, BookOpen, MessageSquare, AlertTriangle, CheckCircle } from "lucide-react"
 import type { DashboardStats } from "@/lib/features/dashboard/dashboard.service"
 
 interface StatsCardsProps {

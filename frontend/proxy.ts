@@ -1,15 +1,16 @@
-import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+
 import {
   ACCESS_COOKIE,
-  REFRESH_COOKIE,
+  type AccessPayload,
   clearSessionCookies,
   getClientIp,
+  REFRESH_COOKIE,
   refreshSession,
+  type SessionTokens,
   setSessionCookies,
   verifyAccessToken,
-  type AccessPayload,
-  type SessionTokens,
 } from "@/lib/server/session"
 
 const PROTECTED_ROUTES = ["/dashboard", "/products", "/users", "/tickets", "/knowledge", "/communications"]

@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server"
+
 import { PaginatedProductsSchema, ProductFiltersSchema } from "@/lib/schemas/product.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { errorResponse, proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 const NUMERIC_FILTERS = new Set(["maxStock", "page", "limit"])
 
@@ -17,7 +18,7 @@ export function GET(request: NextRequest) {
   }
 
   const query = new URLSearchParams(
-    Object.entries(filters.data).flatMap(([key, value]) => (value === undefined ? [] : [[key, String(value)]])),
+    Object.entries(filters.data).map(([key, value]) => [key, String(value)]),
   ).toString()
 
   return proxyToBackend({

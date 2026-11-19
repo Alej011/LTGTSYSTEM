@@ -1,15 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { Badge } from "@/components/ui/badge"
-import { StatsCards } from "@/components/dashboard/stats-cards"
-import { RecentActivityComponent } from "@/components/dashboard/recent-activity"
-import { QuickActions } from "@/components/dashboard/quick-actions"
-import { getDashboardStats, getRecentActivity, type DashboardStats, type RecentActivity } from "@/lib/features/dashboard/dashboard.service"
-import { Building2, Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { Building2, Calendar } from "lucide-react"
+import { useEffect,useState } from "react"
+
+import { QuickActions } from "@/components/dashboard/quick-actions"
+import { RecentActivityComponent } from "@/components/dashboard/recent-activity"
+import { StatsCards } from "@/components/dashboard/stats-cards"
+import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/contexts/auth-context"
+import { type DashboardStats, getDashboardStats, getRecentActivity, type RecentActivity } from "@/lib/features/dashboard/dashboard.service"
 import { TONE_CLASSES } from "@/lib/shared/tones"
 
 export default function DashboardPage() {
@@ -36,7 +37,7 @@ export default function DashboardPage() {
       }
     }
 
-    loadDashboardData()
+    void loadDashboardData()
   }, [user])
 
   if (!user) return null
@@ -52,11 +53,11 @@ export default function DashboardPage() {
   }
 
   const getRoleBadgeColor = (role: string) => {
-    const colors = {
+    const colors: Partial<Record<string, string>> = {
       admin: TONE_CLASSES.primary,
       empleado: TONE_CLASSES.info,
     }
-    return colors[role as keyof typeof colors] || colors.empleado
+    return colors[role] ?? TONE_CLASSES.info
   }
 
   const getRoleLabel = (role: string) => {

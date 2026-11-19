@@ -2,6 +2,7 @@
  * React Query hooks for authentication
  */
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
+
 import { authenticate, getCurrentUser, logout, type User } from "@/lib/features/auth/auth.service"
 
 /**

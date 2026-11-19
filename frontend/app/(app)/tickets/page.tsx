@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { TicketList } from "@/components/tickets/ticket-list"
-import { TicketForm } from "@/components/tickets/ticket-form"
+
 import { TicketDetail } from "@/components/tickets/ticket-detail"
+import { TicketForm } from "@/components/tickets/ticket-form"
+import { TicketList } from "@/components/tickets/ticket-list"
 import type { Ticket } from "@/lib/features/tickets/tickets.service"
 
 type View = "list" | "form" | "detail"

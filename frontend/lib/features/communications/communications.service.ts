@@ -251,7 +251,7 @@ export const getCommunications = (userId?: string, userRole?: string, userDepart
   return filtered.sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1
     if (!a.isPinned && b.isPinned) return 1
-    return b.publishedAt!.getTime() - a.publishedAt!.getTime()
+    return (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0)
   })
 }
 
@@ -304,10 +304,10 @@ export const updateCommunication = async (
   return mockCommunications[index]
 }
 
-export const markAsRead = async (communicationId: string, userId: string): Promise<void> => {
+export const markAsRead = (communicationId: string, userId: string): Promise<void> => {
   // Check if already read
   const existingRead = mockReadStatus.find((r) => r.communicationId === communicationId && r.userId === userId)
-  if (existingRead) return
+  if (existingRead) return Promise.resolve()
 
   // Add read status
   const newRead: CommunicationRead = {
@@ -318,6 +318,7 @@ export const markAsRead = async (communicationId: string, userId: string): Promi
   }
 
   mockReadStatus.push(newRead)
+  return Promise.resolve()
 }
 
 export const isRead = (communicationId: string, userId: string): boolean => {

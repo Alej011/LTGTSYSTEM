@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { Edit, Plus, Search,Users } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { type User, getUsers } from "@/lib/features/users/users.service"
-import { Users, Plus, Edit, Search } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/contexts/auth-context"
-import { useUserPermissions } from "@/lib/shared/permissions"
+import { getUsers,type User } from "@/lib/features/users/users.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface UserListProps {
   onEdit: (user: User) => void
@@ -19,13 +20,13 @@ interface UserListProps {
 
 export function UserList({ onEdit, onAdd }: UserListProps) {
   const { user: currentUser } = useAuth()
-  const permissions = useUserPermissions(currentUser?.role)
+  const permissions = getResourcePermissions(currentUser?.role, "users")
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    loadUsers()
+    void loadUsers()
   }, [])
 
   const loadUsers = async () => {
@@ -50,7 +51,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
   })
 
   const getRoleBadge = (role: string) => {
-    const tones = {
+    const tones: Partial<Record<string, string>> = {
       admin: TONE_CLASSES.primary,
       empleado: TONE_CLASSES.info,
     }
@@ -61,7 +62,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
     }
 
     return (
-      <Badge variant="outline" className={tones[role as keyof typeof tones] ?? TONE_CLASSES.neutral}>
+      <Badge variant="outline" className={tones[role] ?? TONE_CLASSES.neutral}>
         {labels[role as keyof typeof labels] || role}
       </Badge>
     )

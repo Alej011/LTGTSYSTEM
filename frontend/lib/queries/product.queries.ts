@@ -2,19 +2,20 @@
  * React Query hooks for products
  */
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
+
 import {
-  getProducts,
-  getProductById,
+  type Brand,
+  type Category,
   createProduct,
-  updateProduct,
   deleteProduct,
   getBrands,
   getCategories,
+  getProductById,
+  getProducts,
+  type PaginatedProducts,
   type Product,
   type ProductFilters,
-  type PaginatedProducts,
-  type Brand,
-  type Category,
+  updateProduct,
 } from "@/lib/features/products/products.service"
 
 /**
@@ -85,7 +86,7 @@ export function useCreateProduct() {
     mutationFn: createProduct,
     onSuccess: () => {
       // Invalidate and refetch product lists
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     },
   })
 }
@@ -105,8 +106,8 @@ export function useUpdateProduct() {
       updateProduct(id, data),
     onSuccess: (_, variables) => {
       // Invalidate specific product and lists
-      queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) })
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     },
   })
 }
@@ -128,7 +129,7 @@ export function useDeleteProduct() {
     onSuccess: (_, productId) => {
       // Remove from cache and invalidate lists
       queryClient.removeQueries({ queryKey: productKeys.detail(productId) })
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     },
   })
 }

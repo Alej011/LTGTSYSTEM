@@ -1,27 +1,27 @@
 "use client"
 
+import { BookOpen, Loader2, X } from "lucide-react"
 import type React from "react"
-
 import { useState } from "react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/contexts/auth-context"
 import {
-  type KnowledgeArticle,
   type ArticleCategory,
   type ArticleStatus,
   createArticle,
-  updateArticle,
   getCategoryLabel,
+  type KnowledgeArticle,
+  updateArticle,
 } from "@/lib/features/knowledge/knowledge.service"
-import { useAuth } from "@/contexts/auth-context"
-import { Loader2, BookOpen, X } from "lucide-react"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ArticleFormProps {
   article?: KnowledgeArticle
@@ -36,14 +36,14 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
     summary: article?.summary || "",
     content: article?.content || "",
     category: article?.category || ("" as ArticleCategory),
-    status: article?.status || ("draft" as ArticleStatus),
+    status: article?.status || "draft",
     tags: article?.tags || [],
   })
   const [newTag, setNewTag] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!user) return
 
@@ -61,7 +61,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
         })
       }
       onSuccess()
-    } catch (err) {
+    } catch {
       setError("Error al guardar el artículo. Intente nuevamente.")
     } finally {
       setIsLoading(false)
@@ -106,7 +106,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="space-y-2">
@@ -191,7 +191,12 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     placeholder="Nueva etiqueta"
-                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                    onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      addTag()
+                    }
+                  }}
                   />
                   <Button type="button" onClick={addTag} size="sm">
                     Agregar
