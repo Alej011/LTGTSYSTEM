@@ -157,7 +157,6 @@ export function ProductForm({
               onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder="Descripción detallada del producto..."
               rows={3}
-              required
             />
           </div>
 

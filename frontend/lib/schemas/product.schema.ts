@@ -52,7 +52,7 @@ export const BackendProductSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
   sku: z.string().min(1),
-  price: z.number().positive(),
+  price: z.number().nonnegative(),
   stock: z.number().int().nonnegative(),
   status: ProductStatusSchema,
   brandId: z.string().min(1), // CUID
@@ -80,7 +80,7 @@ export const ProductSchema = z.object({
   name: z.string().min(1, "El nombre del producto es requerido"),
   description: z.string(),
   sku: z.string().min(1, "El SKU es requerido"),
-  price: z.number().positive("El precio debe ser positivo"),
+  price: z.number().nonnegative("El precio no puede ser negativo"),
   stock: z.number().int().nonnegative("El stock no puede ser negativo"),
   status: ProductStatusSchema,
   brandId: UUIDSchema,
@@ -151,9 +151,9 @@ export type ProductFilters = z.infer<typeof ProductFiltersSchema>
  */
 export const CreateProductRequestSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
-  description: z.string().min(1, "La descripción es requerida"),
+  description: z.string().optional(),
   sku: z.string().min(1, "El SKU es requerido").max(50, "Máximo 50 caracteres"),
-  price: z.number().positive("El precio debe ser positivo"),
+  price: z.number().nonnegative("El precio no puede ser negativo"),
   stock: z.number().int().nonnegative("El stock no puede ser negativo"),
   status: ProductStatusSchema,
   brandId: z.string().min(1, "Debe seleccionar una marca"), // CUID, not UUID
@@ -167,9 +167,9 @@ export type CreateProductRequest = z.infer<typeof CreateProductRequestSchema>
  */
 export const UpdateProductRequestSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres").optional(),
-  description: z.string().min(1, "La descripción es requerida").optional(),
+  description: z.string().optional(),
   sku: z.string().min(1, "El SKU es requerido").max(50, "Máximo 50 caracteres").optional(),
-  price: z.number().positive("El precio debe ser positivo").optional(),
+  price: z.number().nonnegative("El precio no puede ser negativo").optional(),
   stock: z.number().int().nonnegative("El stock no puede ser negativo").optional(),
   status: ProductStatusSchema.optional(),
   brandId: z.string().min(1, "Debe seleccionar una marca").optional(), // CUID
