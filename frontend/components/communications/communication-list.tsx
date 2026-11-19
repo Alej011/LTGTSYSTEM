@@ -21,8 +21,8 @@ import {
   isRead,
   markAsRead,
 } from '@/lib/features/communications/communications.service';
-import { getResourcePermissions } from '@/lib/shared/permissions';
 import { TONE_CLASSES } from '@/lib/shared/tones';
+import { useCan } from '@/lib/shared/use-can';
 
 interface CommunicationListProps {
   onView: (communication: Communication) => void;
@@ -106,8 +106,8 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
   };
 
   const types: CommunicationType[] = ['anuncio', 'politica', 'evento', 'urgente', 'general'];
-  const communicationPermissions = getResourcePermissions(user?.role, 'communications');
-  const canManageCommunications = communicationPermissions.canCreate || communicationPermissions.canEdit;
+  const can = useCan();
+  const canManageCommunications = can('communications', 'create') || can('communications', 'edit');
 
   return (
     <div className="space-y-6">

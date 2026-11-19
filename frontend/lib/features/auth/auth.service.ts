@@ -7,7 +7,7 @@ export type { BackendRole, LoginRequest, User, FrontendRole as UserRole } from '
 export { mapBackendRoleToFrontend, mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
 
 // Import types for local use in this file
-import type { FrontendRole as UserRole, User } from '@/lib/schemas/auth.schema';
+import type { User } from '@/lib/schemas/auth.schema';
 
 /**
  * Inicia sesión a través del BFF. Los tokens quedan en cookies HttpOnly;
@@ -48,18 +48,4 @@ export const getCurrentUser = async (): Promise<User | null> => {
  */
 export const logout = async (): Promise<void> => {
   await apiClient.post('/api/auth/logout');
-};
-
-export const getUserPermissions = (role: UserRole) => {
-  const permissions: Partial<Record<string, string[]>> = {
-    admin: ['all'],
-    empleado: ['tickets', 'knowledge', 'products', 'communications'],
-  };
-
-  return permissions[role] ?? [];
-};
-
-export const hasPermission = (userRole: UserRole, permission: string): boolean => {
-  const userPermissions = getUserPermissions(userRole);
-  return userPermissions.includes('all') || userPermissions.includes(permission);
 };

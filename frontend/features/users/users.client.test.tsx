@@ -5,18 +5,11 @@ import { ApiClientError } from '@/lib/shared/api-client';
 import { bffCalls, mockBff } from '@/test/mock-bff';
 import { renderHookWithQuery } from '@/test/render';
 
-import { backendRoleOf, useSaveUser, useUsers } from './users.client';
+import { useSaveUser, useUsers } from './users.client';
 import { admin, support } from './users.fixtures';
 
 afterEach(() => {
   vi.unstubAllGlobals();
-});
-
-describe('backendRoleOf', () => {
-  it('translates the frontend role to the one the backend accepts', () => {
-    expect(backendRoleOf('admin')).toBe('ADMIN');
-    expect(backendRoleOf('empleado')).toBe('SUPPORT');
-  });
 });
 
 describe('useUsers', () => {

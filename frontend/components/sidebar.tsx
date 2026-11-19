@@ -32,16 +32,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/auth-context';
-import { hasPermission } from '@/lib/features/auth/auth.service';
+import type { Resource } from '@/lib/shared/permissions';
+import { useCan } from '@/lib/shared/use-can';
 import { cn } from '@/lib/shared/utils';
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: null },
-  { name: 'Productos', href: '/products', icon: Package, permission: 'products' },
-  { name: 'Soporte Técnico', href: '/tickets', icon: Headphones, permission: 'tickets' },
-  { name: 'Base de Conocimientos', href: '/knowledge', icon: BookOpen, permission: 'knowledge' },
-  { name: 'Comunicaciones', href: '/communications', icon: MessageSquare, permission: 'communications' },
-  { name: 'Usuarios', href: '/users', icon: Users, permission: 'users' },
+const navigation: { name: string; href: string; icon: typeof Package; resource: Resource }[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, resource: 'dashboard' },
+  { name: 'Productos', href: '/products', icon: Package, resource: 'products' },
+  { name: 'Soporte Técnico', href: '/tickets', icon: Headphones, resource: 'tickets' },
+  { name: 'Base de Conocimientos', href: '/knowledge', icon: BookOpen, resource: 'knowledge' },
+  { name: 'Comunicaciones', href: '/communications', icon: MessageSquare, resource: 'communications' },
+  { name: 'Usuarios', href: '/users', icon: Users, resource: 'users' },
 ];
 
 const THEME_OPTIONS = [
@@ -84,6 +85,7 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   const { user, logout } = useAuth();
+  const can = useCan();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   // El tema guardado solo se conoce en el cliente; evita un desajuste de hidratación
@@ -92,7 +94,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
   if (!user) return null;
 
-  const items = navigation.filter((item) => !item.permission || hasPermission(user.role, item.permission));
+  const items = navigation.filter((item) => can(item.resource, 'view'));
   const ToggleIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
 
   return (

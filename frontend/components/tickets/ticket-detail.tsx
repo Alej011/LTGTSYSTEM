@@ -24,6 +24,7 @@ import {
   type TicketStatus,
   updateTicket,
 } from '@/lib/features/tickets/tickets.service';
+import { useCan } from '@/lib/shared/use-can';
 
 interface TicketDetailProps {
   ticket: Ticket;
@@ -33,6 +34,7 @@ interface TicketDetailProps {
 
 export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
   const { user } = useAuth();
+  const can = useCan();
   const [comments, setComments] = useState<TicketComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [newStatus, setNewStatus] = useState<TicketStatus>(ticket.status);
@@ -100,7 +102,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
     }
   };
 
-  const canManageTicket = user?.role === 'empleado' || user?.role === 'admin';
+  const canManageTicket = can('tickets', 'edit');
   const isAssignedToUser = ticket.assignedTo === user?.id;
   const canUpdateStatus = canManageTicket && (isAssignedToUser || !ticket.assignedTo);
 
@@ -307,7 +309,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   )}
                 </Button>
 
-                {!ticket.assignedTo && user.role === 'empleado' && (
+                {!ticket.assignedTo && user?.role === 'empleado' && (
                   <Alert>
                     <AlertDescription>
                       Al actualizar este ticket, se te asignará automáticamente como responsable.

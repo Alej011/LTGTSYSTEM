@@ -15,13 +15,10 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { UserRole } from '@/lib/features/auth/auth.service';
+import { useCan } from '@/lib/shared/use-can';
 
-interface QuickActionsProps {
-  userRole: UserRole;
-}
-
-export function QuickActions({ userRole }: QuickActionsProps) {
+export function QuickActions() {
+  const can = useCan();
   const getIcon = (iconName: string) => {
     const icons: Partial<Record<string, typeof Package>> = {
       Package,
@@ -41,7 +38,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: 'Reportar problema técnico',
       href: '/tickets',
       icon: 'Headphones',
-      roles: ['empleado', 'admin'],
+      requires: ['tickets', 'create'] as const,
       action: 'create',
     },
     {
@@ -49,7 +46,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: 'Consultar catálogo',
       href: '/products',
       icon: 'Package',
-      roles: ['empleado', 'admin'],
+      requires: ['products', 'view'] as const,
       action: 'view',
     },
     {
@@ -57,7 +54,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: 'Buscar soluciones',
       href: '/knowledge',
       icon: 'BookOpen',
-      roles: ['empleado', 'admin'],
+      requires: ['knowledge', 'view'] as const,
       action: 'search',
     },
     {
@@ -65,7 +62,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: 'Ver novedades',
       href: '/communications',
       icon: 'MessageSquare',
-      roles: ['empleado', 'admin'],
+      requires: ['communications', 'view'] as const,
       action: 'view',
     },
     {
@@ -73,7 +70,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: 'Administrar personal',
       href: '/users',
       icon: 'Users',
-      roles: ['admin'],
+      requires: ['users', 'view'] as const,
       action: 'manage',
     },
     {
@@ -81,7 +78,7 @@ export function QuickActions({ userRole }: QuickActionsProps) {
       description: 'Resolver incidencias',
       href: '/tickets',
       icon: 'AlertCircle',
-      roles: ['empleado', 'admin'],
+      requires: ['tickets', 'edit'] as const,
       action: 'manage',
     },
   ];
@@ -99,7 +96,10 @@ export function QuickActions({ userRole }: QuickActionsProps) {
     }
   };
 
-  const filteredActions = actions.filter((action) => action.roles.includes(userRole));
+  const filteredActions = actions.filter((action) => {
+    const [resource, permission] = action.requires;
+    return can(resource, permission);
+  });
 
   return (
     <Card>

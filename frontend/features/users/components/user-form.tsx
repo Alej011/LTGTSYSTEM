@@ -10,11 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { BackendRole } from '@/lib/schemas/auth.schema';
+import { type BackendRole, mapFrontendRoleToBackend } from '@/lib/schemas/auth.schema';
 import { PasswordSchema } from '@/lib/schemas/common.schema';
 import { ApiClientError } from '@/lib/shared/api-client';
 
-import { backendRoleOf, type User, useSaveUser } from '../users.client';
+import { type User, useSaveUser } from '../users.client';
 
 interface UserFormProps {
   user?: User;
@@ -27,7 +27,7 @@ function initialFormState(user?: User) {
     name: user?.name ?? '',
     email: user?.email ?? '',
     password: '',
-    role: user ? backendRoleOf(user.role) : ('SUPPORT' as BackendRole),
+    role: user ? mapFrontendRoleToBackend(user.role) : ('SUPPORT' as BackendRole),
   };
 }
 

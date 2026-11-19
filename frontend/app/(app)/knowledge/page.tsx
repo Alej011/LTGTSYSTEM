@@ -6,14 +6,12 @@ import { ArticleForm } from '@/components/knowledge/article-form';
 import { ArticleList } from '@/components/knowledge/article-list';
 import { ArticleViewer } from '@/components/knowledge/article-viewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/contexts/auth-context';
 import type { KnowledgeArticle } from '@/lib/features/knowledge/knowledge.service';
-import { getResourcePermissions } from '@/lib/shared/permissions';
+import { useCan } from '@/lib/shared/use-can';
 
 type View = 'browse' | 'manage' | 'form' | 'view';
 
 export default function KnowledgePage() {
-  const { user } = useAuth();
   const [view, setView] = useState<View>('browse');
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | undefined>(undefined);
   const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | undefined>(undefined);
@@ -48,8 +46,8 @@ export default function KnowledgePage() {
     setSelectedArticle(undefined);
   };
 
-  const knowledgePermissions = getResourcePermissions(user?.role, 'knowledge');
-  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit;
+  const can = useCan();
+  const canManageKnowledge = can('knowledge', 'create') || can('knowledge', 'edit');
 
   if (view === 'form') {
     return (

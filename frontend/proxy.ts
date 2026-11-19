@@ -12,9 +12,9 @@ import {
   setSessionCookies,
   verifyAccessToken,
 } from '@/lib/server/session';
+import { canOpenPage } from '@/lib/shared/permissions';
 
 const PROTECTED_ROUTES = ['/dashboard', '/products', '/users', '/tickets', '/knowledge', '/communications'];
-const ADMIN_ONLY_ROUTES = ['/users'];
 // Rutas BFF que gestionan la sesión por sí mismas
 const SESSION_ROUTES = new Set(['/api/auth/login', '/api/auth/logout']);
 
@@ -62,7 +62,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (isProtectedPage && matchesRoute(pathname, ADMIN_ONLY_ROUTES) && session.role !== 'ADMIN') {
+  if (isProtectedPage && !canOpenPage(session.role, pathname)) {
     return redirectTo(request, '/dashboard');
   }
 
