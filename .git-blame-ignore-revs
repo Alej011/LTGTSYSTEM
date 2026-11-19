@@ -1,0 +1,7 @@
+# Commits que solo aplican formato con Prettier; git blame los salta
+# Local: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style(backend): apply Prettier formatting
+fa68ed9d41ff85c8a7be7623e5299bf944418c89
+# style(frontend): apply Prettier formatting
+c3ebc7d2d29cb1dd6b5583b7717a4b668868ec85
