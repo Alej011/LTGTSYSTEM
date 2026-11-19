@@ -27,7 +27,7 @@ export async function parseBody<S extends z.ZodType>(
   message: string,
   { partial = false }: { partial?: boolean } = {},
 ): Promise<{ data: z.infer<S>; response?: never } | { data?: never; response: NextResponse }> {
-  const raw = await request.json().catch(() => undefined)
+  const raw: unknown = await request.json().catch(() => undefined)
   const result = schema.safeParse(partial ? dropNullish(raw) : raw)
   if (!result.success) {
     return { response: errorResponse(400, message, "VALIDATION_ERROR", result.error.issues) }
