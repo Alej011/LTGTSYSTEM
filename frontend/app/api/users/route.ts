@@ -3,7 +3,7 @@ import {
   CreateUserRequestSchema,
   mapBackendUserListItemToFrontend,
   UsersListResponseSchema,
-} from '@/lib/schemas/user.schema';
+} from '@/features/users/users.schemas';
 import { parseBody, proxyToBackend } from '@/lib/server/backend';
 
 export function GET() {

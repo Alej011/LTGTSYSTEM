@@ -6,12 +6,12 @@ import { bffCalls, mockBff } from '@/test/mock-bff';
 import { renderHookWithQuery } from '@/test/render';
 
 import {
-  fetchStockSummary,
   stockLevel,
   useDeleteProduct,
   useProduct,
   useProducts,
   useSaveProduct,
+  useStockSummary,
 } from './products.client';
 import { page, product } from './products.fixtures';
 
@@ -159,16 +159,43 @@ describe('useDeleteProduct', () => {
   });
 });
 
-describe('fetchStockSummary', () => {
+describe('useStockSummary', () => {
+  const stockRoutes = (total: () => number) => ({
+    'GET /api/products': ({ url }: { url: URL }) => ({
+      status: 200,
+      body: page([], url.searchParams.has('maxStock') ? 4 : total()),
+    }),
+  });
+
   it('counts all products and those at or below the low stock threshold', async () => {
-    const fetchMock = mockBff({
-      'GET /api/products': ({ url }) => ({
-        status: 200,
-        body: page([], url.searchParams.has('maxStock') ? 4 : 30),
-      }),
+    const fetchMock = mockBff(stockRoutes(() => 30));
+
+    const { result } = renderHookWithQuery(() => useStockSummary());
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual({ total: 30, lowStock: 4 });
+    });
+    expect(bffCalls(fetchMock)).toEqual(['GET /api/products?limit=1', 'GET /api/products?limit=1&maxStock=5']);
+  });
+
+  it('refreshes after a product is deleted', async () => {
+    let total = 30;
+    mockBff({
+      ...stockRoutes(() => total),
+      'DELETE /api/products/:id': () => {
+        total -= 1;
+        return { status: 200, body: { message: 'ok' } };
+      },
+    });
+    const { result } = renderHookWithQuery(() => ({ summary: useStockSummary(), remove: useDeleteProduct() }));
+    await waitFor(() => {
+      expect(result.current.summary.data?.total).toBe(30);
     });
 
-    await expect(fetchStockSummary()).resolves.toEqual({ total: 30, lowStock: 4 });
-    expect(bffCalls(fetchMock)).toEqual(['GET /api/products?limit=1', 'GET /api/products?limit=1&maxStock=5']);
+    await act(() => result.current.remove.mutateAsync('p1'));
+
+    await waitFor(() => {
+      expect(result.current.summary.data?.total).toBe(29);
+    });
   });
 });

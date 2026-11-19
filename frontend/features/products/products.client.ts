@@ -38,8 +38,10 @@ export function stockLevel(stock: number): StockLevel {
 
 const productKeys = {
   all: ['products'] as const,
-  lists: () => [...productKeys.all, 'list'] as const,
-  list: (filters: ProductFilters) => [...productKeys.lists(), filters] as const,
+  // Todo lo que depende del catálogo completo (páginas y totales); se invalida con cada cambio
+  collection: () => [...productKeys.all, 'collection'] as const,
+  list: (filters: ProductFilters) => [...productKeys.collection(), 'list', filters] as const,
+  summary: () => [...productKeys.collection(), 'summary'] as const,
   detail: (id: string) => [...productKeys.all, 'detail', id] as const,
 };
 
@@ -86,7 +88,7 @@ export function useProduct(id: string | null) {
   });
 }
 
-/** Crea el producto si no recibe id; si lo recibe, lo actualiza. Refresca las listas al terminar. */
+/** Crea el producto si no recibe id; si lo recibe, lo actualiza. Refresca listas y totales al terminar. */
 export function useSaveProduct() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -94,7 +96,7 @@ export function useSaveProduct() {
       id ? apiClient.patch<Product>(productPath(id), input) : apiClient.post<Product>('/api/products', input),
     onSuccess: (product) => {
       queryClient.setQueryData(productKeys.detail(product.id), product);
-      return queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      return queryClient.invalidateQueries({ queryKey: productKeys.collection() });
     },
   });
 }
@@ -105,7 +107,7 @@ export function useDeleteProduct() {
     mutationFn: (id: string) => apiClient.delete(productPath(id)),
     onSuccess: (_, id) => {
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
-      return queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      return queryClient.invalidateQueries({ queryKey: productKeys.collection() });
     },
   });
 }
@@ -118,11 +120,17 @@ export function useCategories() {
   return useQuery({ queryKey: ['categories'], queryFn: () => apiClient.get<Category[]>('/api/categories') });
 }
 
-/** Totales para el dashboard: solo pide la metadata (limit 1), no el catálogo. */
-export async function fetchStockSummary(): Promise<{ total: number; lowStock: number }> {
+export type StockSummary = { total: number; lowStock: number };
+
+async function fetchStockSummary(): Promise<StockSummary> {
   const [all, low] = await Promise.all([
     fetchProducts({ limit: 1 }),
     fetchProducts({ limit: 1, maxStock: LOW_STOCK_THRESHOLD }),
   ]);
   return { total: all.meta.total, lowStock: low.meta.total };
+}
+
+/** Total de productos y cuántos tienen stock bajo. Solo pide la metadata (limit 1), no el catálogo. */
+export function useStockSummary() {
+  return useQuery({ queryKey: productKeys.summary(), queryFn: fetchStockSummary });
 }

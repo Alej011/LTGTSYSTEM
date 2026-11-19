@@ -5,8 +5,8 @@ Aplicación web en **Next.js 16 (App Router) + React 19** con React Query, Zod 4
 ## Cómo fluyen los datos
 
 ```
-Componente ──► hook de React Query (lib/queries)
-           ──► servicio (lib/features/*/*.service.ts)
+Componente ──► hook del dominio (features/<dominio>/<dominio>.client.ts, React Query)
+           ──► api-client (lib/shared/api-client.ts)
            ──► ruta BFF de Next (app/api/**/route.ts)   valida con Zod y adapta los datos
            ──► API NestJS (http://backend:4000/api)
 ```
@@ -35,11 +35,18 @@ app/
 ├── error.tsx                # Pantalla de error fuera de la app (login)
 ├── layout.tsx, providers.tsx # Layout raíz, tema (next-themes) y React Query
 ├── globals.css              # Tokens del tema
-features/
-└── products/                # Un dominio completo en una carpeta
-    ├── products.client.ts   # Interfaz para los componentes: hooks de React Query y regla de stock bajo
-    ├── products.schemas.ts  # Zod: validación del BFF (entrada y respuesta)
-    └── components/          # Vista, lista, formulario, detalle y badges
+features/                    # Un dominio completo por carpeta
+├── products/
+│   ├── products.client.ts   # Interfaz para los componentes: hooks de React Query y regla de stock bajo
+│   ├── products.schemas.ts  # Zod: validación del BFF (entrada y respuesta)
+│   └── components/          # Vista, lista, formulario, detalle y badges
+├── users/
+│   ├── users.client.ts      # useUsers y useSaveUser
+│   ├── users.schemas.ts     # Zod: validación del BFF y traducción de roles
+│   └── components/          # Vista, lista y formulario
+└── dashboard/
+    ├── dashboard.data.ts    # Cifras y actividad de los módulos que aún son mock
+    └── components/          # Vista, tarjetas (productos vía useStockSummary), actividad y accesos
 components/
 ├── <módulo>/                # Componentes de los módulos que aún no pasan a features/
 ├── ui/                      # Componentes base de shadcn/ui
@@ -48,7 +55,7 @@ contexts/auth-context.tsx    # Usuario actual, login y logout
 lib/
 ├── features/<módulo>/       # Servicios que aún no pasan a features/ (BFF o datos mock)
 ├── queries/                 # Hooks de React Query de auth
-├── schemas/                 # Esquemas Zod de auth, usuarios y comunes
+├── schemas/                 # Esquemas Zod de auth y comunes
 └── shared/
     ├── api-client.ts        # Cliente HTTP hacia el BFF (timeout, errores tipados, 401 → login)
     ├── api-config.ts        # URL del backend y timeout
@@ -78,18 +85,18 @@ Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt00000
 
 ## Estado de los módulos
 
-| Módulo                                                    | Origen de datos                              |
-| --------------------------------------------------------- | -------------------------------------------- |
-| Login / sesión, Usuarios, Productos (marcas y categorías) | API real vía BFF                             |
-| Tickets, Base de conocimiento, Comunicaciones             | **Mock en memoria** — se pierden al recargar |
-| Dashboard                                                 | Datos estáticos                              |
+| Módulo                                                    | Origen de datos                               |
+| --------------------------------------------------------- | --------------------------------------------- |
+| Login / sesión, Usuarios, Productos (marcas y categorías) | API real vía BFF                              |
+| Tickets, Base de conocimiento, Comunicaciones             | **Mock en memoria** — se pierden al recargar  |
+| Dashboard                                                 | Totales de productos de la API; el resto mock |
 
 ## Agregar una funcionalidad conectada al backend
 
-1. Esquema Zod de petición/respuesta en `lib/schemas/`.
-2. Ruta BFF en `app/api/<módulo>/.../route.ts` con `proxyToBackend` (o `callBackend` si necesitas manipular la respuesta) de `lib/server/backend.ts`. Si la respuesta del backend no cumple el esquema, el BFF responde `502` en lugar de reenviar datos sin validar.
-3. Endpoint en `lib/shared/api-config.ts` y función en `lib/features/<módulo>/<módulo>.service.ts`.
-4. Hook en `lib/queries/<módulo>.queries.ts`.
+1. Esquema Zod de petición/respuesta en `features/<dominio>/<dominio>.schemas.ts`.
+2. Ruta BFF en `app/api/<dominio>/.../route.ts`, con la misma ruta que el backend, usando `proxyToBackend` (o `callBackend` si necesitas manipular la respuesta) de `lib/server/backend.ts`. Si la respuesta del backend no cumple el esquema, el BFF responde `502` en lugar de reenviar datos sin validar.
+3. Hook en `features/<dominio>/<dominio>.client.ts`: los componentes no conocen URLs ni query keys, y toda falla llega como `ApiClientError`. Las mutaciones invalidan las queries que dependen de ellas.
+4. Test del hook contra el BFF simulado de `test/mock-bff.ts`.
 5. Si requiere permisos, regístralo en `lib/shared/permissions.ts`.
 
 ## Desarrollo local

@@ -36,7 +36,7 @@ export default tseslint.config(
     },
   },
   {
-    // Data loading still lives in useEffect; Phase C.4 moves it to React Query hooks and restores these as errors
+    // features/ already uses React Query hooks; these folders still load data in useEffect until C.7 (session) and C.8 (mock modules)
     files: ['app/**', 'components/**', 'contexts/**'],
     rules: {
       'react-hooks/exhaustive-deps': 'warn',

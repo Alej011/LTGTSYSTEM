@@ -6,8 +6,9 @@ import { BookOpen, Clock, Headphones, MessageSquare, Package } from 'lucide-reac
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { RecentActivity } from '@/lib/features/dashboard/dashboard.service';
 import { TONE_CLASSES } from '@/lib/shared/tones';
+
+import type { RecentActivity } from '../dashboard.data';
 
 interface RecentActivityProps {
   activities: RecentActivity[];

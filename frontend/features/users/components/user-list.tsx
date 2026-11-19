@@ -1,7 +1,7 @@
 'use client';
 
 import { Edit, Plus, Search, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/contexts/auth-context';
-import { getUsers, type User } from '@/lib/features/users/users.service';
+import { ApiClientError } from '@/lib/shared/api-client';
 import { getResourcePermissions } from '@/lib/shared/permissions';
 import { TONE_CLASSES } from '@/lib/shared/tones';
+
+import { type User, useUsers } from '../users.client';
+
+const COLUMNS = 4;
+
+const ROLE_BADGES: Record<User['role'], { label: string; tone: string }> = {
+  admin: { label: 'Administrador', tone: TONE_CLASSES.primary },
+  empleado: { label: 'Soporte', tone: TONE_CLASSES.info },
+};
+
+function matches(user: User, query: string): boolean {
+  const needle = query.toLowerCase();
+  return user.name.toLowerCase().includes(needle) || user.email.toLowerCase().includes(needle);
+}
 
 interface UserListProps {
   onEdit: (user: User) => void;
@@ -21,49 +35,10 @@ interface UserListProps {
 export function UserList({ onEdit, onAdd }: UserListProps) {
   const { user: currentUser } = useAuth();
   const permissions = getResourcePermissions(currentUser?.role, 'users');
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    void loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getUsers();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error cargando usuarios:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Filter users based on search query
-  const filteredUsers = users.filter((user) => {
-    const query = searchQuery.toLowerCase();
-    return user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query);
-  });
-
-  const getRoleBadge = (role: string) => {
-    const tones: Partial<Record<string, string>> = {
-      admin: TONE_CLASSES.primary,
-      empleado: TONE_CLASSES.info,
-    };
-
-    const labels = {
-      admin: 'Administrador',
-      empleado: 'Soporte',
-    };
-
-    return (
-      <Badge variant="outline" className={tones[role] ?? TONE_CLASSES.neutral}>
-        {labels[role as keyof typeof labels] || role}
-      </Badge>
-    );
-  };
+  const users = useUsers();
+  const rows = (users.data ?? []).filter((user) => matches(user, searchQuery));
 
   return (
     <div className="space-y-6">
@@ -86,7 +61,6 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Search bar */}
           <div className="mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -110,35 +84,52 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading ? (
+                {users.isPending ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={COLUMNS} className="text-center py-8">
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
                         <span className="text-muted-foreground">Cargando usuarios...</span>
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : filteredUsers.length === 0 ? (
+                ) : users.isError ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={COLUMNS} role="alert" className="text-center py-8 text-destructive">
+                      {users.error instanceof ApiClientError
+                        ? users.error.getUserMessage()
+                        : 'No se pudieron cargar los usuarios'}
+                    </TableCell>
+                  </TableRow>
+                ) : rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={COLUMNS} className="text-center py-8 text-muted-foreground">
                       {searchQuery
                         ? 'No se encontraron usuarios que coincidan con la búsqueda'
                         : 'No se encontraron usuarios'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user) => (
+                  rows.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="font-medium">{user.name}</div>
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
-                      <TableCell>{getRoleBadge(user.role)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={ROLE_BADGES[user.role].tone}>
+                          {ROLE_BADGES[user.role].label}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-2">
                           {permissions.canEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              aria-label={`Editar ${user.name}`}
+                              onClick={() => onEdit(user)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                           )}

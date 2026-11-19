@@ -1,12 +1,14 @@
-import { fetchStockSummary } from '@/features/products/products.client';
-import type { UserRole } from '@/lib/features/auth/auth.service';
+/**
+ * Cifras y actividad del dashboard que vienen de módulos con datos simulados síncronos
+ * (tickets, conocimiento, comunicaciones). Los totales de productos vienen de useStockSummary.
+ * En C.8 estos módulos pasan a hooks asíncronos y estas funciones se reemplazan.
+ */
+import type { User } from '@/lib/features/auth/auth.service';
 import { getCommunications, getUnreadCount } from '@/lib/features/communications/communications.service';
 import { getArticles } from '@/lib/features/knowledge/knowledge.service';
 import { getTickets } from '@/lib/features/tickets/tickets.service';
 
 export interface DashboardStats {
-  totalProducts: number;
-  lowStockProducts: number;
   openTickets: number;
   myTickets: number;
   knowledgeArticles: number;
@@ -23,37 +25,29 @@ export interface RecentActivity {
   priority?: string;
 }
 
-export const getDashboardStats = async (
-  userId: string,
-  userRole: UserRole,
-  userDepartment: string,
-): Promise<DashboardStats> => {
-  const stock = await fetchStockSummary();
-
+export function getDashboardStats(user: User): DashboardStats {
   const tickets = getTickets();
   const articles = getArticles('published');
-  const unreadComms = getUnreadCount(userId, userRole, userDepartment);
+  const unreadComms = getUnreadCount(user.id, user.role, user.department ?? '');
 
   const openTickets = tickets.filter((t) => t.status === 'abierto' || t.status === 'en_progreso').length;
-  const myTickets = tickets.filter((t) => t.createdBy === userId || t.assignedTo === userId).length;
+  const myTickets = tickets.filter((t) => t.createdBy === user.id || t.assignedTo === user.id).length;
 
   return {
-    totalProducts: stock.total,
-    lowStockProducts: stock.lowStock,
     openTickets,
     myTickets,
     knowledgeArticles: articles.length,
     unreadCommunications: unreadComms,
   };
-};
+}
 
-export const getRecentActivity = (userId: string, userRole: UserRole, userDepartment: string): RecentActivity[] => {
+export function getRecentActivity(user: User): RecentActivity[] {
   const activities: RecentActivity[] = [];
 
   // Recent tickets
   const tickets = getTickets()
     .filter((t) => {
-      if (userRole === 'empleado') return t.createdBy === userId || t.assignedTo === userId;
+      if (user.role === 'empleado') return t.createdBy === user.id || t.assignedTo === user.id;
       return true;
     })
     .slice(0, 3);
@@ -71,7 +65,7 @@ export const getRecentActivity = (userId: string, userRole: UserRole, userDepart
   });
 
   // Recent communications
-  const communications = getCommunications(userId, userRole, userDepartment).slice(0, 2);
+  const communications = getCommunications(user.id, user.role, user.department ?? '').slice(0, 2);
   communications.forEach((comm) => {
     activities.push({
       id: comm.id,
@@ -97,4 +91,4 @@ export const getRecentActivity = (userId: string, userRole: UserRole, userDepart
 
   // Sort by time and return top 8
   return activities.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 8);
-};
+}
