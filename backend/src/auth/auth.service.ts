@@ -130,7 +130,10 @@ export class AuthService {
   }
 
   private async isActive(id: string, now: Date) {
-    const token = await this.prisma.refreshToken.findUnique({ where: { id }, select: { revokedAt: true, expiresAt: true } });
+    const token = await this.prisma.refreshToken.findUnique({
+      where: { id },
+      select: { revokedAt: true, expiresAt: true },
+    });
     return !!token && !token.revokedAt && token.expiresAt > now;
   }
 

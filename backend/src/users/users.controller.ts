@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam,ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -21,7 +21,9 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Lista de usuarios' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
-  findAll() { return this.users.findAll(); }
+  findAll() {
+    return this.users.findAll();
+  }
 
   @Post('create')
   @ApiOperation({ summary: 'Crear un nuevo usuario (solo ADMIN)' })
@@ -41,7 +43,9 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Usuario no encontrado' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
-  findOne(@Param('id') id: string) { return this.users.findOne(id); }
+  findOne(@Param('id') id: string) {
+    return this.users.findOne(id);
+  }
 
   @Patch('update/:id')
   @ApiOperation({ summary: 'Actualizar usuario (solo ADMIN)' })

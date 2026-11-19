@@ -14,7 +14,10 @@ const ERRORS: Partial<Record<string, { status: HttpStatus; message: string }>> =
 export class PrismaExceptionFilter extends BaseExceptionFilter {
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const mapped = ERRORS[exception.code];
-    if (!mapped) { super.catch(exception, host); return; }
+    if (!mapped) {
+      super.catch(exception, host);
+      return;
+    }
 
     host
       .switchToHttp()

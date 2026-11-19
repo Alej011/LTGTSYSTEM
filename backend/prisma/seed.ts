@@ -29,10 +29,9 @@ function userFromEnv(prefix: 'ADMIN' | 'SUPPORT', role: Role, required: boolean)
 }
 
 async function seedUsers() {
-  const users = [
-    userFromEnv('ADMIN', Role.ADMIN, true),
-    userFromEnv('SUPPORT', Role.SUPPORT, false),
-  ].filter((user): user is SeedUser => user !== null);
+  const users = [userFromEnv('ADMIN', Role.ADMIN, true), userFromEnv('SUPPORT', Role.SUPPORT, false)].filter(
+    (user): user is SeedUser => user !== null,
+  );
 
   // update vacío: no sobrescribe contraseñas de usuarios ya existentes
   for (const user of users) {
