@@ -222,14 +222,13 @@ export const updateProduct = async (
 };
 
 /**
- * Elimina un producto a través del BFF
+ * Elimina un producto a través del BFF. Lanza ApiClientError si falla.
  */
-export const deleteProduct = async (id: string): Promise<boolean> => {
+export const deleteProduct = async (id: string): Promise<void> => {
   try {
     await apiClient.delete(`/api/products/${id}`); // BFF endpoint
-    return true;
   } catch (error) {
-    return handleApiError(error, "Al eliminar producto", false);
+    throw handleApiError(error, "eliminar producto");
   }
 };
 
