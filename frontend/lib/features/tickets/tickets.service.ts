@@ -139,10 +139,6 @@ export const getTickets = (): Ticket[] => {
   return mockTickets;
 };
 
-export const getTicketById = (id: string): Ticket | undefined => {
-  return mockTickets.find((t) => t.id === id);
-};
-
 export const getTicketComments = (ticketId: string): TicketComment[] => {
   return mockComments.filter((c) => c.ticketId === ticketId);
 };

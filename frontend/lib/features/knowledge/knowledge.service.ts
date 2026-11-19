@@ -255,10 +255,6 @@ export const getArticles = (status?: ArticleStatus): KnowledgeArticle[] => {
   return mockArticles;
 };
 
-export const getArticleById = (id: string): KnowledgeArticle | undefined => {
-  return mockArticles.find((article) => article.id === id);
-};
-
 export const searchArticles = (query: string, category?: ArticleCategory): KnowledgeArticle[] => {
   let filtered = mockArticles.filter((article) => article.status === 'published');
 

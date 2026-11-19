@@ -82,34 +82,6 @@ export const LoginRequestSchema = z.object({
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 
 /**
- * Respuesta del BFF al iniciar sesión (los tokens van en cookies HttpOnly)
- */
-export const LoginResultSchema = z.object({
-  user: UserSchema,
-});
-
-export type LoginResult = z.infer<typeof LoginResultSchema>;
-
-/**
  * Current user response (GET /api/auth/me)
  */
 export const CurrentUserResponseSchema = BackendUserSchema;
-
-export type CurrentUserResponse = z.infer<typeof CurrentUserResponseSchema>;
-
-/**
- * Register request schema (for future use)
- */
-export const RegisterRequestSchema = z
-  .object({
-    email: EmailSchema,
-    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-    password: PasswordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'],
-  });
-
-export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;

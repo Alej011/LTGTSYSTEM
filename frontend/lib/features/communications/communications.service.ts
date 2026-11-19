@@ -28,14 +28,6 @@ export interface CommunicationRead {
   readAt: Date;
 }
 
-export interface NotificationPreference {
-  userId: string;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  departmentUpdates: boolean;
-  urgentOnly: boolean;
-}
-
 // Mock data - In production, this would be a real database
 export const mockCommunications: Communication[] = [
   {
@@ -257,10 +249,6 @@ export const getCommunications = (userId?: string, userRole?: string, userDepart
 
 export const getAllCommunications = (): Communication[] => {
   return mockCommunications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-};
-
-export const getCommunicationById = (id: string): Communication | undefined => {
-  return mockCommunications.find((comm) => comm.id === id);
 };
 
 export const createCommunication = async (

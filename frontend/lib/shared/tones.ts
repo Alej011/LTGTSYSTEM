@@ -7,5 +7,3 @@ export const TONE_CLASSES = {
   primary: 'border-primary/25 bg-primary/10 text-primary',
   neutral: 'border-border bg-muted text-muted-foreground',
 } as const;
-
-export type Tone = keyof typeof TONE_CLASSES;

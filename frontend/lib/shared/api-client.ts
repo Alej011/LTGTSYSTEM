@@ -12,20 +12,6 @@ import { z } from 'zod';
 
 import { API_TIMEOUT } from './api-config';
 
-// Tipos de respuesta de la API
-export interface ApiResponse<T = unknown> {
-  data?: T;
-  error?: string;
-  message?: string;
-  statusCode?: number;
-}
-
-export interface ApiError {
-  message: string;
-  statusCode: number;
-  error?: string;
-}
-
 /**
  * Clase para errores de API mejorada
  */

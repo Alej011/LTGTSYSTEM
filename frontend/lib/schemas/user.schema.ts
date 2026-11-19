@@ -35,8 +35,6 @@ export type UserListItem = z.infer<typeof UserListItemSchema>;
  */
 export const UsersListResponseSchema = z.array(BackendUserListItemSchema);
 
-export type UsersListResponse = z.infer<typeof UsersListResponseSchema>;
-
 /**
  * Transform backend user to frontend user
  */
