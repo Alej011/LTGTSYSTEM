@@ -1,5 +1,5 @@
-import { apiClient, ApiClientError } from "@/lib/shared/api-client";
-import { handleApiError } from "@/lib/shared/error-handler";
+import { apiClient, ApiClientError } from '@/lib/shared/api-client';
+import { handleApiError } from '@/lib/shared/error-handler';
 
 export interface Brand {
   id: string;
@@ -22,7 +22,7 @@ export interface ProductResponse {
   sku: string;
   price: number;
   stock: number;
-  status: "active" | "inactive" | "discontinued";
+  status: 'active' | 'inactive' | 'discontinued';
   brandId: string;
   brand: {
     id: string;
@@ -48,7 +48,7 @@ export interface Product {
   stock: number;
   price: number;
   categories: Category[]; // Cambiado de category: string a categories: Category[]
-  status: "active" | "inactive" | "discontinued";
+  status: 'active' | 'inactive' | 'discontinued';
   createdAt: string; // ISO string from backend
   updatedAt: string; // ISO string from backend
 }
@@ -72,13 +72,13 @@ function mapBackendProductToFrontend(backendProduct: ProductResponse): Product {
     brand: {
       id: backendProduct.brand.id,
       name: backendProduct.brand.name,
-      description: "",
-      createdAt: backendProduct.createdAt, 
-      updatedAt: backendProduct.updatedAt, 
+      description: '',
+      createdAt: backendProduct.createdAt,
+      updatedAt: backendProduct.updatedAt,
     },
     categories: backendProduct.categories,
     createdAt: backendProduct.createdAt,
-    updatedAt: backendProduct.updatedAt, 
+    updatedAt: backendProduct.updatedAt,
   };
 }
 
@@ -101,40 +101,36 @@ export interface PaginatedProducts {
 export interface ProductFilters {
   search?: string;
   category?: string;
-  status?: "active" | "inactive" | "discontinued";
+  status?: 'active' | 'inactive' | 'discontinued';
   brandId?: string;
   maxStock?: number;
   page?: number;
   limit?: number;
-  sortBy?: "name" | "price" | "stock" | "createdAt";
-  sortOrder?: "asc" | "desc";
+  sortBy?: 'name' | 'price' | 'stock' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
-// FUNCIONES DE API 
+// FUNCIONES DE API
 
 /**
  * Obtiene productos con paginación y filtros del BFF
  */
-export const getProducts = async (
-  filters?: ProductFilters
-): Promise<PaginatedProducts> => {
+export const getProducts = async (filters?: ProductFilters): Promise<PaginatedProducts> => {
   try {
     // Construir query params
     const params = new URLSearchParams();
-    if (filters?.search) params.append("search", filters.search);
-    if (filters?.category) params.append("category", filters.category);
-    if (filters?.status) params.append("status", filters.status);
-    if (filters?.brandId) params.append("brandId", filters.brandId);
-    if (filters?.maxStock !== undefined) params.append("maxStock", filters.maxStock.toString());
-    if (filters?.page) params.append("page", filters.page.toString());
-    if (filters?.limit) params.append("limit", filters.limit.toString());
-    if (filters?.sortBy) params.append("sortBy", filters.sortBy);
-    if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.brandId) params.append('brandId', filters.brandId);
+    if (filters?.maxStock !== undefined) params.append('maxStock', filters.maxStock.toString());
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy);
+    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const queryString = params.toString();
-    const endpoint = queryString
-      ? `/api/products/list?${queryString}` 
-      : `/api/products/list`; 
+    const endpoint = queryString ? `/api/products/list?${queryString}` : `/api/products/list`;
 
     const response = await apiClient.get<{
       data: ProductResponse[];
@@ -142,16 +138,14 @@ export const getProducts = async (
     }>(endpoint);
 
     // Transform backend products to frontend format (dates stay as ISO strings)
-    const products: Product[] = response.data.map((bp) =>
-      mapBackendProductToFrontend(bp)
-    );
+    const products: Product[] = response.data.map((bp) => mapBackendProductToFrontend(bp));
 
     return {
       data: products,
       meta: response.meta,
     };
   } catch (error) {
-    throw handleApiError(error, "obtener productos");
+    throw handleApiError(error, 'obtener productos');
   }
 };
 
@@ -162,7 +156,7 @@ export const getProducts = async (
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
     const response = await apiClient.get<ProductResponse>(
-      `/api/products/${id}` // BFF endpoint
+      `/api/products/${id}`, // BFF endpoint
     );
 
     // Transform backend product (dates stay as ISO strings)
@@ -177,23 +171,20 @@ export const getProductById = async (id: string): Promise<Product | null> => {
  * Crea un nuevo producto a través del BFF
  */
 export const createProduct = async (
-  productData: Omit<
-    Product,
-    "id" | "createdAt" | "updatedAt" | "categories" | "brand"
-  > & {
+  productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'categories' | 'brand'> & {
     categoryIds: string[]; // Agregar categoryIds requerido por el backend
-  }
+  },
 ): Promise<Product | null> => {
   try {
     const response = await apiClient.post<ProductResponse>(
       `/api/products/create`, // BFF endpoint
-      productData
+      productData,
     );
 
     // Transform backend product (dates stay as ISO strings)
     return mapBackendProductToFrontend(response);
   } catch (error) {
-    throw handleApiError(error, "crear producto") ;
+    throw handleApiError(error, 'crear producto');
   }
 };
 
@@ -202,15 +193,14 @@ export const createProduct = async (
  */
 export const updateProduct = async (
   id: string,
-  productData: Partial<
-    Omit<Product, "id" | "createdAt" | "updatedAt" | "categories" | "brand">
-  > & {    categoryIds?: string[]; // categoryIds opcional para actualización
-  }
+  productData: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'categories' | 'brand'>> & {
+    categoryIds?: string[]; // categoryIds opcional para actualización
+  },
 ): Promise<Product | null> => {
   try {
     const response = await apiClient.patch<ProductResponse>(
       `/api/products/${id}`, // BFF endpoint
-      productData
+      productData,
     );
 
     // Transform backend product (dates stay as ISO strings)
@@ -227,7 +217,7 @@ export const deleteProduct = async (id: string): Promise<void> => {
   try {
     await apiClient.delete(`/api/products/${id}`); // BFF endpoint
   } catch (error) {
-    throw handleApiError(error, "eliminar producto");
+    throw handleApiError(error, 'eliminar producto');
   }
 };
 
@@ -241,7 +231,7 @@ export const getBrands = async (): Promise<Brand[]> => {
     // Dates are already ISO strings from BFF, just return as-is
     return response;
   } catch (error) {
-    return handleApiError(error, "obtener marcas", []);
+    return handleApiError(error, 'obtener marcas', []);
   }
 };
 
@@ -253,6 +243,6 @@ export const getCategories = async (): Promise<Category[]> => {
     const response = await apiClient.get<Category[]>(`/api/categories`); // BFF endpoint
     return response;
   } catch (error) {
-    return handleApiError( error, "obtener categorías", []);
+    return handleApiError(error, 'obtener categorías', []);
   }
 };

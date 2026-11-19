@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { Calendar,Loader2, MessageSquare } from "lucide-react"
-import type React from "react"
-import { useState } from "react"
+import { Calendar, Loader2, MessageSquare } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { useAuth } from "@/contexts/auth-context"
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/auth-context';
 import {
   type Communication,
   type CommunicationStatus,
@@ -20,35 +20,35 @@ import {
   createCommunication,
   getTypeLabel,
   updateCommunication,
-} from "@/lib/features/communications/communications.service"
+} from '@/lib/features/communications/communications.service';
 
 interface CommunicationFormProps {
-  communication?: Communication
-  onSuccess: () => void
-  onCancel: () => void
+  communication?: Communication;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function CommunicationForm({ communication, onSuccess, onCancel }: CommunicationFormProps) {
-  const { user } = useAuth()
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    title: communication?.title || "",
-    content: communication?.content || "",
-    type: communication?.type || "general",
-    status: communication?.status || "draft",
-    targetDepartments: communication?.targetDepartments || ["Todos"],
+    title: communication?.title || '',
+    content: communication?.content || '',
+    type: communication?.type || 'general',
+    status: communication?.status || 'draft',
+    targetDepartments: communication?.targetDepartments || ['Todos'],
     targetRoles: communication?.targetRoles || [],
     isPinned: communication?.isPinned || false,
-    expiresAt: communication?.expiresAt ? communication.expiresAt.toISOString().split("T")[0] : "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+    expiresAt: communication?.expiresAt ? communication.expiresAt.toISOString().split('T')[0] : '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!user) return
+    e.preventDefault();
+    if (!user) return;
 
-    setError("")
-    setIsLoading(true)
+    setError('');
+    setIsLoading(true);
 
     try {
       const commData = {
@@ -57,73 +57,73 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
         authorName: user.name,
         authorRole: user.role,
         expiresAt: formData.expiresAt ? new Date(formData.expiresAt) : undefined,
-      }
+      };
 
       if (communication) {
-        await updateCommunication(communication.id, commData)
+        await updateCommunication(communication.id, commData);
       } else {
-        await createCommunication(commData)
+        await createCommunication(commData);
       }
-      onSuccess()
+      onSuccess();
     } catch {
-      setError("Error al guardar la comunicación. Intente nuevamente.")
+      setError('Error al guardar la comunicación. Intente nuevamente.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleInputChange = <K extends keyof typeof formData>(field: K, value: (typeof formData)[K]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleDepartmentChange = (department: string, checked: boolean) => {
-    if (department === "Todos") {
+    if (department === 'Todos') {
       setFormData((prev) => ({
         ...prev,
-        targetDepartments: checked ? ["Todos"] : [],
-      }))
+        targetDepartments: checked ? ['Todos'] : [],
+      }));
     } else {
       setFormData((prev) => {
-        let newDepartments = [...prev.targetDepartments]
+        let newDepartments = [...prev.targetDepartments];
         if (checked) {
-          newDepartments = newDepartments.filter((d) => d !== "Todos")
-          newDepartments.push(department)
+          newDepartments = newDepartments.filter((d) => d !== 'Todos');
+          newDepartments.push(department);
         } else {
-          newDepartments = newDepartments.filter((d) => d !== department)
+          newDepartments = newDepartments.filter((d) => d !== department);
         }
-        return { ...prev, targetDepartments: newDepartments }
-      })
+        return { ...prev, targetDepartments: newDepartments };
+      });
     }
-  }
+  };
 
   const handleRoleChange = (role: string, checked: boolean) => {
     setFormData((prev) => {
-      let newRoles = [...prev.targetRoles]
+      let newRoles = [...prev.targetRoles];
       if (checked) {
-        newRoles.push(role)
+        newRoles.push(role);
       } else {
-        newRoles = newRoles.filter((r) => r !== role)
+        newRoles = newRoles.filter((r) => r !== role);
       }
-      return { ...prev, targetRoles: newRoles }
-    })
-  }
+      return { ...prev, targetRoles: newRoles };
+    });
+  };
 
-  const types: CommunicationType[] = ["anuncio", "politica", "evento", "urgente", "general"]
-  const statuses: CommunicationStatus[] = ["draft", "published", "archived"]
-  const departments = ["IT", "Recursos Humanos", "Gerencia", "Ventas", "Soporte Técnico", "Administración"]
-  const roles = ["empleado", "admin"]
+  const types: CommunicationType[] = ['anuncio', 'politica', 'evento', 'urgente', 'general'];
+  const statuses: CommunicationStatus[] = ['draft', 'published', 'archived'];
+  const departments = ['IT', 'Recursos Humanos', 'Gerencia', 'Ventas', 'Soporte Técnico', 'Administración'];
+  const roles = ['empleado', 'admin'];
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          {communication ? "Editar Comunicación" : "Nueva Comunicación"}
+          {communication ? 'Editar Comunicación' : 'Nueva Comunicación'}
         </CardTitle>
         <CardDescription>
           {communication
-            ? "Modifica la información de la comunicación interna"
-            : "Crea una nueva comunicación para el personal"}
+            ? 'Modifica la información de la comunicación interna'
+            : 'Crea una nueva comunicación para el personal'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -135,7 +135,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="Ej: Nueva Política de Trabajo Remoto"
                   required
                 />
@@ -146,7 +146,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                 <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) => handleInputChange("content", e.target.value)}
+                  onChange={(e) => handleInputChange('content', e.target.value)}
                   placeholder="Contenido completo de la comunicación. Puedes usar Markdown para formato..."
                   rows={15}
                   className="font-mono text-sm"
@@ -161,7 +161,10 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Tipo de Comunicación</Label>
-                <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value as CommunicationType)}>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => handleInputChange('type', value as CommunicationType)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -177,7 +180,10 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
 
               <div className="space-y-2">
                 <Label htmlFor="status">Estado</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value as CommunicationStatus)}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleInputChange('status', value as CommunicationStatus)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -185,7 +191,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                     {statuses.map((status) => (
                       <SelectItem key={status} value={status}>
                         <span className="capitalize">
-                          {status === "draft" ? "Borrador" : status === "published" ? "Publicado" : "Archivado"}
+                          {status === 'draft' ? 'Borrador' : status === 'published' ? 'Publicado' : 'Archivado'}
                         </span>
                       </SelectItem>
                     ))}
@@ -201,7 +207,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                     id="expiresAt"
                     type="date"
                     value={formData.expiresAt}
-                    onChange={(e) => handleInputChange("expiresAt", e.target.value)}
+                    onChange={(e) => handleInputChange('expiresAt', e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -211,7 +217,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                 <Checkbox
                   id="isPinned"
                   checked={formData.isPinned}
-                  onCheckedChange={(checked) => handleInputChange("isPinned", checked === true)}
+                  onCheckedChange={(checked) => handleInputChange('isPinned', checked === true)}
                 />
                 <Label htmlFor="isPinned">Fijar comunicación</Label>
               </div>
@@ -222,8 +228,8 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="dept-todos"
-                      checked={formData.targetDepartments.includes("Todos")}
-                      onCheckedChange={(checked) => handleDepartmentChange("Todos", checked as boolean)}
+                      checked={formData.targetDepartments.includes('Todos')}
+                      onCheckedChange={(checked) => handleDepartmentChange('Todos', checked as boolean)}
                     />
                     <Label htmlFor="dept-todos" className="font-medium">
                       Todos los departamentos
@@ -235,7 +241,7 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                         id={`dept-${dept}`}
                         checked={formData.targetDepartments.includes(dept)}
                         onCheckedChange={(checked) => handleDepartmentChange(dept, checked as boolean)}
-                        disabled={formData.targetDepartments.includes("Todos")}
+                        disabled={formData.targetDepartments.includes('Todos')}
                       />
                       <Label htmlFor={`dept-${dept}`}>{dept}</Label>
                     </div>
@@ -283,14 +289,14 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
                   Guardando...
                 </>
               ) : communication ? (
-                "Actualizar Comunicación"
+                'Actualizar Comunicación'
               ) : (
-                "Crear Comunicación"
+                'Crear Comunicación'
               )}
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

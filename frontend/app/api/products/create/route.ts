@@ -1,17 +1,17 @@
-import { BackendProductSchema, CreateProductRequestSchema } from "@/lib/schemas/product.schema"
-import { parseBody, proxyToBackend } from "@/lib/server/backend"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
+import { BackendProductSchema, CreateProductRequestSchema } from '@/lib/schemas/product.schema';
+import { parseBody, proxyToBackend } from '@/lib/server/backend';
+import { API_ENDPOINTS } from '@/lib/shared/api-config';
 
 export async function POST(request: Request) {
-  const body = await parseBody(request, CreateProductRequestSchema, "Datos del producto inválidos")
-  if (body.response) return body.response
+  const body = await parseBody(request, CreateProductRequestSchema, 'Datos del producto inválidos');
+  if (body.response) return body.response;
 
   return proxyToBackend({
     path: API_ENDPOINTS.products.create,
-    method: "POST",
+    method: 'POST',
     body: body.data,
     schema: BackendProductSchema,
     status: 201,
-    errorMessage: "Error al crear producto",
-  })
+    errorMessage: 'Error al crear producto',
+  });
 }

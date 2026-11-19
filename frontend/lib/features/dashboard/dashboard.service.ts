@@ -1,43 +1,47 @@
-import type { UserRole } from "@/lib/features/auth/auth.service"
-import { getCommunications, getUnreadCount } from "@/lib/features/communications/communications.service"
-import { getArticles } from "@/lib/features/knowledge/knowledge.service"
-import { getProducts } from "@/lib/features/products/products.service"
-import { getTickets } from "@/lib/features/tickets/tickets.service"
+import type { UserRole } from '@/lib/features/auth/auth.service';
+import { getCommunications, getUnreadCount } from '@/lib/features/communications/communications.service';
+import { getArticles } from '@/lib/features/knowledge/knowledge.service';
+import { getProducts } from '@/lib/features/products/products.service';
+import { getTickets } from '@/lib/features/tickets/tickets.service';
 
 export interface DashboardStats {
-  totalProducts: number
-  lowStockProducts: number
-  openTickets: number
-  myTickets: number
-  knowledgeArticles: number
-  unreadCommunications: number
+  totalProducts: number;
+  lowStockProducts: number;
+  openTickets: number;
+  myTickets: number;
+  knowledgeArticles: number;
+  unreadCommunications: number;
 }
 
 export interface RecentActivity {
-  id: string
-  type: "ticket" | "product" | "communication" | "knowledge"
-  title: string
-  description: string
-  time: Date
-  status?: string
-  priority?: string
+  id: string;
+  type: 'ticket' | 'product' | 'communication' | 'knowledge';
+  title: string;
+  description: string;
+  time: Date;
+  status?: string;
+  priority?: string;
 }
 
-const LOW_STOCK_THRESHOLD = 5
+const LOW_STOCK_THRESHOLD = 5;
 
-export const getDashboardStats = async (userId: string, userRole: UserRole, userDepartment: string): Promise<DashboardStats> => {
+export const getDashboardStats = async (
+  userId: string,
+  userRole: UserRole,
+  userDepartment: string,
+): Promise<DashboardStats> => {
   // Solo se necesitan los totales: limit 1 evita traer el catálogo completo
   const [allProducts, lowStock] = await Promise.all([
     getProducts({ limit: 1 }),
     getProducts({ limit: 1, maxStock: LOW_STOCK_THRESHOLD }),
-  ])
+  ]);
 
-  const tickets = getTickets()
-  const articles = getArticles("published")
-  const unreadComms = getUnreadCount(userId, userRole, userDepartment)
+  const tickets = getTickets();
+  const articles = getArticles('published');
+  const unreadComms = getUnreadCount(userId, userRole, userDepartment);
 
-  const openTickets = tickets.filter((t) => t.status === "abierto" || t.status === "en_progreso").length
-  const myTickets = tickets.filter((t) => t.createdBy === userId || t.assignedTo === userId).length
+  const openTickets = tickets.filter((t) => t.status === 'abierto' || t.status === 'en_progreso').length;
+  const myTickets = tickets.filter((t) => t.createdBy === userId || t.assignedTo === userId).length;
 
   return {
     totalProducts: allProducts.meta.total,
@@ -46,106 +50,106 @@ export const getDashboardStats = async (userId: string, userRole: UserRole, user
     myTickets,
     knowledgeArticles: articles.length,
     unreadCommunications: unreadComms,
-  }
-}
+  };
+};
 
 export const getRecentActivity = (userId: string, userRole: UserRole, userDepartment: string): RecentActivity[] => {
-  const activities: RecentActivity[] = []
+  const activities: RecentActivity[] = [];
 
   // Recent tickets
   const tickets = getTickets()
     .filter((t) => {
-      if (userRole === "empleado") return t.createdBy === userId || t.assignedTo === userId
-      return true
+      if (userRole === 'empleado') return t.createdBy === userId || t.assignedTo === userId;
+      return true;
     })
-    .slice(0, 3)
+    .slice(0, 3);
 
   tickets.forEach((ticket) => {
     activities.push({
       id: ticket.id,
-      type: "ticket",
+      type: 'ticket',
       title: `Ticket #${ticket.id}: ${ticket.title}`,
       description: `${ticket.createdByName} - ${ticket.category}`,
       time: ticket.updatedAt,
       status: ticket.status,
       priority: ticket.priority,
-    })
-  })
+    });
+  });
 
   // Recent communications
-  const communications = getCommunications(userId, userRole, userDepartment).slice(0, 2)
+  const communications = getCommunications(userId, userRole, userDepartment).slice(0, 2);
   communications.forEach((comm) => {
     activities.push({
       id: comm.id,
-      type: "communication",
+      type: 'communication',
       title: comm.title,
       description: `${comm.authorName} - ${comm.type}`,
       time: comm.publishedAt || comm.createdAt,
       status: comm.type,
-    })
-  })
+    });
+  });
 
   // Recent knowledge articles
-  const articles = getArticles("published").slice(0, 2)
+  const articles = getArticles('published').slice(0, 2);
   articles.forEach((article) => {
     activities.push({
       id: article.id,
-      type: "knowledge",
+      type: 'knowledge',
       title: article.title,
       description: `${article.authorName} - ${article.category}`,
       time: article.updatedAt,
-    })
-  })
+    });
+  });
 
   // Sort by time and return top 8
-  return activities.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 8)
-}
+  return activities.sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 8);
+};
 
 export const getQuickActions = (userRole: UserRole) => {
   const allActions = [
     {
-      title: "Crear Ticket",
-      description: "Reportar problema técnico",
-      href: "/tickets",
-      icon: "Headphones",
-      roles: ["empleado", "admin"],
+      title: 'Crear Ticket',
+      description: 'Reportar problema técnico',
+      href: '/tickets',
+      icon: 'Headphones',
+      roles: ['empleado', 'admin'],
     },
     {
-      title: "Ver Productos",
-      description: "Consultar catálogo",
-      href: "/products",
-      icon: "Package",
-      roles: ["empleado", "admin"],
+      title: 'Ver Productos',
+      description: 'Consultar catálogo',
+      href: '/products',
+      icon: 'Package',
+      roles: ['empleado', 'admin'],
     },
     {
-      title: "Base Conocimientos",
-      description: "Buscar soluciones",
-      href: "/knowledge",
-      icon: "BookOpen",
-      roles: ["empleado", "admin"],
+      title: 'Base Conocimientos',
+      description: 'Buscar soluciones',
+      href: '/knowledge',
+      icon: 'BookOpen',
+      roles: ['empleado', 'admin'],
     },
     {
-      title: "Comunicaciones",
-      description: "Ver novedades",
-      href: "/communications",
-      icon: "MessageSquare",
-      roles: ["empleado", "admin"],
+      title: 'Comunicaciones',
+      description: 'Ver novedades',
+      href: '/communications',
+      icon: 'MessageSquare',
+      roles: ['empleado', 'admin'],
     },
     {
-      title: "Gestionar Usuarios",
-      description: "Administrar personal",
-      href: "/users",
-      icon: "Users",
-      roles: ["admin"],
+      title: 'Gestionar Usuarios',
+      description: 'Administrar personal',
+      href: '/users',
+      icon: 'Users',
+      roles: ['admin'],
     },
     {
-      title: "Tickets Pendientes",
-      description: "Resolver incidencias",
-      href: "/tickets",
-      icon: "AlertCircle",
-      roles: ["empleado", "admin"],
+      title: 'Tickets Pendientes',
+      description: 'Resolver incidencias',
+      href: '/tickets',
+      icon: 'AlertCircle',
+      roles: ['empleado', 'admin'],
     },
-  ]
+  ];
 
-  return allActions.filter((action) => action.roles.includes(userRole))
-}
+  return allActions.filter((action) => action.roles.includes(userRole));
+};

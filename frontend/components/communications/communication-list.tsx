@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
-import { Clock, Edit, Eye, MessageSquare, Pin, Plus, Search, Users } from "lucide-react"
-import { useEffect,useState } from "react"
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Clock, Edit, Eye, MessageSquare, Pin, Plus, Search, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuth } from "@/contexts/auth-context"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/auth-context';
 import {
   type Communication,
   type CommunicationType,
@@ -20,38 +20,38 @@ import {
   getTypeLabel,
   isRead,
   markAsRead,
-} from "@/lib/features/communications/communications.service"
-import { getResourcePermissions } from "@/lib/shared/permissions"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+} from '@/lib/features/communications/communications.service';
+import { getResourcePermissions } from '@/lib/shared/permissions';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 interface CommunicationListProps {
-  onView: (communication: Communication) => void
-  onEdit?: (communication: Communication) => void
-  onAdd?: () => void
-  showManagement?: boolean
+  onView: (communication: Communication) => void;
+  onEdit?: (communication: Communication) => void;
+  onAdd?: () => void;
+  showManagement?: boolean;
 }
 
 export function CommunicationList({ onView, onEdit, onAdd, showManagement = false }: CommunicationListProps) {
-  const { user } = useAuth()
-  const [communications, setCommunications] = useState<Communication[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [typeFilter, setTypeFilter] = useState<CommunicationType | "all">("all")
+  const { user } = useAuth();
+  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<CommunicationType | 'all'>('all');
 
   useEffect(() => {
-    loadCommunications()
-  }, [searchTerm, typeFilter, showManagement, user])
+    loadCommunications();
+  }, [searchTerm, typeFilter, showManagement, user]);
 
   const loadCommunications = () => {
-    if (!user) return
+    if (!user) return;
 
-    let filtered: Communication[]
+    let filtered: Communication[];
 
     if (showManagement) {
       // Show all communications for management
-      filtered = getAllCommunications()
+      filtered = getAllCommunications();
     } else {
       // Show only relevant communications for the user
-      filtered = getCommunications(user.id, user.role, user.department || "")
+      filtered = getCommunications(user.id, user.role, user.department || '');
     }
 
     // Apply filters
@@ -60,54 +60,54 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
         (comm) =>
           comm.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           comm.content.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+      );
     }
 
-    if (typeFilter !== "all") {
-      filtered = filtered.filter((comm) => comm.type === typeFilter)
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter((comm) => comm.type === typeFilter);
     }
 
-    setCommunications(filtered)
-  }
+    setCommunications(filtered);
+  };
 
   const handleView = async (communication: Communication) => {
     if (user && !showManagement) {
-      await markAsRead(communication.id, user.id)
+      await markAsRead(communication.id, user.id);
     }
-    onView(communication)
-  }
+    onView(communication);
+  };
 
   const getTypeBadge = (type: CommunicationType) => {
     return (
       <Badge variant="outline" className={getTypeColor(type)}>
         {getTypeLabel(type)}
       </Badge>
-    )
-  }
+    );
+  };
 
   const getStatusBadge = (status: string) => {
     const tones: Partial<Record<string, string>> = {
       draft: TONE_CLASSES.warning,
       published: TONE_CLASSES.success,
       archived: TONE_CLASSES.neutral,
-    }
+    };
 
     const labels = {
-      draft: "Borrador",
-      published: "Publicado",
-      archived: "Archivado",
-    }
+      draft: 'Borrador',
+      published: 'Publicado',
+      archived: 'Archivado',
+    };
 
     return (
       <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
-    )
-  }
+    );
+  };
 
-  const types: CommunicationType[] = ["anuncio", "politica", "evento", "urgente", "general"]
-  const communicationPermissions = getResourcePermissions(user?.role, "communications")
-  const canManageCommunications = communicationPermissions.canCreate || communicationPermissions.canEdit
+  const types: CommunicationType[] = ['anuncio', 'politica', 'evento', 'urgente', 'general'];
+  const communicationPermissions = getResourcePermissions(user?.role, 'communications');
+  const canManageCommunications = communicationPermissions.canCreate || communicationPermissions.canEdit;
 
   return (
     <div className="space-y-6">
@@ -117,12 +117,12 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
             <div>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
-                {showManagement ? "Gestión de Comunicaciones" : "Comunicaciones Internas"}
+                {showManagement ? 'Gestión de Comunicaciones' : 'Comunicaciones Internas'}
               </CardTitle>
               <CardDescription>
                 {showManagement
-                  ? "Administra las comunicaciones internas de la empresa"
-                  : "Mantente informado sobre novedades y directrices de la empresa"}
+                  ? 'Administra las comunicaciones internas de la empresa'
+                  : 'Mantente informado sobre novedades y directrices de la empresa'}
               </CardDescription>
             </div>
             {canManageCommunications && onAdd && (
@@ -146,7 +146,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                 />
               </div>
             </div>
-            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as CommunicationType | "all")}>
+            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as CommunicationType | 'all')}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="Todos los tipos" />
               </SelectTrigger>
@@ -169,12 +169,12 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
               </div>
             ) : (
               communications.map((communication) => {
-                const isUnread = user && !showManagement && !isRead(communication.id, user.id)
+                const isUnread = user && !showManagement && !isRead(communication.id, user.id);
                 return (
                   <Card
                     key={communication.id}
                     className={`cursor-pointer hover:shadow-md transition-shadow ${
-                      isUnread ? "border-primary bg-primary/5" : ""
+                      isUnread ? 'border-primary bg-primary/5' : ''
                     }`}
                     onClick={() => void handleView(communication)}
                   >
@@ -192,7 +192,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                             {showManagement && getStatusBadge(communication.status)}
                             <div className="flex items-center gap-1 text-sm text-muted-foreground">
                               <Users className="h-3 w-3" />
-                              {communication.targetDepartments.join(", ")}
+                              {communication.targetDepartments.join(', ')}
                             </div>
                           </div>
 
@@ -224,8 +224,8 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                             variant="outline"
                             size="sm"
                             onClick={(e) => {
-                              e.stopPropagation()
-                              void handleView(communication)
+                              e.stopPropagation();
+                              void handleView(communication);
                             }}
                           >
                             <Eye className="h-4 w-4" />
@@ -235,8 +235,8 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                               variant="outline"
                               size="sm"
                               onClick={(e) => {
-                                e.stopPropagation()
-                                onEdit(communication)
+                                e.stopPropagation();
+                                onEdit(communication);
                               }}
                             >
                               <Edit className="h-4 w-4" />
@@ -246,12 +246,12 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
                       </div>
                     </CardContent>
                   </Card>
-                )
+                );
               })
             )}
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

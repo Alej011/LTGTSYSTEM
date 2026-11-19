@@ -1,18 +1,18 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth,ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { Roles } from "../common/decorators/roles.decorator";
-import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
-import { RolesGuard } from "../common/guards/roles.guard";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { PaginatedProductsDto } from "./dto/paginated-products.dto";
-import { ProductResponseDto } from "./dto/product-response.dto";
-import { QueryProductsDto } from "./dto/query-products.dto";
-import { UpdateProductDto } from "./dto/update-product.dto";
-import { ProductsService } from "./products.service";
+import { Roles } from '../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { CreateProductDto } from './dto/create-product.dto';
+import { PaginatedProductsDto } from './dto/paginated-products.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
+import { QueryProductsDto } from './dto/query-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductsService } from './products.service';
 
-@ApiTags("products")
-@Controller("products")
+@ApiTags('products')
+@Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class ProductsController {
@@ -61,7 +61,7 @@ export class ProductsController {
   @Post('create')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Crear un nuevo producto' })
-  @ApiResponse ({
+  @ApiResponse({
     status: 201,
     description: 'Producto creado exitosamente',
     type: ProductResponseDto,
@@ -76,8 +76,8 @@ export class ProductsController {
   @Patch('update/:id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Actualizar un producto existente' })
-  @ApiResponse ({
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Producto actualizado exitosamente',
     type: ProductResponseDto,
   })
@@ -85,24 +85,21 @@ export class ProductsController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado' })
-  async update(
-    @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
-  ): Promise<ProductResponseDto> {
+  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto): Promise<ProductResponseDto> {
     return this.productsService.update(id, updateProductDto);
   }
 
   @Delete('delete/:id')
   @Roles('ADMIN')
-  @ApiOperation({ summary: 'Eliminar un producto'})
-  @ApiResponse ({
+  @ApiOperation({ summary: 'Eliminar un producto' })
+  @ApiResponse({
     status: 200,
     description: 'Producto eliminado exitosamente',
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado' })
-  async remove(@Param('id') id : string): Promise<{message: string}>{
+  async remove(@Param('id') id: string): Promise<{ message: string }> {
     await this.productsService.remove(id);
     return { message: 'Producto eliminado exitosamente' };
   }

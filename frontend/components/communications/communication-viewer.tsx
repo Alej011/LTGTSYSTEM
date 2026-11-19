@@ -1,38 +1,43 @@
-"use client"
+'use client';
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { ArrowLeft, Calendar,Clock, Pin, User, Users } from "lucide-react"
-import { useEffect } from "react"
-import ReactMarkdown from "react-markdown"
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { ArrowLeft, Calendar, Clock, Pin, User, Users } from 'lucide-react';
+import { useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/contexts/auth-context"
-import { type Communication, getTypeColor, getTypeLabel, markAsRead } from "@/lib/features/communications/communications.service"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/auth-context';
+import {
+  type Communication,
+  getTypeColor,
+  getTypeLabel,
+  markAsRead,
+} from '@/lib/features/communications/communications.service';
 
 interface CommunicationViewerProps {
-  communication: Communication
-  onBack: () => void
+  communication: Communication;
+  onBack: () => void;
 }
 
 export function CommunicationViewer({ communication, onBack }: CommunicationViewerProps) {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   useEffect(() => {
     // Mark as read when viewing
     if (user) {
-      void markAsRead(communication.id, user.id)
+      void markAsRead(communication.id, user.id);
     }
-  }, [communication.id, user])
+  }, [communication.id, user]);
 
   const getTypeBadge = () => (
     <Badge variant="outline" className={getTypeColor(communication.type)}>
       {getTypeLabel(communication.type)}
     </Badge>
-  )
+  );
 
   return (
     <div className="space-y-6">
@@ -48,7 +53,7 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
           </div>
           <div className="flex items-center gap-2">
             {getTypeBadge()}
-            {communication.type === "urgente" && <Badge variant="destructive">Urgente</Badge>}
+            {communication.type === 'urgente' && <Badge variant="destructive">Urgente</Badge>}
           </div>
         </div>
       </div>
@@ -107,10 +112,10 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
                 <label className="text-sm font-medium text-muted-foreground">Dirigido a</label>
                 <p className="mt-1 flex items-center text-sm">
                   <Users className="h-3 w-3 mr-1" />
-                  {communication.targetDepartments.join(", ")}
+                  {communication.targetDepartments.join(', ')}
                 </p>
                 {communication.targetRoles.length > 0 && (
-                  <p className="text-xs text-muted-foreground">Roles: {communication.targetRoles.join(", ")}</p>
+                  <p className="text-xs text-muted-foreground">Roles: {communication.targetRoles.join(', ')}</p>
                 )}
               </div>
 
@@ -159,5 +164,5 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
         </div>
       </div>
     </div>
-  )
+  );
 }

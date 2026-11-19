@@ -1,18 +1,18 @@
 /**
  * React Query hooks for authentication
  */
-import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
 
-import { authenticate, getCurrentUser, logout, type User } from "@/lib/features/auth/auth.service"
+import { authenticate, getCurrentUser, logout, type User } from '@/lib/features/auth/auth.service';
 
 /**
  * Query keys for auth-related queries
  * Organized hierarchically for easy invalidation
  */
 export const authKeys = {
-  all: ["auth"] as const,
-  currentUser: () => [...authKeys.all, "currentUser"] as const,
-}
+  all: ['auth'] as const,
+  currentUser: () => [...authKeys.all, 'currentUser'] as const,
+};
 
 /**
  * Hook to get current authenticated user
@@ -21,14 +21,14 @@ export const authKeys = {
  * @example
  * const { data: user, isLoading, error } = useCurrentUser()
  */
-export function useCurrentUser(options?: Omit<UseQueryOptions<User | null>, "queryKey" | "queryFn">) {
+export function useCurrentUser(options?: Omit<UseQueryOptions<User | null>, 'queryKey' | 'queryFn'>) {
   return useQuery({
     queryKey: authKeys.currentUser(),
     queryFn: getCurrentUser,
     staleTime: 10 * 60 * 1000, // 10 minutos - sesión es válida por más tiempo
     retry: false, // No reintentar si falla (401 = no autenticado)
     ...options,
-  })
+  });
 }
 
 /**
@@ -52,18 +52,18 @@ export function useCurrentUser(options?: Omit<UseQueryOptions<User | null>, "que
  * )
  */
 export function useLogin() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => authenticate(email, password),
     onSuccess: (user) => {
       // Actualizar cache de currentUser
-      queryClient.setQueryData(authKeys.currentUser(), user)
+      queryClient.setQueryData(authKeys.currentUser(), user);
     },
     onError: (error) => {
-      console.error("Login error:", error)
+      console.error('Login error:', error);
     },
-  })
+  });
 }
 
 /**
@@ -80,19 +80,19 @@ export function useLogin() {
  * })
  */
 export function useLogout() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: logout,
     // Se limpia la caché aunque falle la petición: el usuario quiere salir
     onSettled: () => {
       // Clear all auth-related queries
-      queryClient.removeQueries({ queryKey: authKeys.all })
+      queryClient.removeQueries({ queryKey: authKeys.all });
 
       // Clear all other queries (optional - cleanup on logout)
-      queryClient.clear()
+      queryClient.clear();
     },
-  })
+  });
 }
 
 /**
@@ -103,12 +103,12 @@ export function useLogout() {
  * refetch() // Manually refresh user data
  */
 export function useRefreshUser() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: getCurrentUser,
     onSuccess: (user) => {
-      queryClient.setQueryData(authKeys.currentUser(), user)
+      queryClient.setQueryData(authKeys.currentUser(), user);
     },
-  })
+  });
 }

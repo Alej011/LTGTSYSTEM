@@ -1,67 +1,67 @@
-"use client"
-import { Building2, Eye, EyeOff,Loader2 } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import type React from "react"
-import { useState } from "react"
+'use client';
+import { Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type React from 'react';
+import { useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "@/contexts/auth-context"
-import { getLoginErrorMessage } from "@/lib/features/auth/auth.service"
-import { LoginRequestSchema } from "@/lib/schemas/auth.schema"
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/auth-context';
+import { getLoginErrorMessage } from '@/lib/features/auth/auth.service';
+import { LoginRequestSchema } from '@/lib/schemas/auth.schema';
 
 // Solo rutas internas: evita redirecciones abiertas a otros dominios
 function safeRedirect(target: string | null): string {
-  if (!target || !target.startsWith("/") || target.startsWith("//") || target.startsWith("/\\")) {
-    return "/dashboard"
+  if (!target || !target.startsWith('/') || target.startsWith('//') || target.startsWith('/\\')) {
+    return '/dashboard';
   }
-  return target
+  return target;
 }
 
 export function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectTo = safeRedirect(searchParams.get("redirect"))
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = safeRedirect(searchParams.get('redirect'));
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({})
-  const { login, isLoading } = useAuth()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
+  const { login, isLoading } = useAuth();
 
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
-    setValidationErrors({})
+    e.preventDefault();
+    setError('');
+    setValidationErrors({});
 
     // Client-side validation with Zod
-    const validation = LoginRequestSchema.safeParse({ email, password })
+    const validation = LoginRequestSchema.safeParse({ email, password });
 
     if (!validation.success) {
-      const errors: { email?: string; password?: string } = {}
+      const errors: { email?: string; password?: string } = {};
       validation.error.issues.forEach((err) => {
-        if (err.path[0] === "email") {
-          errors.email = err.message
-        } else if (err.path[0] === "password") {
-          errors.password = err.message
+        if (err.path[0] === 'email') {
+          errors.email = err.message;
+        } else if (err.path[0] === 'password') {
+          errors.password = err.message;
         }
-      })
-      setValidationErrors(errors)
-      return
+      });
+      setValidationErrors(errors);
+      return;
     }
 
     try {
-      await login(email, password)
-      router.push(redirectTo)
+      await login(email, password);
+      router.push(redirectTo);
     } catch (err) {
-      setError(getLoginErrorMessage(err))
+      setError(getLoginErrorMessage(err));
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
@@ -86,12 +86,10 @@ export function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="usuario@ltgt.com"
-                className={validationErrors.email ? "border-destructive" : ""}
+                className={validationErrors.email ? 'border-destructive' : ''}
                 required
               />
-              {validationErrors.email && (
-                <p className="text-sm text-destructive">{validationErrors.email}</p>
-              )}
+              {validationErrors.email && <p className="text-sm text-destructive">{validationErrors.email}</p>}
             </div>
 
             {/* Password con botón de mostrar/ocultar */}
@@ -101,11 +99,11 @@ export function LoginForm() {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`${validationErrors.password ? "border-destructive" : ""} pr-10`}
+                  className={`${validationErrors.password ? 'border-destructive' : ''} pr-10`}
                   required
                 />
 
@@ -118,9 +116,7 @@ export function LoginForm() {
                 </button>
               </div>
 
-              {validationErrors.password && (
-                <p className="text-sm text-destructive">{validationErrors.password}</p>
-              )}
+              {validationErrors.password && <p className="text-sm text-destructive">{validationErrors.password}</p>}
             </div>
 
             {/* Error general */}
@@ -138,12 +134,12 @@ export function LoginForm() {
                   Iniciando sesión...
                 </>
               ) : (
-                "Iniciar Sesión"
+                'Iniciar Sesión'
               )}
             </Button>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

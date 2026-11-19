@@ -1,72 +1,69 @@
-"use client"
+'use client';
 
-import { Edit, Plus, Search,Users } from "lucide-react"
-import { useEffect,useState } from "react"
+import { Edit, Plus, Search, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuth } from "@/contexts/auth-context"
-import { getUsers,type User } from "@/lib/features/users/users.service"
-import { getResourcePermissions } from "@/lib/shared/permissions"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAuth } from '@/contexts/auth-context';
+import { getUsers, type User } from '@/lib/features/users/users.service';
+import { getResourcePermissions } from '@/lib/shared/permissions';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 interface UserListProps {
-  onEdit: (user: User) => void
-  onAdd: () => void
+  onEdit: (user: User) => void;
+  onAdd: () => void;
 }
 
 export function UserList({ onEdit, onAdd }: UserListProps) {
-  const { user: currentUser } = useAuth()
-  const permissions = getResourcePermissions(currentUser?.role, "users")
-  const [users, setUsers] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
+  const { user: currentUser } = useAuth();
+  const permissions = getResourcePermissions(currentUser?.role, 'users');
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    void loadUsers()
-  }, [])
+    void loadUsers();
+  }, []);
 
   const loadUsers = async () => {
     try {
-      setIsLoading(true)
-      const data = await getUsers()
-      setUsers(data)
+      setIsLoading(true);
+      const data = await getUsers();
+      setUsers(data);
     } catch (error) {
-      console.error("Error cargando usuarios:", error)
+      console.error('Error cargando usuarios:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Filter users based on search query
   const filteredUsers = users.filter((user) => {
-    const query = searchQuery.toLowerCase()
-    return (
-      user.name.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query)
-    )
-  })
+    const query = searchQuery.toLowerCase();
+    return user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query);
+  });
 
   const getRoleBadge = (role: string) => {
     const tones: Partial<Record<string, string>> = {
       admin: TONE_CLASSES.primary,
       empleado: TONE_CLASSES.info,
-    }
+    };
 
     const labels = {
-      admin: "Administrador",
-      empleado: "Soporte",
-    }
+      admin: 'Administrador',
+      empleado: 'Soporte',
+    };
 
     return (
       <Badge variant="outline" className={tones[role] ?? TONE_CLASSES.neutral}>
         {labels[role as keyof typeof labels] || role}
       </Badge>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -125,7 +122,9 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      {searchQuery ? "No se encontraron usuarios que coincidan con la búsqueda" : "No se encontraron usuarios"}
+                      {searchQuery
+                        ? 'No se encontraron usuarios que coincidan con la búsqueda'
+                        : 'No se encontraron usuarios'}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -154,5 +153,5 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

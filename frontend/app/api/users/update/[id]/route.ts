@@ -1,18 +1,22 @@
-import { BackendUserListItemSchema, mapBackendUserListItemToFrontend,UpdateUserRequestSchema } from "@/lib/schemas/user.schema"
-import { parseBody, proxyToBackend } from "@/lib/server/backend"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
+import {
+  BackendUserListItemSchema,
+  mapBackendUserListItemToFrontend,
+  UpdateUserRequestSchema,
+} from '@/lib/schemas/user.schema';
+import { parseBody, proxyToBackend } from '@/lib/server/backend';
+import { API_ENDPOINTS } from '@/lib/shared/api-config';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const body = await parseBody(request, UpdateUserRequestSchema, "Datos del usuario inválidos", { partial: true })
-  if (body.response) return body.response
+  const { id } = await params;
+  const body = await parseBody(request, UpdateUserRequestSchema, 'Datos del usuario inválidos', { partial: true });
+  if (body.response) return body.response;
 
   return proxyToBackend({
     path: API_ENDPOINTS.users.update(id),
-    method: "PATCH",
+    method: 'PATCH',
     body: body.data,
     schema: BackendUserListItemSchema,
     map: mapBackendUserListItemToFrontend,
-    errorMessage: "Error al actualizar usuario",
-  })
+    errorMessage: 'Error al actualizar usuario',
+  });
 }

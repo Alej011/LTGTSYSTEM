@@ -1,9 +1,9 @@
-"use client"
+'use client';
 
-import { Edit, Eye,Package, Plus, Search, Trash2 } from "lucide-react"
-import { useEffect,useState } from "react"
+import { Edit, Eye, Package, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,147 +13,162 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuth } from "@/contexts/auth-context"
-import { deleteProduct,getProducts, type PaginationMetadata, type Product } from "@/lib/features/products/products.service"
-import { ApiClientError } from "@/lib/shared/api-client"
-import { getResourcePermissions } from "@/lib/shared/permissions"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAuth } from '@/contexts/auth-context';
+import {
+  deleteProduct,
+  getProducts,
+  type PaginationMetadata,
+  type Product,
+} from '@/lib/features/products/products.service';
+import { ApiClientError } from '@/lib/shared/api-client';
+import { getResourcePermissions } from '@/lib/shared/permissions';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
-import { ProductDetailModal } from "./product-detail-modal"
+import { ProductDetailModal } from './product-detail-modal';
 
 interface ProductListProps {
-  onEdit: (product: Product) => void
-  onAdd: () => void
+  onEdit: (product: Product) => void;
+  onAdd: () => void;
 }
 
 export function ProductList({ onEdit, onAdd }: ProductListProps) {
-  const { user } = useAuth()
-  const permissions = getResourcePermissions(user?.role, "products")
-  const [products, setProducts] = useState<Product[]>([])
-  const [pagination, setPagination] = useState<PaginationMetadata | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
-  const [deleteError, setDeleteError] = useState("")
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [detailModalOpen, setDetailModalOpen] = useState(false)
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
+  const { user } = useAuth();
+  const permissions = getResourcePermissions(user?.role, 'products');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<PaginationMetadata | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [deleteError, setDeleteError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
 
   // Cargar productos cuando cambien filtros o página
   useEffect(() => {
-    void loadProducts()
-  }, [currentPage, searchTerm, categoryFilter, statusFilter])
+    void loadProducts();
+  }, [currentPage, searchTerm, categoryFilter, statusFilter]);
 
   const loadProducts = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       const response = await getProducts({
         search: searchTerm || undefined,
-        category: categoryFilter !== "all" ? categoryFilter : undefined,
-        status: statusFilter !== "all" ? (statusFilter as Product["status"]) : undefined,
+        category: categoryFilter !== 'all' ? categoryFilter : undefined,
+        status: statusFilter !== 'all' ? (statusFilter as Product['status']) : undefined,
         page: currentPage,
         limit: 20,
-      })
-      setProducts(response.data)
-      setPagination(response.meta)
+      });
+      setProducts(response.data);
+      setPagination(response.meta);
     } catch (error) {
-      console.error("Error cargando productos:", error)
+      console.error('Error cargando productos:', error);
       // TODO: Mostrar mensaje de error al usuario
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (!productToDelete) return
+    if (!productToDelete) return;
 
-    setDeleteError("")
-    setIsDeleting(true)
+    setDeleteError('');
+    setIsDeleting(true);
     try {
-      await deleteProduct(productToDelete.id)
-      void loadProducts()
-      setDeleteDialogOpen(false)
-      setProductToDelete(null)
+      await deleteProduct(productToDelete.id);
+      void loadProducts();
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
     } catch (error) {
       setDeleteError(
-        error instanceof ApiClientError ? error.getUserMessage() : "No se pudo eliminar el producto. Intente nuevamente.",
-      )
+        error instanceof ApiClientError
+          ? error.getUserMessage()
+          : 'No se pudo eliminar el producto. Intente nuevamente.',
+      );
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleDeleteDialogChange = (open: boolean) => {
-    setDeleteDialogOpen(open)
-    if (!open) setDeleteError("")
-  }
+    setDeleteDialogOpen(open);
+    if (!open) setDeleteError('');
+  };
 
   const getStatusBadge = (status: string) => {
     const tones: Partial<Record<string, string>> = {
       active: TONE_CLASSES.success,
       inactive: TONE_CLASSES.neutral,
       discontinued: TONE_CLASSES.danger,
-    }
+    };
 
     const labels = {
-      active: "Activo",
-      inactive: "Inactivo",
-      discontinued: "Descontinuado",
-    }
+      active: 'Activo',
+      inactive: 'Inactivo',
+      discontinued: 'Descontinuado',
+    };
 
     return (
       <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
-    )
-  }
+    );
+  };
 
   const getStockBadge = (stock: number) => {
     if (stock === 0) {
-      return <Badge variant="outline" className={TONE_CLASSES.danger}>Sin stock</Badge>
+      return (
+        <Badge variant="outline" className={TONE_CLASSES.danger}>
+          Sin stock
+        </Badge>
+      );
     } else if (stock <= 5) {
-      return <Badge variant="outline" className={TONE_CLASSES.warning}>Stock bajo</Badge>
+      return (
+        <Badge variant="outline" className={TONE_CLASSES.warning}>
+          Stock bajo
+        </Badge>
+      );
     }
-    return <Badge variant="outline">{stock} unidades</Badge>
-  }
+    return <Badge variant="outline">{stock} unidades</Badge>;
+  };
 
   // Obtener todas las categorías únicas de los productos actuales
-  const categories = [...new Set(products.flatMap((p) => p.categories.map((c) => c.name)))]
+  const categories = [...new Set(products.flatMap((p) => p.categories.map((c) => c.name)))];
 
   // Calcular número de columnas dinámicamente (siempre incluye Acciones)
-  const totalColumns = 8
+  const totalColumns = 8;
 
   // Determinar si mostrar columna de acciones
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
+    setCurrentPage(newPage);
+  };
 
   const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1) // Resetear a página 1 al buscar
-  }
+    setSearchTerm(value);
+    setCurrentPage(1); // Resetear a página 1 al buscar
+  };
 
   const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value)
-    setCurrentPage(1) // Resetear a página 1 al filtrar
-  }
+    setCategoryFilter(value);
+    setCurrentPage(1); // Resetear a página 1 al filtrar
+  };
 
   const handleStatusChange = (value: string) => {
-    setStatusFilter(value)
-    setCurrentPage(1) // Resetear a página 1 al filtrar
-  }
+    setStatusFilter(value);
+    setCurrentPage(1); // Resetear a página 1 al filtrar
+  };
 
   return (
     <div className="space-y-6">
@@ -274,8 +289,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                setSelectedProductId(product.id)
-                                setDetailModalOpen(true)
+                                setSelectedProductId(product.id);
+                                setDetailModalOpen(true);
                               }}
                             >
                               <Eye className="h-4 w-4 mr-1" />
@@ -293,8 +308,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                               size="sm"
                               aria-label={`Eliminar ${product.name}`}
                               onClick={() => {
-                                setProductToDelete(product)
-                                setDeleteDialogOpen(true)
+                                setProductToDelete(product);
+                                setDeleteDialogOpen(true);
                               }}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -313,7 +328,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-between pt-4">
               <div className="text-sm text-muted-foreground">
-                Mostrando {(pagination.page - 1) * pagination.limit + 1} a{" "}
+                Mostrando {(pagination.page - 1) * pagination.limit + 1} a{' '}
                 {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total} productos
               </div>
               <div className="flex items-center gap-2">
@@ -361,23 +376,19 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
             <AlertDialogAction
               onClick={(e) => {
                 // El diálogo solo se cierra si el borrado funciona
-                e.preventDefault()
-                void handleDelete()
+                e.preventDefault();
+                void handleDelete();
               }}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Eliminando..." : "Eliminar"}
+              {isDeleting ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <ProductDetailModal
-        productId={selectedProductId}
-        open={detailModalOpen}
-        onOpenChange={setDetailModalOpen}
-      />
+      <ProductDetailModal productId={selectedProductId} open={detailModalOpen} onOpenChange={setDetailModalOpen} />
     </div>
-  )
+  );
 }

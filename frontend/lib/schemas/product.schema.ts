@@ -1,48 +1,48 @@
 /**
  * Product, Brand, and Category schemas with Zod validation
  */
-import { z } from "zod"
+import { z } from 'zod';
 
-import { DateStringSchema, PaginationMetadataSchema,UUIDSchema } from "./common.schema"
+import { DateStringSchema, PaginationMetadataSchema, UUIDSchema } from './common.schema';
 
 /**
  * Product status enum
  */
-export const ProductStatusSchema = z.enum(["active", "inactive", "discontinued"])
-export type ProductStatus = z.infer<typeof ProductStatusSchema>
+export const ProductStatusSchema = z.enum(['active', 'inactive', 'discontinued']);
+export type ProductStatus = z.infer<typeof ProductStatusSchema>;
 
 /**
  * Sort options for products
  */
-export const ProductSortBySchema = z.enum(["name", "price", "stock", "createdAt"])
-export type ProductSortBy = z.infer<typeof ProductSortBySchema>
+export const ProductSortBySchema = z.enum(['name', 'price', 'stock', 'createdAt']);
+export type ProductSortBy = z.infer<typeof ProductSortBySchema>;
 
-export const SortOrderSchema = z.enum(["asc", "desc"])
-export type SortOrder = z.infer<typeof SortOrderSchema>
+export const SortOrderSchema = z.enum(['asc', 'desc']);
+export type SortOrder = z.infer<typeof SortOrderSchema>;
 
 /**
  * Brand schema (CUIDs from backend)
  */
 export const BrandSchema = z.object({
   id: z.string().min(1), // CUID
-  name: z.string().min(1, "El nombre de la marca es requerido"),
+  name: z.string().min(1, 'El nombre de la marca es requerido'),
   description: z.string().optional(),
   createdAt: z.string(), // ISO string from backend
   updatedAt: z.string(), // ISO string from backend
-})
+});
 
-export type Brand = z.infer<typeof BrandSchema>
+export type Brand = z.infer<typeof BrandSchema>;
 
 /**
  * Category schema (CUIDs from backend)
  */
 export const CategorySchema = z.object({
   id: z.string().min(1), // CUID
-  name: z.string().min(1, "El nombre de la categoría es requerido"),
+  name: z.string().min(1, 'El nombre de la categoría es requerido'),
   description: z.string().optional(),
-})
+});
 
-export type Category = z.infer<typeof CategorySchema>
+export type Category = z.infer<typeof CategorySchema>;
 
 /**
  * Backend product response schema (as received from API with CUIDs)
@@ -64,33 +64,33 @@ export const BackendProductSchema = z.object({
     z.object({
       id: z.string().min(1), // CUID
       name: z.string(),
-    })
+    }),
   ),
   createdAt: z.string(), // ISO 8601 string from backend
   updatedAt: z.string(), // ISO 8601 string from backend
-})
+});
 
-export type BackendProduct = z.infer<typeof BackendProductSchema>
+export type BackendProduct = z.infer<typeof BackendProductSchema>;
 
 /**
  * Frontend product schema (after transformation)
  */
 export const ProductSchema = z.object({
   id: UUIDSchema,
-  name: z.string().min(1, "El nombre del producto es requerido"),
+  name: z.string().min(1, 'El nombre del producto es requerido'),
   description: z.string(),
-  sku: z.string().min(1, "El SKU es requerido"),
-  price: z.number().nonnegative("El precio no puede ser negativo"),
-  stock: z.number().int().nonnegative("El stock no puede ser negativo"),
+  sku: z.string().min(1, 'El SKU es requerido'),
+  price: z.number().nonnegative('El precio no puede ser negativo'),
+  stock: z.number().int().nonnegative('El stock no puede ser negativo'),
   status: ProductStatusSchema,
   brandId: UUIDSchema,
   brand: BrandSchema.optional(),
   categories: z.array(CategorySchema),
   createdAt: DateStringSchema,
   updatedAt: DateStringSchema,
-})
+});
 
-export type Product = z.infer<typeof ProductSchema>
+export type Product = z.infer<typeof ProductSchema>;
 
 /**
  * Transform backend product to frontend product
@@ -109,14 +109,14 @@ export function mapBackendProductToFrontend(backendProduct: BackendProduct): Pro
     brand: {
       id: backendProduct.brand.id,
       name: backendProduct.brand.name,
-      description: "",
+      description: '',
       createdAt: backendProduct.createdAt, // Keep as ISO string
       updatedAt: backendProduct.updatedAt, // Keep as ISO string
     },
     categories: backendProduct.categories,
     createdAt: backendProduct.createdAt, // Keep as ISO string
     updatedAt: backendProduct.updatedAt, // Keep as ISO string
-  }
+  };
 }
 
 /**
@@ -125,9 +125,9 @@ export function mapBackendProductToFrontend(backendProduct: BackendProduct): Pro
 export const PaginatedProductsSchema = z.object({
   data: z.array(BackendProductSchema),
   meta: PaginationMetadataSchema,
-})
+});
 
-export type PaginatedProducts = z.infer<typeof PaginatedProductsSchema>
+export type PaginatedProducts = z.infer<typeof PaginatedProductsSchema>;
 
 /**
  * Product filters schema
@@ -142,52 +142,52 @@ export const ProductFiltersSchema = z.object({
   limit: z.number().int().positive().max(100).optional(),
   sortBy: ProductSortBySchema.optional(),
   sortOrder: SortOrderSchema.optional(),
-})
+});
 
-export type ProductFilters = z.infer<typeof ProductFiltersSchema>
+export type ProductFilters = z.infer<typeof ProductFiltersSchema>;
 
 /**
  * Create product request schema (matches backend DTO exactly)
  */
 export const CreateProductRequestSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
+  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
   description: z.string().optional(),
-  sku: z.string().min(1, "El SKU es requerido").max(50, "Máximo 50 caracteres"),
-  price: z.number().nonnegative("El precio no puede ser negativo"),
-  stock: z.number().int().nonnegative("El stock no puede ser negativo"),
+  sku: z.string().min(1, 'El SKU es requerido').max(50, 'Máximo 50 caracteres'),
+  price: z.number().nonnegative('El precio no puede ser negativo'),
+  stock: z.number().int().nonnegative('El stock no puede ser negativo'),
   status: ProductStatusSchema,
-  brandId: z.string().min(1, "Debe seleccionar una marca"), // CUID, not UUID
-  categoryIds: z.array(z.string().min(1)).min(1, "Debe seleccionar al menos una categoría"), // CUIDs
-})
+  brandId: z.string().min(1, 'Debe seleccionar una marca'), // CUID, not UUID
+  categoryIds: z.array(z.string().min(1)).min(1, 'Debe seleccionar al menos una categoría'), // CUIDs
+});
 
-export type CreateProductRequest = z.infer<typeof CreateProductRequestSchema>
+export type CreateProductRequest = z.infer<typeof CreateProductRequestSchema>;
 
 /**
  * Update product request schema (all fields optional, same as Create but partial)
  */
 export const UpdateProductRequestSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres").optional(),
+  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres').optional(),
   description: z.string().optional(),
-  sku: z.string().min(1, "El SKU es requerido").max(50, "Máximo 50 caracteres").optional(),
-  price: z.number().nonnegative("El precio no puede ser negativo").optional(),
-  stock: z.number().int().nonnegative("El stock no puede ser negativo").optional(),
+  sku: z.string().min(1, 'El SKU es requerido').max(50, 'Máximo 50 caracteres').optional(),
+  price: z.number().nonnegative('El precio no puede ser negativo').optional(),
+  stock: z.number().int().nonnegative('El stock no puede ser negativo').optional(),
   status: ProductStatusSchema.optional(),
-  brandId: z.string().min(1, "Debe seleccionar una marca").optional(), // CUID
-  categoryIds: z.array(z.string().min(1)).min(1, "Debe seleccionar al menos una categoría").optional(), // CUIDs
-})
+  brandId: z.string().min(1, 'Debe seleccionar una marca').optional(), // CUID
+  categoryIds: z.array(z.string().min(1)).min(1, 'Debe seleccionar al menos una categoría').optional(), // CUIDs
+});
 
-export type UpdateProductRequest = z.infer<typeof UpdateProductRequestSchema>
+export type UpdateProductRequest = z.infer<typeof UpdateProductRequestSchema>;
 
 /**
  * Brands list response schema
  */
-export const BrandsResponseSchema = z.array(BrandSchema)
+export const BrandsResponseSchema = z.array(BrandSchema);
 
-export type BrandsResponse = z.infer<typeof BrandsResponseSchema>
+export type BrandsResponse = z.infer<typeof BrandsResponseSchema>;
 
 /**
  * Categories list response schema
  */
-export const CategoriesResponseSchema = z.array(CategorySchema)
+export const CategoriesResponseSchema = z.array(CategorySchema);
 
-export type CategoriesResponse = z.infer<typeof CategoriesResponseSchema>
+export type CategoriesResponse = z.infer<typeof CategoriesResponseSchema>;

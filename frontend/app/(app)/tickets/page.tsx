@@ -1,53 +1,53 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 
-import { TicketDetail } from "@/components/tickets/ticket-detail"
-import { TicketForm } from "@/components/tickets/ticket-form"
-import { TicketList } from "@/components/tickets/ticket-list"
-import type { Ticket } from "@/lib/features/tickets/tickets.service"
+import { TicketDetail } from '@/components/tickets/ticket-detail';
+import { TicketForm } from '@/components/tickets/ticket-form';
+import { TicketList } from '@/components/tickets/ticket-list';
+import type { Ticket } from '@/lib/features/tickets/tickets.service';
 
-type View = "list" | "form" | "detail"
+type View = 'list' | 'form' | 'detail';
 
 export default function TicketsPage() {
-  const [view, setView] = useState<View>("list")
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | undefined>(undefined)
+  const [view, setView] = useState<View>('list');
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | undefined>(undefined);
 
   const handleView = (ticket: Ticket) => {
-    setSelectedTicket(ticket)
-    setView("detail")
-  }
+    setSelectedTicket(ticket);
+    setView('detail');
+  };
 
   const handleAdd = () => {
-    setView("form")
-  }
+    setView('form');
+  };
 
   const handleSuccess = () => {
-    setView("list")
-  }
+    setView('list');
+  };
 
   const handleCancel = () => {
-    setView("list")
-  }
+    setView('list');
+  };
 
   const handleBack = () => {
-    setView("list")
-    setSelectedTicket(undefined)
-  }
+    setView('list');
+    setSelectedTicket(undefined);
+  };
 
   const handleUpdate = () => {
     // Refresh the ticket list
-    setView("list")
-    setSelectedTicket(undefined)
-  }
+    setView('list');
+    setSelectedTicket(undefined);
+  };
 
   return (
     <div className="p-6">
-      {view === "list" && <TicketList onView={handleView} onAdd={handleAdd} />}
-      {view === "form" && <TicketForm onSuccess={handleSuccess} onCancel={handleCancel} />}
-      {view === "detail" && selectedTicket && (
+      {view === 'list' && <TicketList onView={handleView} onAdd={handleAdd} />}
+      {view === 'form' && <TicketForm onSuccess={handleSuccess} onCancel={handleCancel} />}
+      {view === 'detail' && selectedTicket && (
         <TicketDetail ticket={selectedTicket} onBack={handleBack} onUpdate={handleUpdate} />
       )}
     </div>
-  )
+  );
 }

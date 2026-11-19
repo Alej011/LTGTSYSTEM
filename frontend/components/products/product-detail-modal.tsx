@@ -1,82 +1,84 @@
-"use client"
+'use client';
 
-import { Box, Calendar, DollarSign, Hash,Package, Tag } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Box, Calendar, DollarSign, Hash, Package, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { getProductById,type Product } from "@/lib/features/products/products.service"
-import { ApiClientError } from "@/lib/shared/api-client"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { getProductById, type Product } from '@/lib/features/products/products.service';
+import { ApiClientError } from '@/lib/shared/api-client';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 interface ProductDetailModalProps {
-  productId: string | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  productId: string | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function ProductDetailModal({ productId, open, onOpenChange }: ProductDetailModalProps) {
-  const [product, setProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [loadError, setLoadError] = useState("")
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     if (productId && open) {
-      void loadProductDetails()
+      void loadProductDetails();
     }
-  }, [productId, open])
+  }, [productId, open]);
 
   const loadProductDetails = async () => {
-    if (!productId) return
+    if (!productId) return;
 
-    setIsLoading(true)
-    setLoadError("")
-    setProduct(null)
+    setIsLoading(true);
+    setLoadError('');
+    setProduct(null);
     try {
-      setProduct(await getProductById(productId))
+      setProduct(await getProductById(productId));
     } catch (error) {
       setLoadError(
-        error instanceof ApiClientError ? error.getUserMessage() : "No se pudo cargar la información del producto",
-      )
+        error instanceof ApiClientError ? error.getUserMessage() : 'No se pudo cargar la información del producto',
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const tones: Partial<Record<string, string>> = {
       active: TONE_CLASSES.success,
       inactive: TONE_CLASSES.neutral,
       discontinued: TONE_CLASSES.danger,
-    }
+    };
 
     const labels = {
-      active: "Activo",
-      inactive: "Inactivo",
-      discontinued: "Descontinuado",
-    }
+      active: 'Activo',
+      inactive: 'Inactivo',
+      discontinued: 'Descontinuado',
+    };
 
     return (
       <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
-    )
-  }
+    );
+  };
 
   const getStockBadge = (stock: number) => {
     if (stock === 0) {
-      return <Badge variant="outline" className={TONE_CLASSES.danger}>Sin stock</Badge>
+      return (
+        <Badge variant="outline" className={TONE_CLASSES.danger}>
+          Sin stock
+        </Badge>
+      );
     } else if (stock <= 5) {
-      return <Badge variant="outline" className={TONE_CLASSES.warning}>Stock bajo</Badge>
+      return (
+        <Badge variant="outline" className={TONE_CLASSES.warning}>
+          Stock bajo
+        </Badge>
+      );
     }
-    return <Badge variant="outline">{stock} unidades</Badge>
-  }
+    return <Badge variant="outline">{stock} unidades</Badge>;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -164,11 +166,11 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
             <div className="pt-4 border-t space-y-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                <span>Creado: {new Date(product.createdAt).toLocaleDateString("es-ES")}</span>
+                <span>Creado: {new Date(product.createdAt).toLocaleDateString('es-ES')}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                <span>Actualizado: {new Date(product.updatedAt).toLocaleDateString("es-ES")}</span>
+                <span>Actualizado: {new Date(product.updatedAt).toLocaleDateString('es-ES')}</span>
               </div>
             </div>
           </div>
@@ -181,5 +183,5 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

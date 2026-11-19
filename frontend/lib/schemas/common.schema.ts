@@ -1,7 +1,7 @@
 /**
  * Common Zod schemas shared across the application
  */
-import { z } from "zod"
+import { z } from 'zod';
 
 /**
  * API Response wrapper
@@ -12,7 +12,7 @@ export const ApiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
     message: z.string().optional(),
     error: z.string().optional(),
     statusCode: z.number().optional(),
-  })
+  });
 
 /**
  * Pagination metadata (matches backend response exactly)
@@ -24,9 +24,9 @@ export const PaginationMetadataSchema = z.object({
   totalPages: z.number().int().nonnegative(),
   hasPrevPage: z.boolean(),
   hasNextPage: z.boolean(),
-})
+});
 
-export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>
+export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>;
 
 /**
  * Paginated response wrapper
@@ -35,7 +35,7 @@ export const PaginatedResponseSchema = <T extends z.ZodType>(itemSchema: T) =>
   z.object({
     data: z.array(itemSchema),
     meta: PaginationMetadataSchema,
-  })
+  });
 
 /**
  * Common error response
@@ -45,29 +45,27 @@ export const ErrorResponseSchema = z.object({
   error: z.string().optional(),
   statusCode: z.number(),
   field: z.string().optional(), // For validation errors
-})
+});
 
-export type ErrorResponse = z.infer<typeof ErrorResponseSchema>
+export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
 /**
  * Date string that transforms to Date object
  * Accepts ISO strings, date strings
  */
-export const DateStringSchema = z.string()
+export const DateStringSchema = z.string();
 
 /**
  * ID validation - accepts any non-empty string (UUID, CUID, etc.)
  */
-export const UUIDSchema = z.string().min(1)
+export const UUIDSchema = z.string().min(1);
 
 /**
  * Email validation
  */
-export const EmailSchema = z.email("Email inválido")
+export const EmailSchema = z.email('Email inválido');
 
 /**
  * Password validation (min 6 characters)
  */
-export const PasswordSchema = z
-  .string()
-  .min(6, "La contraseña debe tener al menos 6 caracteres")
+export const PasswordSchema = z.string().min(6, 'La contraseña debe tener al menos 6 caracteres');

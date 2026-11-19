@@ -1,79 +1,79 @@
-"use client"
+'use client';
 
-import { ArrowLeft,Loader2 } from "lucide-react"
-import type React from "react"
-import { useState } from "react"
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createUser, updateUser,type User } from "@/lib/features/users/users.service"
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { createUser, updateUser, type User } from '@/lib/features/users/users.service';
 
 interface UserFormProps {
-  user?: User
-  onSuccess: () => void
-  onCancel: () => void
+  user?: User;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    password: "",
-    role: user?.role === "admin" ? "ADMIN" : "SUPPORT",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+    name: user?.name || '',
+    email: user?.email || '',
+    password: '',
+    role: user?.role === 'admin' ? 'ADMIN' : 'SUPPORT',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
     try {
       if (user) {
         // EDITAR: Solo nombre y rol
         await updateUser(user.id, {
           name: formData.name,
-          role: formData.role as "ADMIN" | "SUPPORT",
-        })
+          role: formData.role as 'ADMIN' | 'SUPPORT',
+        });
       } else {
         // CREAR: Validar que tenga contraseña
         if (!formData.password || formData.password.length < 6) {
-          setError("La contraseña debe tener al menos 6 caracteres")
-          setIsLoading(false)
-          return
+          setError('La contraseña debe tener al menos 6 caracteres');
+          setIsLoading(false);
+          return;
         }
 
         await createUser({
           email: formData.email,
           name: formData.name,
           password: formData.password,
-          role: formData.role as "ADMIN" | "SUPPORT",
-        })
+          role: formData.role as 'ADMIN' | 'SUPPORT',
+        });
       }
-      onSuccess()
+      onSuccess();
     } catch (err) {
-      const errorMessage = (err instanceof Error && err.message) || "Error al guardar el usuario. Intente nuevamente."
-      setError(errorMessage)
+      const errorMessage = (err instanceof Error && err.message) || 'Error al guardar el usuario. Intente nuevamente.';
+      setError(errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{user ? "Editar Usuario" : "Nuevo Usuario"}</CardTitle>
+        <CardTitle>{user ? 'Editar Usuario' : 'Nuevo Usuario'}</CardTitle>
         <CardDescription>
-          {user ? "Modifica la información del usuario" : "Registra un nuevo usuario en el sistema"}
+          {user ? 'Modifica la información del usuario' : 'Registra un nuevo usuario en el sistema'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -84,7 +84,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Ej: Juan Pérez"
                 required
               />
@@ -96,7 +96,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="usuario@ltgt.local"
                 required
                 disabled={!!user}
@@ -111,7 +111,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
                 id="password"
                 type="password"
                 value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
+                onChange={(e) => handleInputChange('password', e.target.value)}
                 placeholder="Mínimo 6 caracteres"
                 required
                 minLength={6}
@@ -121,7 +121,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="role">Rol</Label>
-            <Select value={formData.role} onValueChange={(value) => handleInputChange("role", value)}>
+            <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
@@ -150,14 +150,14 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
                   Guardando...
                 </>
               ) : user ? (
-                "Actualizar"
+                'Actualizar'
               ) : (
-                "Crear Usuario"
+                'Crear Usuario'
               )}
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

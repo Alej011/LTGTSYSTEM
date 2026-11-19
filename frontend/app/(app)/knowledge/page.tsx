@@ -1,70 +1,70 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 
-import { ArticleForm } from "@/components/knowledge/article-form"
-import { ArticleList } from "@/components/knowledge/article-list"
-import { ArticleViewer } from "@/components/knowledge/article-viewer"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useAuth } from "@/contexts/auth-context"
-import type { KnowledgeArticle } from "@/lib/features/knowledge/knowledge.service"
-import { getResourcePermissions } from "@/lib/shared/permissions"
+import { ArticleForm } from '@/components/knowledge/article-form';
+import { ArticleList } from '@/components/knowledge/article-list';
+import { ArticleViewer } from '@/components/knowledge/article-viewer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/auth-context';
+import type { KnowledgeArticle } from '@/lib/features/knowledge/knowledge.service';
+import { getResourcePermissions } from '@/lib/shared/permissions';
 
-type View = "browse" | "manage" | "form" | "view"
+type View = 'browse' | 'manage' | 'form' | 'view';
 
 export default function KnowledgePage() {
-  const { user } = useAuth()
-  const [view, setView] = useState<View>("browse")
-  const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | undefined>(undefined)
-  const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | undefined>(undefined)
+  const { user } = useAuth();
+  const [view, setView] = useState<View>('browse');
+  const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | undefined>(undefined);
+  const [editingArticle, setEditingArticle] = useState<KnowledgeArticle | undefined>(undefined);
 
   const handleView = (article: KnowledgeArticle) => {
-    setSelectedArticle(article)
-    setView("view")
-  }
+    setSelectedArticle(article);
+    setView('view');
+  };
 
   const handleEdit = (article: KnowledgeArticle) => {
-    setEditingArticle(article)
-    setView("form")
-  }
+    setEditingArticle(article);
+    setView('form');
+  };
 
   const handleAdd = () => {
-    setEditingArticle(undefined)
-    setView("form")
-  }
+    setEditingArticle(undefined);
+    setView('form');
+  };
 
   const handleSuccess = () => {
-    setView("browse")
-    setEditingArticle(undefined)
-  }
+    setView('browse');
+    setEditingArticle(undefined);
+  };
 
   const handleCancel = () => {
-    setView("browse")
-    setEditingArticle(undefined)
-  }
+    setView('browse');
+    setEditingArticle(undefined);
+  };
 
   const handleBack = () => {
-    setView("browse")
-    setSelectedArticle(undefined)
-  }
+    setView('browse');
+    setSelectedArticle(undefined);
+  };
 
-  const knowledgePermissions = getResourcePermissions(user?.role, "knowledge")
-  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit
+  const knowledgePermissions = getResourcePermissions(user?.role, 'knowledge');
+  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit;
 
-  if (view === "form") {
+  if (view === 'form') {
     return (
       <div className="p-6">
         <ArticleForm article={editingArticle} onSuccess={handleSuccess} onCancel={handleCancel} />
       </div>
-    )
+    );
   }
 
-  if (view === "view" && selectedArticle) {
+  if (view === 'view' && selectedArticle) {
     return (
       <div className="p-6">
         <ArticleViewer article={selectedArticle} onBack={handleBack} />
       </div>
-    )
+    );
   }
 
   return (
@@ -86,5 +86,5 @@ export default function KnowledgePage() {
         <ArticleList onView={handleView} />
       )}
     </div>
-  )
+  );
 }
