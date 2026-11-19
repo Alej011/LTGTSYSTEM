@@ -45,6 +45,23 @@ describe('ProductList', () => {
     expect(within(row as HTMLElement).getByText('Stock bajo')).toBeInTheDocument();
   });
 
+  it('lets support staff only view details', async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'u2', email: 'soporte@ltgt.com', name: 'Soporte', role: 'empleado' },
+    } as ReturnType<typeof useAuth>);
+    mockBff({
+      'GET /api/products': () => ({ status: 200, body: page([product]) }),
+      'GET /api/categories': () => ({ status: 200, body: categories }),
+    });
+
+    renderList();
+
+    expect(await screen.findByRole('button', { name: /Ver Detalles/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Nuevo Producto/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Editar Cable HDMI' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Eliminar Cable HDMI' })).not.toBeInTheDocument();
+  });
+
   it('shows why the list could not load', async () => {
     mockBff({
       'GET /api/products': () => ({ status: 502, body: { message: 'Sin backend' } }),
