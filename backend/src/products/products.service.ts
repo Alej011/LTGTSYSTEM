@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+
 import { Prisma } from '../generated/prisma/client';
-import { QueryProductsDto } from './dto/query-products.dto';
-import { PaginatedProductsDto } from './dto/paginated-products.dto';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { PaginatedProductsDto } from './dto/paginated-products.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
+import { QueryProductsDto } from './dto/query-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 const productInclude = {
   brand: { select: { id: true, name: true } },

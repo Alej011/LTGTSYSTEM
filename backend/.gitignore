@@ -18,3 +18,4 @@ dist
 # Prisma Client generado (prisma generate)
 src/generated
 dist-seed
+coverage

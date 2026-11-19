@@ -1,12 +1,14 @@
+import { createHash, randomBytes } from 'node:crypto';
+
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomBytes } from 'node:crypto';
-import { PrismaService } from '../prisma/prisma.service';
+
 import type { Role } from '../generated/prisma/enums';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { PrismaService } from '../prisma/prisma.service';
 import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_REUSE_GRACE_MS, REFRESH_TOKEN_TTL_SECONDS } from './auth.constants';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 export type AccessTokenPayload = { sub: string; role: Role; email: string; name: string };
 

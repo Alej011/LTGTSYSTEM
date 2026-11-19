@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, Min, Max, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsIn,IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 /**
  * DTO para query parameters al listar productos

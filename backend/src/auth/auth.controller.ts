@@ -1,14 +1,16 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
+import { ApiBearerAuth, ApiBody,ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { Roles } from '../common/decorators/roles.decorator';
 import { User } from '../common/decorators/user.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { RegisterDto } from './dto/register.dto';
 import { LoginThrottlerGuard } from './guards/login-throttler.guard';
+import type { AuthUser } from './strategies/jwt.strategy';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -77,7 +79,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Obtener información del usuario actual' })
   @ApiResponse({ status: 200, description: 'Datos del usuario' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  me(@User() user: any) {
+  me(@User() user: AuthUser) {
     return this.auth.me(user);
   }
 }

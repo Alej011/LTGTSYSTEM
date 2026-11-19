@@ -1,8 +1,9 @@
+import { type INestApplication,Logger, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { Logger, ValidationPipe, type INestApplication } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder,SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
@@ -52,4 +53,4 @@ async function bootstrap() {
   if (!isProduction) logger.log(`Swagger disponible en /api/docs`);
 }
 
-bootstrap();
+void bootstrap();

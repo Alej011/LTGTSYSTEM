@@ -1,5 +1,6 @@
-import { ArrayMinSize, ArrayUnique, IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { ArrayMinSize, ArrayUnique, IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
+
 import { ProductStatus } from "../../generated/prisma/enums";
 
 export class CreateProductDto {
