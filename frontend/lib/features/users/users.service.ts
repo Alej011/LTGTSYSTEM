@@ -39,7 +39,7 @@ export interface UpdateUserData {
 export const getUsers = async (): Promise<User[]> => {
   try {
     // Call BFF endpoint (same domain) - already validated and transformed
-    const response = await apiClient.get<User[]>('/api/users/list');
+    const response = await apiClient.get<User[]>('/api/users');
     return response;
   } catch (error) {
     if (error instanceof ApiClientError) {
@@ -56,7 +56,7 @@ export const getUsers = async (): Promise<User[]> => {
 export const createUser = async (userData: CreateUserData): Promise<User | null> => {
   try {
     // Call BFF endpoint (same domain) - already validated and transformed
-    const response = await apiClient.post<User>('/api/users/create', userData);
+    const response = await apiClient.post<User>('/api/users', userData);
     return response;
   } catch (error) {
     if (error instanceof ApiClientError) {
@@ -73,7 +73,7 @@ export const createUser = async (userData: CreateUserData): Promise<User | null>
 export const updateUser = async (id: string, userData: UpdateUserData): Promise<User | null> => {
   try {
     // Call BFF endpoint (same domain) - already validated and transformed
-    const response = await apiClient.patch<User>(`/api/users/update/${id}`, userData);
+    const response = await apiClient.patch<User>(`/api/users/${id}`, userData);
     return response;
   } catch (error) {
     if (error instanceof ApiClientError) {

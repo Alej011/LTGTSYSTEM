@@ -3,14 +3,13 @@ import { NextResponse } from 'next/server';
 import { LoginRequestSchema, mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
 import { callBackend, parseBody } from '@/lib/server/backend';
 import { SessionTokensSchema, setSessionCookies } from '@/lib/server/session';
-import { API_ENDPOINTS } from '@/lib/shared/api-config';
 
 export async function POST(request: Request) {
   const body = await parseBody(request, LoginRequestSchema, 'Datos de inicio de sesión inválidos');
   if (body.response) return body.response;
 
   const result = await callBackend({
-    path: API_ENDPOINTS.auth.login,
+    path: '/api/auth/login',
     method: 'POST',
     body: body.data,
     schema: SessionTokensSchema,

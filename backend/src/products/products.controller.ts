@@ -18,7 +18,7 @@ import { ProductsService } from './products.service';
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  @Get('list')
+  @Get()
   @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({
     summary: 'Listar productos con paginación y filtros',
@@ -43,7 +43,7 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
-  @Get('detail/:id')
+  @Get(':id')
   @Roles('ADMIN', 'SUPPORT')
   @ApiOperation({ summary: 'Obtener detalles de un producto por ID' })
   @ApiResponse({
@@ -58,7 +58,7 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
-  @Post('create')
+  @Post()
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Crear un nuevo producto' })
   @ApiResponse({
@@ -73,7 +73,7 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  @Patch('update/:id')
+  @Patch(':id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Actualizar un producto existente' })
   @ApiResponse({
@@ -89,7 +89,7 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto);
   }
 
-  @Delete('delete/:id')
+  @Delete(':id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Eliminar un producto' })
   @ApiResponse({

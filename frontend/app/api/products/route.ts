@@ -1,8 +1,12 @@
 import type { NextRequest } from 'next/server';
 
-import { PaginatedProductsSchema, ProductFiltersSchema } from '@/lib/schemas/product.schema';
-import { errorResponse, proxyToBackend } from '@/lib/server/backend';
-import { API_ENDPOINTS } from '@/lib/shared/api-config';
+import {
+  BackendProductSchema,
+  CreateProductRequestSchema,
+  PaginatedProductsSchema,
+  ProductFiltersSchema,
+} from '@/lib/schemas/product.schema';
+import { errorResponse, parseBody, proxyToBackend } from '@/lib/server/backend';
 
 const NUMERIC_FILTERS = new Set(['maxStock', 'page', 'limit']);
 
@@ -22,8 +26,22 @@ export function GET(request: NextRequest) {
   ).toString();
 
   return proxyToBackend({
-    path: `${API_ENDPOINTS.products.list}${query ? `?${query}` : ''}`,
+    path: `/api/products${query ? `?${query}` : ''}`,
     schema: PaginatedProductsSchema,
     errorMessage: 'Error al obtener productos',
+  });
+}
+
+export async function POST(request: Request) {
+  const body = await parseBody(request, CreateProductRequestSchema, 'Datos del producto inválidos');
+  if (body.response) return body.response;
+
+  return proxyToBackend({
+    path: '/api/products',
+    method: 'POST',
+    body: body.data,
+    schema: BackendProductSchema,
+    status: 201,
+    errorMessage: 'Error al crear producto',
   });
 }

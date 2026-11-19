@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiClientError } from '@/lib/shared/api-client';
 
-import { deleteProduct, getProductById } from './products.service';
+import { createProduct, deleteProduct, getProductById, getProducts } from './products.service';
 
 function jsonResponse(status: number, body: unknown) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -35,6 +35,41 @@ describe('products service', () => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     fetchMock.mockReset();
+  });
+
+  describe('REST paths', () => {
+    it('lists products from the collection with the filters as query', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse(200, {
+          data: [product],
+          meta: { page: 2, limit: 20, total: 21, totalPages: 2, hasPrevPage: true, hasNextPage: false },
+        }),
+      );
+
+      await getProducts({ search: 'cable', page: 2 });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/products?search=cable&page=2',
+        expect.objectContaining({ method: 'GET' }),
+      );
+    });
+
+    it('creates a product by posting to the collection', async () => {
+      fetchMock.mockResolvedValue(jsonResponse(201, product));
+
+      await createProduct({
+        name: 'Cable HDMI',
+        description: '',
+        sku: 'HDMI-001',
+        price: 0,
+        stock: 10,
+        status: 'active',
+        brandId: 'clbrand1',
+        categoryIds: ['clcat1'],
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith('/api/products', expect.objectContaining({ method: 'POST' }));
+    });
   });
 
   describe('deleteProduct', () => {

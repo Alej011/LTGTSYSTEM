@@ -138,15 +138,15 @@ Para **renombrar** tablas o columnas, usa `--create-only` y cambia el `DROP` + `
 | POST   | `/api/auth/logout`                       | Público (requiere refresh token)                                                                                      |
 | POST   | `/api/auth/register`                     | ADMIN                                                                                                                 |
 | GET    | `/api/auth/me`                           | Autenticado                                                                                                           |
-| GET    | `/api/users/list`                        | ADMIN                                                                                                                 |
-| POST   | `/api/users/create`                      | ADMIN                                                                                                                 |
-| GET    | `/api/users/getById/:id`                 | ADMIN                                                                                                                 |
-| PATCH  | `/api/users/update/:id`                  | ADMIN                                                                                                                 |
-| GET    | `/api/products/list`                     | ADMIN, SUPPORT — filtros (`search`, `category`, `status`, `brandId`, `maxStock`) y paginación (`page`, `limit` ≤ 100) |
-| GET    | `/api/products/detail/:id`               | ADMIN, SUPPORT                                                                                                        |
-| POST   | `/api/products/create`                   | ADMIN                                                                                                                 |
-| PATCH  | `/api/products/update/:id`               | ADMIN                                                                                                                 |
-| DELETE | `/api/products/delete/:id`               | ADMIN                                                                                                                 |
+| GET    | `/api/users`                             | ADMIN                                                                                                                 |
+| POST   | `/api/users`                             | ADMIN                                                                                                                 |
+| GET    | `/api/users/:id`                         | ADMIN                                                                                                                 |
+| PATCH  | `/api/users/:id`                         | ADMIN                                                                                                                 |
+| GET    | `/api/products`                          | ADMIN, SUPPORT — filtros (`search`, `category`, `status`, `brandId`, `maxStock`) y paginación (`page`, `limit` ≤ 100) |
+| GET    | `/api/products/:id`                      | ADMIN, SUPPORT                                                                                                        |
+| POST   | `/api/products`                          | ADMIN                                                                                                                 |
+| PATCH  | `/api/products/:id`                      | ADMIN                                                                                                                 |
+| DELETE | `/api/products/:id`                      | ADMIN                                                                                                                 |
 | GET    | `/api/brands`, `/api/brands/:id`         | ADMIN, SUPPORT                                                                                                        |
 | GET    | `/api/categories`, `/api/categories/:id` | ADMIN, SUPPORT                                                                                                        |
 

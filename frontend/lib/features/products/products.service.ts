@@ -130,7 +130,7 @@ export const getProducts = async (filters?: ProductFilters): Promise<PaginatedPr
     if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/api/products/list?${queryString}` : `/api/products/list`;
+    const endpoint = queryString ? `/api/products?${queryString}` : '/api/products';
 
     const response = await apiClient.get<{
       data: ProductResponse[];
@@ -155,9 +155,7 @@ export const getProducts = async (filters?: ProductFilters): Promise<PaginatedPr
  */
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
-    const response = await apiClient.get<ProductResponse>(
-      `/api/products/${id}`, // BFF endpoint
-    );
+    const response = await apiClient.get<ProductResponse>(`/api/products/${id}`);
 
     // Transform backend product (dates stay as ISO strings)
     return mapBackendProductToFrontend(response);
@@ -176,10 +174,7 @@ export const createProduct = async (
   },
 ): Promise<Product | null> => {
   try {
-    const response = await apiClient.post<ProductResponse>(
-      `/api/products/create`, // BFF endpoint
-      productData,
-    );
+    const response = await apiClient.post<ProductResponse>('/api/products', productData);
 
     // Transform backend product (dates stay as ISO strings)
     return mapBackendProductToFrontend(response);
@@ -198,10 +193,7 @@ export const updateProduct = async (
   },
 ): Promise<Product | null> => {
   try {
-    const response = await apiClient.patch<ProductResponse>(
-      `/api/products/${id}`, // BFF endpoint
-      productData,
-    );
+    const response = await apiClient.patch<ProductResponse>(`/api/products/${id}`, productData);
 
     // Transform backend product (dates stay as ISO strings)
     return mapBackendProductToFrontend(response);
@@ -215,7 +207,7 @@ export const updateProduct = async (
  */
 export const deleteProduct = async (id: string): Promise<void> => {
   try {
-    await apiClient.delete(`/api/products/${id}`); // BFF endpoint
+    await apiClient.delete(`/api/products/${id}`);
   } catch (error) {
     throw handleApiError(error, 'eliminar producto');
   }
@@ -226,7 +218,7 @@ export const deleteProduct = async (id: string): Promise<void> => {
  */
 export const getBrands = async (): Promise<Brand[]> => {
   try {
-    const response = await apiClient.get<Brand[]>(`/api/brands`); // BFF endpoint
+    const response = await apiClient.get<Brand[]>(`/api/brands`);
 
     // Dates are already ISO strings from BFF, just return as-is
     return response;
@@ -240,7 +232,7 @@ export const getBrands = async (): Promise<Brand[]> => {
  */
 export const getCategories = async (): Promise<Category[]> => {
   try {
-    const response = await apiClient.get<Category[]>(`/api/categories`); // BFF endpoint
+    const response = await apiClient.get<Category[]>(`/api/categories`);
     return response;
   } catch (error) {
     return handleApiError(error, 'obtener categorías', []);
