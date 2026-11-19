@@ -15,7 +15,8 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
+  // Lanza ApiClientError si el login falla
+  login: (email: string, password: string) => Promise<void>
   logout: () => void
 }
 
@@ -27,14 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginMutation = useLoginMutation()
   const logoutMutation = useLogoutMutation()
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      await loginMutation.mutateAsync({ email, password })
-      return true
-    } catch (error) {
-      console.error("Login failed:", error)
-      return false
-    }
+  const login = async (email: string, password: string): Promise<void> => {
+    await loginMutation.mutateAsync({ email, password })
   }
 
   const logout = () => {

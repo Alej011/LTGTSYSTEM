@@ -63,6 +63,9 @@ export class ApiClientError extends Error {
     if (this.statusCode === 404) {
       return "El recurso solicitado no existe."
     }
+    if (this.statusCode === 429) {
+      return "Demasiados intentos. Espera un minuto e intenta de nuevo."
+    }
     if (this.statusCode === 422 || this.statusCode === 400) {
       return `Error de validación: ${this.message}`
     }

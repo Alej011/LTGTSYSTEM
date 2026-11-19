@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
   type Communication,
   type CommunicationType,
@@ -22,6 +21,7 @@ import {
   isRead,
   markAsRead,
 } from "@/lib/features/communications/communications.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
 import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface CommunicationListProps {
@@ -106,8 +106,8 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
   }
 
   const types: CommunicationType[] = ["anuncio", "politica", "evento", "urgente", "general"]
-  const canManageCommunications =
-    hasPermission(user?.role || "empleado", "communications") && user?.role === "admin"
+  const communicationPermissions = getResourcePermissions(user?.role, "communications")
+  const canManageCommunications = communicationPermissions.canCreate || communicationPermissions.canEdit
 
   return (
     <div className="space-y-6">

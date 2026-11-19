@@ -55,13 +55,7 @@ export function useLogin() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const user = await authenticate(email, password)
-      if (!user) {
-        throw new Error("Credenciales inválidas")
-      }
-      return user
-    },
+    mutationFn: ({ email, password }: { email: string; password: string }) => authenticate(email, password),
     onSuccess: (user) => {
       // Actualizar cache de currentUser
       queryClient.setQueryData(authKeys.currentUser(), user)

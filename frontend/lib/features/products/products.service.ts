@@ -156,7 +156,8 @@ export const getProducts = async (
 };
 
 /**
- * Obtiene un producto por ID desde BFF
+ * Obtiene un producto por ID desde BFF.
+ * Devuelve null solo si el producto no existe; cualquier otra falla lanza ApiClientError.
  */
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
@@ -167,10 +168,8 @@ export const getProductById = async (id: string): Promise<Product | null> => {
     // Transform backend product (dates stay as ISO strings)
     return mapBackendProductToFrontend(response);
   } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error(`Error al obtener producto ${id}:`, error.message);
-    }
-    return null;
+    if (error instanceof ApiClientError && error.statusCode === 404) return null;
+    throw handleApiError(error, `obtener producto ${id}`);
   }
 };
 
@@ -222,14 +221,13 @@ export const updateProduct = async (
 };
 
 /**
- * Elimina un producto a través del BFF
+ * Elimina un producto a través del BFF. Lanza ApiClientError si falla.
  */
-export const deleteProduct = async (id: string): Promise<boolean> => {
+export const deleteProduct = async (id: string): Promise<void> => {
   try {
     await apiClient.delete(`/api/products/${id}`); // BFF endpoint
-    return true;
   } catch (error) {
-    return handleApiError(error, "Al eliminar producto", false);
+    throw handleApiError(error, "eliminar producto");
   }
 };
 

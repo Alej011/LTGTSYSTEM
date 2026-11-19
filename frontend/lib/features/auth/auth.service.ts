@@ -27,15 +27,21 @@ export interface AuthState {
 /**
  * Inicia sesión a través del BFF. Los tokens quedan en cookies HttpOnly;
  * la respuesta solo trae el usuario ya transformado al formato del frontend.
+ * Lanza ApiClientError si falla, para que se pueda distinguir el motivo.
  */
-export const authenticate = async (email: string, password: string): Promise<User | null> => {
-  try {
-    const response = await apiClient.post<{ user: User }>("/api/auth/login", { email, password })
-    return response.user
-  } catch (error) {
-    if (error instanceof ApiClientError) console.error("Login failed:", error.message)
-    return null
-  }
+export const authenticate = async (email: string, password: string): Promise<User> => {
+  const response = await apiClient.post<{ user: User }>("/api/auth/login", { email, password })
+  return response.user
+}
+
+/**
+ * Mensaje para el formulario de login: un 401 son credenciales incorrectas;
+ * bloqueo por intentos, servidor caído o timeout conservan su propio mensaje.
+ */
+export function getLoginErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiClientError)) return "Error inesperado. Por favor intente nuevamente."
+  if (error.statusCode === 401) return "Credenciales inválidas. Por favor intente nuevamente."
+  return error.getUserMessage()
 }
 
 /**

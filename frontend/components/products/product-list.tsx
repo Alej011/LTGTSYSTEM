@@ -3,6 +3,7 @@
 import { Edit, Eye,Package, Plus, Search, Trash2 } from "lucide-react"
 import { useEffect,useState } from "react"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/contexts/auth-context"
 import { deleteProduct,getProducts, type PaginationMetadata, type Product } from "@/lib/features/products/products.service"
+import { ApiClientError } from "@/lib/shared/api-client"
 import { getResourcePermissions } from "@/lib/shared/permissions"
 import { TONE_CLASSES } from "@/lib/shared/tones"
 
@@ -43,6 +45,8 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [deleteError, setDeleteError] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
 
@@ -74,14 +78,25 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
   const handleDelete = async () => {
     if (!productToDelete) return
 
+    setDeleteError("")
+    setIsDeleting(true)
     try {
       await deleteProduct(productToDelete.id)
       void loadProducts()
       setDeleteDialogOpen(false)
       setProductToDelete(null)
     } catch (error) {
-      console.error("Error deleting product:", error)
+      setDeleteError(
+        error instanceof ApiClientError ? error.getUserMessage() : "No se pudo eliminar el producto. Intente nuevamente.",
+      )
+    } finally {
+      setIsDeleting(false)
     }
+  }
+
+  const handleDeleteDialogChange = (open: boolean) => {
+    setDeleteDialogOpen(open)
+    if (!open) setDeleteError("")
   }
 
   const getStatusBadge = (status: string) => {
@@ -276,6 +291,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                             <Button
                               variant="outline"
                               size="sm"
+                              aria-label={`Eliminar ${product.name}`}
                               onClick={() => {
                                 setProductToDelete(product)
                                 setDeleteDialogOpen(true)
@@ -326,7 +342,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
         </CardContent>
       </Card>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={handleDeleteDialogChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
@@ -335,13 +351,23 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
               sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleteError && (
+            <Alert variant="destructive">
+              <AlertDescription>{deleteError}</AlertDescription>
+            </Alert>
+          )}
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => void handleDelete()}
+              onClick={(e) => {
+                // El diálogo solo se cierra si el borrado funciona
+                e.preventDefault()
+                void handleDelete()
+              }}
+              disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Eliminar
+              {isDeleting ? "Eliminando..." : "Eliminar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
   type ArticleCategory,
   type ArticleStatus,
@@ -21,6 +20,7 @@ import {
   type KnowledgeArticle,
   searchArticles,
 } from "@/lib/features/knowledge/knowledge.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
 import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ArticleListProps {
@@ -70,8 +70,8 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
   }
 
   const categories: ArticleCategory[] = ["hardware", "software", "red", "acceso", "procedimientos", "faq"]
-  const canManageKnowledge =
-    hasPermission(user?.role || "empleado", "knowledge") && (user?.role === "empleado" || user?.role === "admin")
+  const knowledgePermissions = getResourcePermissions(user?.role, "knowledge")
+  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit
 
   return (
     <div className="space-y-6">
