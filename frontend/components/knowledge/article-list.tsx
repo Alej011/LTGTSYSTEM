@@ -1,25 +1,26 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { formatDistanceToNow } from "date-fns"
+import { es } from "date-fns/locale"
+import { BookOpen, Edit, Eye, Plus, Search, ThumbsDown, ThumbsUp, Users } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuth } from "@/contexts/auth-context"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
-  type KnowledgeArticle,
   type ArticleCategory,
-  searchArticles,
   getArticles,
   getCategoryLabel,
   getStatusLabel,
+  type KnowledgeArticle,
+  searchArticles,
 } from "@/lib/features/knowledge/knowledge.service"
-import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
-import { Search, Plus, Eye, Edit, BookOpen, ThumbsUp, ThumbsDown, Users } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ArticleListProps {
   onView: (article: KnowledgeArticle) => void

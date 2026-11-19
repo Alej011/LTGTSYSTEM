@@ -2,19 +2,20 @@
  * React Query hooks for products
  */
 import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
+
 import {
-  getProducts,
-  getProductById,
+  type Brand,
+  type Category,
   createProduct,
-  updateProduct,
   deleteProduct,
   getBrands,
   getCategories,
+  getProductById,
+  getProducts,
+  type PaginatedProducts,
   type Product,
   type ProductFilters,
-  type PaginatedProducts,
-  type Brand,
-  type Category,
+  updateProduct,
 } from "@/lib/features/products/products.service"
 
 /**

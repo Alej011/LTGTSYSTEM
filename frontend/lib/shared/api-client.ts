@@ -9,6 +9,7 @@
  */
 
 import { z } from "zod"
+
 import { API_TIMEOUT } from "./api-config"
 
 // Tipos de respuesta de la API

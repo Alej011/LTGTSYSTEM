@@ -1,9 +1,9 @@
 "use client"
 
+import { Box, Calendar, DollarSign, Hash,Package, Tag } from "lucide-react"
 import { useEffect, useState } from "react"
-import { type Product, getProductById } from "@/lib/features/products/products.service"
+
 import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Package, Tag, DollarSign, Box, Calendar, Hash } from "lucide-react"
+import { getProductById,type Product } from "@/lib/features/products/products.service"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ProductDetailModalProps {
   productId: string | null

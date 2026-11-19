@@ -1,27 +1,27 @@
 "use client"
 
+import { BookOpen, Loader2, X } from "lucide-react"
 import type React from "react"
-
 import { useState } from "react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/contexts/auth-context"
 import {
-  type KnowledgeArticle,
   type ArticleCategory,
   type ArticleStatus,
   createArticle,
-  updateArticle,
   getCategoryLabel,
+  type KnowledgeArticle,
+  updateArticle,
 } from "@/lib/features/knowledge/knowledge.service"
-import { useAuth } from "@/contexts/auth-context"
-import { Loader2, BookOpen, X } from "lucide-react"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ArticleFormProps {
   article?: KnowledgeArticle

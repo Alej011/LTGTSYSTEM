@@ -1,13 +1,14 @@
 "use client"
 
+import { Building2, Menu } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
 import type React from "react"
 import { useCallback, useEffect, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import { Building2, Menu } from "lucide-react"
-import { useAuth } from "@/contexts/auth-context"
+
 import { Sidebar } from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { useAuth } from "@/contexts/auth-context"
 
 const COLLAPSED_KEY = "ltgt_sidebar_collapsed"
 

@@ -1,6 +1,6 @@
 import { BackendUserListItemSchema, CreateUserRequestSchema, mapBackendUserListItemToFrontend } from "@/lib/schemas/user.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { parseBody, proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function POST(request: Request) {
   const body = await parseBody(request, CreateUserRequestSchema, "Datos del usuario inválidos")

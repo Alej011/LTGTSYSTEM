@@ -1,6 +1,6 @@
 import { apiClient, ApiClientError } from "@/lib/shared/api-client";
-import { handleApiError } from "@/lib/shared/error-handler";
 import { API_ENDPOINTS } from "@/lib/shared/api-config";
+import { handleApiError } from "@/lib/shared/error-handler";
 
 export interface Brand {
   id: string;

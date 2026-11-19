@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { UserList } from "@/components/users/user-list"
+
 import { UserForm } from "@/components/users/user-form"
+import { UserList } from "@/components/users/user-list"
 import type { User } from "@/lib/features/users/users.service"
 
 export default function UsersPage() {

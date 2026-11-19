@@ -1,27 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { formatDistanceToNow } from "date-fns"
+import { es } from "date-fns/locale"
+import { Clock, Edit, Eye, MessageSquare, Pin, Plus, Search, Users } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuth } from "@/contexts/auth-context"
+import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
   type Communication,
   type CommunicationType,
-  getCommunications,
   getAllCommunications,
-  getTypeLabel,
+  getCommunications,
   getTypeColor,
+  getTypeLabel,
   isRead,
   markAsRead,
 } from "@/lib/features/communications/communications.service"
-import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
-import { Search, Plus, Eye, Edit, MessageSquare, Pin, Clock, Users } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface CommunicationListProps {
   onView: (communication: Communication) => void

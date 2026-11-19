@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
+
 import { LoginRequestSchema, mapBackendUserToFrontend } from "@/lib/schemas/auth.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { callBackend, parseBody } from "@/lib/server/backend"
 import { SessionTokensSchema, setSessionCookies } from "@/lib/server/session"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function POST(request: Request) {
   const body = await parseBody(request, LoginRequestSchema, "Datos de inicio de sesión inválidos")

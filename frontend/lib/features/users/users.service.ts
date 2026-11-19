@@ -3,9 +3,9 @@ import { API_ENDPOINTS } from "@/lib/shared/api-config";
 
 // Re-export types from schemas
 export type {
-  UserListItem,
   CreateUserRequest,
   UpdateUserRequest,
+  UserListItem,
 } from "@/lib/schemas/user.schema";
 
 // ====================================

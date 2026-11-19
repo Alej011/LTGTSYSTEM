@@ -1,6 +1,6 @@
 import { BrandsResponseSchema } from "@/lib/schemas/product.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
 import { proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export function GET() {
   return proxyToBackend({

@@ -4,17 +4,16 @@ import { apiClient, ApiClientError } from "@/lib/shared/api-client"
  * Re-export types from schemas for convenience
  */
 export type {
-  User,
-  FrontendRole as UserRole,
   BackendRole,
   LoginRequest,
   LoginResult,
+  User,
+  FrontendRole as UserRole,
 } from "@/lib/schemas/auth.schema"
-
 export { mapBackendRoleToFrontend, mapBackendUserToFrontend } from "@/lib/schemas/auth.schema"
 
 // Import types for local use in this file
-import type { User, FrontendRole as UserRole } from "@/lib/schemas/auth.schema"
+import type { FrontendRole as UserRole,User } from "@/lib/schemas/auth.schema"
 
 /**
  * Estado de autenticación

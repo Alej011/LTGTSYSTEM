@@ -2,8 +2,9 @@
  * User schemas with Zod validation
  */
 import { z } from "zod"
-import { EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
+
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from "./auth.schema"
+import { EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
 
 /**
  * Backend user response schema (from /api/users/list)

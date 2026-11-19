@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { CommunicationList } from "@/components/communications/communication-list"
+
 import { CommunicationForm } from "@/components/communications/communication-form"
+import { CommunicationList } from "@/components/communications/communication-list"
 import { CommunicationViewer } from "@/components/communications/communication-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Communication } from "@/lib/features/communications/communications.service"
 import { useAuth } from "@/contexts/auth-context"
 import { hasPermission } from "@/lib/features/auth/auth.service"
+import type { Communication } from "@/lib/features/communications/communications.service"
 
 type View = "browse" | "manage" | "form" | "view"
 

@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { Edit, Plus, Search,Users } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { type User, getUsers } from "@/lib/features/users/users.service"
-import { Users, Plus, Edit, Search } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/contexts/auth-context"
+import { getUsers,type User } from "@/lib/features/users/users.service"
 import { useUserPermissions } from "@/lib/shared/permissions"
+import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface UserListProps {
   onEdit: (user: User) => void

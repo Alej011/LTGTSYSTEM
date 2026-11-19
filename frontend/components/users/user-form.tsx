@@ -1,15 +1,16 @@
 "use client"
 
+import { ArrowLeft,Loader2 } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type User, createUser, updateUser } from "@/lib/features/users/users.service"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { createUser, updateUser,type User } from "@/lib/features/users/users.service"
 
 interface UserFormProps {
   user?: User

@@ -1,10 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Clock, Headphones, Package, MessageSquare, BookOpen } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import { BookOpen,Clock, Headphones, MessageSquare, Package } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { RecentActivity } from "@/lib/features/dashboard/dashboard.service"
 import { TONE_CLASSES } from "@/lib/shared/tones"
 

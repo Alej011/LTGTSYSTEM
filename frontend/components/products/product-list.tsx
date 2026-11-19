@@ -1,15 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { TONE_CLASSES } from "@/lib/shared/tones"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Product, type PaginationMetadata, getProducts, deleteProduct } from "@/lib/features/products/products.service"
-import { Search, Plus, Edit, Trash2, Package, Eye } from "lucide-react"
+import { Edit, Eye,Package, Plus, Search, Trash2 } from "lucide-react"
+import { useEffect,useState } from "react"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,8 +13,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/contexts/auth-context"
+import { deleteProduct,getProducts, type PaginationMetadata, type Product } from "@/lib/features/products/products.service"
 import { useProductPermissions } from "@/lib/shared/permissions"
+import { TONE_CLASSES } from "@/lib/shared/tones"
+
 import { ProductDetailModal } from "./product-detail-modal"
 
 interface ProductListProps {

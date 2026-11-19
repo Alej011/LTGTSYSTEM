@@ -1,18 +1,18 @@
 "use client"
 
+import { Headphones,Loader2 } from "lucide-react"
 import type React from "react"
-
 import { useState } from "react"
+
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { type TicketCategory, type TicketPriority, createTicket, getCategoryLabel } from "@/lib/features/tickets/tickets.service"
+import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/contexts/auth-context"
-import { Loader2, Headphones } from "lucide-react"
+import { createTicket, getCategoryLabel,type TicketCategory, type TicketPriority } from "@/lib/features/tickets/tickets.service"
 
 interface TicketFormProps {
   onSuccess: () => void

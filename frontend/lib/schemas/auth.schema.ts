@@ -2,7 +2,8 @@
  * Authentication and User schemas with Zod validation
  */
 import { z } from "zod"
-import { EmailSchema, PasswordSchema, DateStringSchema, UUIDSchema } from "./common.schema"
+
+import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
 
 /**
  * Backend role enum (as received from API)

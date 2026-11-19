@@ -4,9 +4,10 @@
  * Estado de autenticación sobre React Query.
  * La sesión vive en cookies HttpOnly; el usuario actual se obtiene de /api/auth/me.
  */
+import { useRouter } from "next/navigation"
 import type React from "react"
 import { createContext, useContext } from "react"
-import { useRouter } from "next/navigation"
+
 import { type User } from "@/lib/features/auth/auth.service"
 import { useCurrentUser, useLogin as useLoginMutation, useLogout as useLogoutMutation } from "@/lib/queries/auth.queries"
 

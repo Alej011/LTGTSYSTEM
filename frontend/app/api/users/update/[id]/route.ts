@@ -1,6 +1,6 @@
-import { BackendUserListItemSchema, UpdateUserRequestSchema, mapBackendUserListItemToFrontend } from "@/lib/schemas/user.schema"
-import { API_ENDPOINTS } from "@/lib/shared/api-config"
+import { BackendUserListItemSchema, mapBackendUserListItemToFrontend,UpdateUserRequestSchema } from "@/lib/schemas/user.schema"
 import { parseBody, proxyToBackend } from "@/lib/server/backend"
+import { API_ENDPOINTS } from "@/lib/shared/api-config"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

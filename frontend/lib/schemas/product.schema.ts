@@ -2,7 +2,8 @@
  * Product, Brand, and Category schemas with Zod validation
  */
 import { z } from "zod"
-import { UUIDSchema, DateStringSchema, PaginationMetadataSchema } from "./common.schema"
+
+import { DateStringSchema, PaginationMetadataSchema,UUIDSchema } from "./common.schema"
 
 /**
  * Product status enum

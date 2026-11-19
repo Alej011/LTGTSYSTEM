@@ -1,9 +1,5 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useTheme } from "next-themes"
 import {
   BookOpen,
   Building2,
@@ -20,7 +16,11 @@ import {
   Sun,
   Users,
 } from "lucide-react"
-import { cn } from "@/lib/shared/utils"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
+import { type ReactNode,useEffect, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -33,6 +33,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/contexts/auth-context"
 import { hasPermission } from "@/lib/features/auth/auth.service"
+import { cn } from "@/lib/shared/utils"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: null },
