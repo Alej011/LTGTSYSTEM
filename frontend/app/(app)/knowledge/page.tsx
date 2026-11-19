@@ -7,8 +7,8 @@ import { ArticleList } from "@/components/knowledge/article-list"
 import { ArticleViewer } from "@/components/knowledge/article-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
 import type { KnowledgeArticle } from "@/lib/features/knowledge/knowledge.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
 
 type View = "browse" | "manage" | "form" | "view"
 
@@ -48,8 +48,8 @@ export default function KnowledgePage() {
     setSelectedArticle(undefined)
   }
 
-  const canManageKnowledge =
-    hasPermission(user?.role || "empleado", "knowledge") && (user?.role === "empleado" || user?.role === "admin")
+  const knowledgePermissions = getResourcePermissions(user?.role, "knowledge")
+  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit
 
   if (view === "form") {
     return (

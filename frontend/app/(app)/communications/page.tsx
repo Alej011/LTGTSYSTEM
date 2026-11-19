@@ -7,8 +7,8 @@ import { CommunicationList } from "@/components/communications/communication-lis
 import { CommunicationViewer } from "@/components/communications/communication-viewer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
 import type { Communication } from "@/lib/features/communications/communications.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
 
 type View = "browse" | "manage" | "form" | "view"
 
@@ -48,8 +48,8 @@ export default function CommunicationsPage() {
     setSelectedCommunication(undefined)
   }
 
-  const canManageCommunications =
-    hasPermission(user?.role || "empleado", "communications") && user?.role === "admin"
+  const communicationPermissions = getResourcePermissions(user?.role, "communications")
+  const canManageCommunications = communicationPermissions.canCreate || communicationPermissions.canEdit
 
   if (view === "form") {
     return (

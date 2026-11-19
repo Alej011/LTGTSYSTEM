@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuth } from "@/contexts/auth-context"
-import { hasPermission } from "@/lib/features/auth/auth.service"
 import {
   getCategoryLabel,
   getPriorityColor,
@@ -22,6 +21,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/lib/features/tickets/tickets.service"
+import { getResourcePermissions } from "@/lib/shared/permissions"
 
 interface TicketListProps {
   onView: (ticket: Ticket) => void
@@ -108,7 +108,7 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
     )
   }
 
-  const canCreateTickets = hasPermission(user?.role || "empleado", "tickets")
+  const canCreateTickets = getResourcePermissions(user?.role, "tickets").canCreate
   const canManageTickets = user?.role === "empleado" || user?.role === "admin"
 
   return (
