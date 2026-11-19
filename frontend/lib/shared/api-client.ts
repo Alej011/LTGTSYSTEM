@@ -12,11 +12,7 @@ import { z } from 'zod';
 
 import { API_TIMEOUT } from './api-config';
 
-/**
- * Clase para errores de API mejorada
- */
-// diccionary of error messages for different status codes
-const ERROR_MESSAGES: Record<number, string> = {
+const ERROR_MESSAGES: Partial<Record<number, string>> = {
   0: 'No se pudo conectar con el servidor. Verifica tu conexión.',
   401: 'Sesión expirada. Por favor inicia sesión nuevamente.',
   403: 'No tienes permisos para realizar esta acción.',
@@ -24,6 +20,10 @@ const ERROR_MESSAGES: Record<number, string> = {
   408: 'La petición tardó demasiado. Verifica tu conexión.',
   429: 'Demasiados intentos. Espera un minuto e intenta de nuevo.',
 };
+
+/**
+ * Clase para errores de API mejorada
+ */
 export class ApiClientError extends Error {
   statusCode: number;
   error?: string;
@@ -43,15 +43,15 @@ export class ApiClientError extends Error {
    * Get user-friendly error message
    */
   getUserMessage(): string {
-    if(this.isValidationError()){
-      return  `Error de validacion: ${this.message}`;
+    if (this.isValidationError()) {
+      return `Error de validación: ${this.message}`;
     }
 
-    if (this.isServerError()){
+    if (this.isServerError()) {
       return 'Error del servidor. Por favor intenta nuevamente.';
     }
-    
-    return ERROR_MESSAGES[this.statusCode] || this.message || 'Error desconocido';
+
+    return ERROR_MESSAGES[this.statusCode] ?? (this.message || 'Ocurrió un error inesperado.');
   }
 
   /**
