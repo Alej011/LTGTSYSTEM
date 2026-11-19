@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
+import { mapBackendRoleToFrontend, mapFrontendRoleToBackend } from '@/lib/schemas/auth.schema';
 
 import { CreateUserRequestSchema, UpdateUserRequestSchema } from './users.schemas';
 
@@ -17,9 +17,12 @@ describe('user role validation in the BFF', () => {
   });
 });
 
-describe('mapBackendRoleToFrontend', () => {
-  it('maps backend roles to the frontend vocabulary', () => {
-    expect(mapBackendRoleToFrontend('ADMIN')).toBe('admin');
-    expect(mapBackendRoleToFrontend('SUPPORT')).toBe('empleado');
+describe('role translation', () => {
+  it.each([
+    ['ADMIN', 'admin'],
+    ['SUPPORT', 'empleado'],
+  ] as const)('%s and %s map to each other', (backend, frontend) => {
+    expect(mapBackendRoleToFrontend(backend)).toBe(frontend);
+    expect(mapFrontendRoleToBackend(frontend)).toBe(backend);
   });
 });

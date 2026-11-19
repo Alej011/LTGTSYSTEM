@@ -8,10 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAuth } from '@/contexts/auth-context';
 import { ApiClientError } from '@/lib/shared/api-client';
-import { getResourcePermissions } from '@/lib/shared/permissions';
 import { TONE_CLASSES } from '@/lib/shared/tones';
+import { useCan } from '@/lib/shared/use-can';
 
 import { type User, useUsers } from '../users.client';
 
@@ -33,8 +32,7 @@ interface UserListProps {
 }
 
 export function UserList({ onEdit, onAdd }: UserListProps) {
-  const { user: currentUser } = useAuth();
-  const permissions = getResourcePermissions(currentUser?.role, 'users');
+  const can = useCan();
   const [searchQuery, setSearchQuery] = useState('');
 
   const users = useUsers();
@@ -52,7 +50,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
               </CardTitle>
               <CardDescription>Administra los usuarios del sistema y sus roles</CardDescription>
             </div>
-            {permissions.canCreate && (
+            {can('users', 'create') && (
               <Button onClick={onAdd}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Usuario
@@ -123,7 +121,7 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-2">
-                          {permissions.canEdit && (
+                          {can('users', 'edit') && (
                             <Button
                               variant="outline"
                               size="sm"

@@ -5,6 +5,7 @@ import type { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { API_BASE_URL } from '@/lib/shared/api-config';
+import { ROLES } from '@/lib/shared/roles';
 
 export const ACCESS_COOKIE = 'ltgt_access_token';
 export const REFRESH_COOKIE = 'ltgt_refresh_token';
@@ -14,7 +15,7 @@ const EXPIRY_MARGIN_SECONDS = 30;
 
 const AccessPayloadSchema = z.object({
   sub: z.string(),
-  role: z.enum(['ADMIN', 'SUPPORT']),
+  role: z.enum(ROLES),
   email: z.string(),
   name: z.string(),
   exp: z.number(),
@@ -31,7 +32,7 @@ export const SessionTokensSchema = z.object({
     id: z.string(),
     email: z.string(),
     name: z.string(),
-    role: z.enum(['ADMIN', 'SUPPORT']),
+    role: z.enum(ROLES),
   }),
 });
 

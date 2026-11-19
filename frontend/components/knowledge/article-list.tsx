@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAuth } from '@/contexts/auth-context';
 import {
   type ArticleCategory,
   type ArticleStatus,
@@ -20,8 +19,8 @@ import {
   type KnowledgeArticle,
   searchArticles,
 } from '@/lib/features/knowledge/knowledge.service';
-import { getResourcePermissions } from '@/lib/shared/permissions';
 import { TONE_CLASSES } from '@/lib/shared/tones';
+import { useCan } from '@/lib/shared/use-can';
 
 interface ArticleListProps {
   onView: (article: KnowledgeArticle) => void;
@@ -31,7 +30,6 @@ interface ArticleListProps {
 }
 
 export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: ArticleListProps) {
-  const { user } = useAuth();
   const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<ArticleCategory | 'all'>('all');
@@ -72,8 +70,8 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
   };
 
   const categories: ArticleCategory[] = ['hardware', 'software', 'red', 'acceso', 'procedimientos', 'faq'];
-  const knowledgePermissions = getResourcePermissions(user?.role, 'knowledge');
-  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit;
+  const can = useCan();
+  const canManageKnowledge = can('knowledge', 'create') || can('knowledge', 'edit');
 
   return (
     <div className="space-y-6">

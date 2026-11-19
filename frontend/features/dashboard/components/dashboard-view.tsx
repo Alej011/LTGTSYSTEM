@@ -51,7 +51,7 @@ export function DashboardView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentActivityComponent activities={getRecentActivity(user)} />
-        <QuickActions userRole={user.role} />
+        <QuickActions />
       </div>
 
       <div className="rounded-lg border bg-card p-6 shadow-sm">

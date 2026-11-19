@@ -1,105 +1,47 @@
 /**
- * Enhanced Permission System
- * Centralized, type-safe permissions for role-based access control
+ * Política de permisos: única fuente de qué puede hacer cada rol sobre cada recurso.
+ * La usan los componentes (con useCan), proxy.ts y los layouts del servidor.
+ * Es una protección de interfaz: la autorización real la hace el backend con @Roles, y
+ * backend/src/permissions.spec.ts falla si esta tabla y los @Roles dejan de coincidir.
+ * Sin dependencias fuera de esta carpeta, para que ese test pueda importarla.
  */
-import type { UserRole } from '@/lib/features/auth/auth.service';
+import type { Role } from './roles';
 
-/**
- * Permission actions (CRUD operations)
- */
-export type PermissionAction = 'view' | 'view_details' | 'create' | 'edit' | 'delete';
+export const ACTIONS = ['view', 'view_details', 'create', 'edit', 'delete'] as const;
+export type Action = (typeof ACTIONS)[number];
+export type Resource = 'dashboard' | 'products' | 'users' | 'tickets' | 'knowledge' | 'communications';
 
-/**
- * Resource types in the system
- */
-export type ResourceType = 'products' | 'users' | 'tickets' | 'knowledge' | 'communications' | 'dashboard';
+const ALL: readonly Role[] = ['ADMIN', 'SUPPORT'];
+const ADMIN: readonly Role[] = ['ADMIN'];
 
-/**
- * Permission definition
- * Maps each resource to allowed actions per role
- */
-type PermissionMatrix = {
-  [K in ResourceType]: {
-    [A in PermissionAction]?: UserRole[];
-  };
+// Una acción ausente no la puede hacer nadie
+const POLICY: Record<Resource, Partial<Record<Action, readonly Role[]>>> = {
+  dashboard: { view: ALL },
+  products: { view: ALL, view_details: ALL, create: ADMIN, edit: ADMIN, delete: ADMIN },
+  users: { view: ADMIN, view_details: ADMIN, create: ADMIN, edit: ADMIN },
+  tickets: { view: ALL, view_details: ALL, create: ALL, edit: ALL, delete: ADMIN },
+  knowledge: { view: ALL, view_details: ALL, create: ADMIN, edit: ADMIN, delete: ADMIN },
+  communications: { view: ALL, view_details: ALL, create: ADMIN, edit: ADMIN, delete: ADMIN },
 };
 
-/**
- * Permission matrix - Single source of truth for all permissions
- * Easy to modify and maintain
- */
-const PERMISSION_MATRIX: PermissionMatrix = {
-  products: {
-    view: ['admin', 'empleado'],
-    view_details: ['admin', 'empleado'],
-    create: ['admin'],
-    edit: ['admin'],
-    delete: ['admin'],
-  },
-  users: {
-    view: ['admin'],
-    view_details: ['admin'],
-    create: ['admin'],
-    edit: ['admin'],
-    delete: ['admin'],
-  },
-  tickets: {
-    view: ['admin', 'empleado'],
-    view_details: ['admin', 'empleado'],
-    create: ['admin', 'empleado'],
-    edit: ['admin', 'empleado'],
-    delete: ['admin'],
-  },
-  knowledge: {
-    view: ['admin', 'empleado'],
-    view_details: ['admin', 'empleado'],
-    create: ['admin'],
-    edit: ['admin'],
-    delete: ['admin'],
-  },
-  communications: {
-    view: ['admin', 'empleado'],
-    view_details: ['admin', 'empleado'],
-    create: ['admin'],
-    edit: ['admin'],
-    delete: ['admin'],
-  },
-  dashboard: {
-    view: ['admin', 'empleado'],
-  },
-};
-
-/**
- * Check if a role has permission for a specific action on a resource
- */
-export function hasPermission(role: UserRole | undefined, resource: ResourceType, action: PermissionAction): boolean {
+/** Sin rol (sin sesión) no hay ningún permiso. */
+export function can(role: Role | undefined, resource: Resource, action: Action): boolean {
   if (!role) return false;
-
-  const allowedRoles = PERMISSION_MATRIX[resource][action];
-  if (!allowedRoles) return false;
-
-  return allowedRoles.includes(role);
+  return POLICY[resource][action]?.includes(role) ?? false;
 }
 
-/**
- * Get all permissions for a role on a specific resource
- */
-export function getResourcePermissions(role: UserRole | undefined, resource: ResourceType) {
-  if (!role) {
-    return {
-      canView: false,
-      canViewDetails: false,
-      canCreate: false,
-      canEdit: false,
-      canDelete: false,
-    };
-  }
+// Cada sección de la app corresponde a un recurso
+const PAGE_RESOURCES: Record<string, Resource> = {
+  '/dashboard': 'dashboard',
+  '/products': 'products',
+  '/users': 'users',
+  '/tickets': 'tickets',
+  '/knowledge': 'knowledge',
+  '/communications': 'communications',
+};
 
-  return {
-    canView: hasPermission(role, resource, 'view'),
-    canViewDetails: hasPermission(role, resource, 'view_details'),
-    canCreate: hasPermission(role, resource, 'create'),
-    canEdit: hasPermission(role, resource, 'edit'),
-    canDelete: hasPermission(role, resource, 'delete'),
-  };
+/** Si el rol puede abrir la página (o una subruta de ella). Las páginas sin recurso son libres. */
+export function canOpenPage(role: Role | undefined, pathname: string): boolean {
+  const page = Object.keys(PAGE_RESOURCES).find((path) => pathname === path || pathname.startsWith(`${path}/`));
+  return page === undefined || can(role, PAGE_RESOURCES[page], 'view');
 }

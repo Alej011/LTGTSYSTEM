@@ -21,7 +21,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from '@/lib/features/tickets/tickets.service';
-import { getResourcePermissions } from '@/lib/shared/permissions';
+import { useCan } from '@/lib/shared/use-can';
 
 interface TicketListProps {
   onView: (ticket: Ticket) => void;
@@ -108,8 +108,9 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
     );
   };
 
-  const canCreateTickets = getResourcePermissions(user?.role, 'tickets').canCreate;
-  const canManageTickets = user?.role === 'empleado' || user?.role === 'admin';
+  const can = useCan();
+  const canCreateTickets = can('tickets', 'create');
+  const canManageTickets = can('tickets', 'edit');
 
   return (
     <div className="space-y-6">

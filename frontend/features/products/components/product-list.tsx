@@ -20,9 +20,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAuth } from '@/contexts/auth-context';
 import { ApiClientError } from '@/lib/shared/api-client';
-import { getResourcePermissions } from '@/lib/shared/permissions';
+import { useCan } from '@/lib/shared/use-can';
 
 import { type Product, type ProductStatus, useCategories, useDeleteProduct, useProducts } from '../products.client';
 import { PRODUCT_STATUSES, ProductStatusBadge, productStatusLabel, StockBadge } from './product-badges';
@@ -42,8 +41,9 @@ interface ProductListProps {
 }
 
 export function ProductList({ onEdit, onAdd }: ProductListProps) {
-  const { user } = useAuth();
-  const permissions = getResourcePermissions(user?.role, 'products');
+  const can = useCan();
+  const canEdit = can('products', 'edit');
+  const canDelete = can('products', 'delete');
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState(ALL);
@@ -93,7 +93,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
               </CardTitle>
               <CardDescription>Administra el catálogo de productos y sus marcas asociadas</CardDescription>
             </div>
-            {permissions.canCreate && (
+            {can('products', 'create') && (
               <Button onClick={onAdd}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Producto
@@ -210,13 +210,13 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-2">
-                          {permissions.canViewDetails && !permissions.canEdit && !permissions.canDelete && (
+                          {can('products', 'view_details') && !canEdit && !canDelete && (
                             <Button variant="outline" size="sm" onClick={() => setDetailProductId(product.id)}>
                               <Eye className="h-4 w-4 mr-1" />
                               Ver Detalles
                             </Button>
                           )}
-                          {permissions.canEdit && (
+                          {canEdit && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -226,7 +226,7 @@ export function ProductList({ onEdit, onAdd }: ProductListProps) {
                               <Edit className="h-4 w-4" />
                             </Button>
                           )}
-                          {permissions.canDelete && (
+                          {canDelete && (
                             <Button
                               variant="outline"
                               size="sm"

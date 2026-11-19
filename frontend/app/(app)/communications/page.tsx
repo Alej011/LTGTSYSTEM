@@ -6,14 +6,12 @@ import { CommunicationForm } from '@/components/communications/communication-for
 import { CommunicationList } from '@/components/communications/communication-list';
 import { CommunicationViewer } from '@/components/communications/communication-viewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/contexts/auth-context';
 import type { Communication } from '@/lib/features/communications/communications.service';
-import { getResourcePermissions } from '@/lib/shared/permissions';
+import { useCan } from '@/lib/shared/use-can';
 
 type View = 'browse' | 'manage' | 'form' | 'view';
 
 export default function CommunicationsPage() {
-  const { user } = useAuth();
   const [view, setView] = useState<View>('browse');
   const [selectedCommunication, setSelectedCommunication] = useState<Communication | undefined>(undefined);
   const [editingCommunication, setEditingCommunication] = useState<Communication | undefined>(undefined);
@@ -48,8 +46,8 @@ export default function CommunicationsPage() {
     setSelectedCommunication(undefined);
   };
 
-  const communicationPermissions = getResourcePermissions(user?.role, 'communications');
-  const canManageCommunications = communicationPermissions.canCreate || communicationPermissions.canEdit;
+  const can = useCan();
+  const canManageCommunications = can('communications', 'create') || can('communications', 'edit');
 
   if (view === 'form') {
     return (

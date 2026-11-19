@@ -3,12 +3,14 @@
  */
 import { z } from 'zod';
 
+import { ROLES } from '@/lib/shared/roles';
+
 import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
 
 /**
  * Backend role enum: same values as Prisma Role, the backend rejects any other casing
  */
-export const BackendRoleSchema = z.enum(['ADMIN', 'SUPPORT']);
+export const BackendRoleSchema = z.enum(ROLES);
 export type BackendRole = z.infer<typeof BackendRoleSchema>;
 
 /**
@@ -24,6 +26,15 @@ const BACKEND_TO_FRONTEND_ROLE: Record<BackendRole, FrontendRole> = {
 
 export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole {
   return BACKEND_TO_FRONTEND_ROLE[backendRole];
+}
+
+const FRONTEND_TO_BACKEND_ROLE: Record<FrontendRole, BackendRole> = {
+  admin: 'ADMIN',
+  empleado: 'SUPPORT',
+};
+
+export function mapFrontendRoleToBackend(frontendRole: FrontendRole): BackendRole {
+  return FRONTEND_TO_BACKEND_ROLE[frontendRole];
 }
 
 /**

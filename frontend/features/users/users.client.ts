@@ -6,7 +6,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { z } from 'zod';
 
-import type { BackendRole } from '@/lib/schemas/auth.schema';
 import { apiClient } from '@/lib/shared/api-client';
 
 import type { CreateUserRequestSchema, UpdateUserRequestSchema, UserListItemSchema } from './users.schemas';
@@ -17,9 +16,6 @@ export type UserChanges = z.infer<typeof UpdateUserRequestSchema>;
 
 /** Crear lleva email y contraseña; editar solo cambia nombre y rol de un usuario existente. */
 export type SaveUserVariables = { input: NewUserInput } | { id: string; changes: UserChanges };
-
-// El BFF entrega el rol en el vocabulario del frontend; el backend lo recibe en el suyo
-export const backendRoleOf = (role: User['role']): BackendRole => (role === 'admin' ? 'ADMIN' : 'SUPPORT');
 
 const userKeys = {
   all: ['users'] as const,
