@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { BookOpen, Loader2, X } from "lucide-react"
-import type React from "react"
-import { useState } from "react"
+import { BookOpen, Loader2, X } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { useAuth } from "@/contexts/auth-context"
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/auth-context';
 import {
   type ArticleCategory,
   type ArticleStatus,
@@ -20,89 +20,89 @@ import {
   getCategoryLabel,
   type KnowledgeArticle,
   updateArticle,
-} from "@/lib/features/knowledge/knowledge.service"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+} from '@/lib/features/knowledge/knowledge.service';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 interface ArticleFormProps {
-  article?: KnowledgeArticle
-  onSuccess: () => void
-  onCancel: () => void
+  article?: KnowledgeArticle;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) {
-  const { user } = useAuth()
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    title: article?.title || "",
-    summary: article?.summary || "",
-    content: article?.content || "",
-    category: article?.category || ("" as ArticleCategory),
-    status: article?.status || "draft",
+    title: article?.title || '',
+    summary: article?.summary || '',
+    content: article?.content || '',
+    category: article?.category || ('' as ArticleCategory),
+    status: article?.status || 'draft',
     tags: article?.tags || [],
-  })
-  const [newTag, setNewTag] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  });
+  const [newTag, setNewTag] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!user) return
+    e.preventDefault();
+    if (!user) return;
 
-    setError("")
-    setIsLoading(true)
+    setError('');
+    setIsLoading(true);
 
     try {
       if (article) {
-        await updateArticle(article.id, formData)
+        await updateArticle(article.id, formData);
       } else {
         await createArticle({
           ...formData,
           authorId: user.id,
           authorName: user.name,
-        })
+        });
       }
-      onSuccess()
+      onSuccess();
     } catch {
-      setError("Error al guardar el artículo. Intente nuevamente.")
+      setError('Error al guardar el artículo. Intente nuevamente.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string | string[]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const addTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
       setFormData((prev) => ({
         ...prev,
         tags: [...prev.tags, newTag.trim()],
-      }))
-      setNewTag("")
+      }));
+      setNewTag('');
     }
-  }
+  };
 
   const removeTag = (tagToRemove: string) => {
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }))
-  }
+    }));
+  };
 
-  const categories: ArticleCategory[] = ["hardware", "software", "red", "acceso", "procedimientos", "faq"]
-  const statuses: ArticleStatus[] = ["draft", "published", "archived"]
+  const categories: ArticleCategory[] = ['hardware', 'software', 'red', 'acceso', 'procedimientos', 'faq'];
+  const statuses: ArticleStatus[] = ['draft', 'published', 'archived'];
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BookOpen className="h-5 w-5" />
-          {article ? "Editar Artículo" : "Nuevo Artículo"}
+          {article ? 'Editar Artículo' : 'Nuevo Artículo'}
         </CardTitle>
         <CardDescription>
           {article
-            ? "Modifica la información del artículo de la base de conocimientos"
-            : "Crea un nuevo artículo para la base de conocimientos"}
+            ? 'Modifica la información del artículo de la base de conocimientos'
+            : 'Crea un nuevo artículo para la base de conocimientos'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -114,7 +114,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="Ej: Cómo reiniciar el router de la oficina"
                   required
                 />
@@ -125,7 +125,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                 <Textarea
                   id="summary"
                   value={formData.summary}
-                  onChange={(e) => handleInputChange("summary", e.target.value)}
+                  onChange={(e) => handleInputChange('summary', e.target.value)}
                   placeholder="Breve descripción del contenido del artículo..."
                   rows={2}
                   required
@@ -137,7 +137,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                 <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) => handleInputChange("content", e.target.value)}
+                  onChange={(e) => handleInputChange('content', e.target.value)}
                   placeholder="Contenido completo del artículo. Puedes usar Markdown para formato..."
                   rows={15}
                   className="font-mono text-sm"
@@ -152,7 +152,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Categoría</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar categoría" />
                   </SelectTrigger>
@@ -168,7 +168,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
 
               <div className="space-y-2">
                 <Label htmlFor="status">Estado</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -176,7 +176,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                     {statuses.map((status) => (
                       <SelectItem key={status} value={status}>
                         <span className="capitalize">
-                          {status === "draft" ? "Borrador" : status === "published" ? "Publicado" : "Archivado"}
+                          {status === 'draft' ? 'Borrador' : status === 'published' ? 'Publicado' : 'Archivado'}
                         </span>
                       </SelectItem>
                     ))}
@@ -192,11 +192,11 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                     onChange={(e) => setNewTag(e.target.value)}
                     placeholder="Nueva etiqueta"
                     onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      addTag()
-                    }
-                  }}
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
                   />
                   <Button type="button" onClick={addTag} size="sm">
                     Agregar
@@ -246,14 +246,14 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                   Guardando...
                 </>
               ) : article ? (
-                "Actualizar Artículo"
+                'Actualizar Artículo'
               ) : (
-                "Crear Artículo"
+                'Crear Artículo'
               )}
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

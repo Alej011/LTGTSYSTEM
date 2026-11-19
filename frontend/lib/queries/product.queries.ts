@@ -1,7 +1,7 @@
 /**
  * React Query hooks for products
  */
-import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
 
 import {
   type Brand,
@@ -16,21 +16,21 @@ import {
   type Product,
   type ProductFilters,
   updateProduct,
-} from "@/lib/features/products/products.service"
+} from '@/lib/features/products/products.service';
 
 /**
  * Query keys for product-related queries
  * Organized hierarchically for easy invalidation
  */
 export const productKeys = {
-  all: ["products"] as const,
-  lists: () => [...productKeys.all, "list"] as const,
+  all: ['products'] as const,
+  lists: () => [...productKeys.all, 'list'] as const,
   list: (filters: ProductFilters = {}) => [...productKeys.lists(), filters] as const,
-  details: () => [...productKeys.all, "detail"] as const,
+  details: () => [...productKeys.all, 'detail'] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
-  brands: () => ["brands"] as const,
-  categories: () => ["categories"] as const,
-}
+  brands: () => ['brands'] as const,
+  categories: () => ['categories'] as const,
+};
 
 /**
  * Hook to get paginated products with filters
@@ -40,14 +40,14 @@ export const productKeys = {
  */
 export function useProducts(
   filters: ProductFilters = {},
-  options?: Omit<UseQueryOptions<PaginatedProducts>, "queryKey" | "queryFn">
+  options?: Omit<UseQueryOptions<PaginatedProducts>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: productKeys.list(filters),
     queryFn: () => getProducts(filters),
     staleTime: 2 * 60 * 1000, // 2 minutos
     ...options,
-  })
+  });
 }
 
 /**
@@ -56,17 +56,14 @@ export function useProducts(
  * @example
  * const { data: product } = useProduct(productId)
  */
-export function useProduct(
-  id: string,
-  options?: Omit<UseQueryOptions<Product | null>, "queryKey" | "queryFn">
-) {
+export function useProduct(id: string, options?: Omit<UseQueryOptions<Product | null>, 'queryKey' | 'queryFn'>) {
   return useQuery({
     queryKey: productKeys.detail(id),
     queryFn: () => getProductById(id),
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutos
     ...options,
-  })
+  });
 }
 
 /**
@@ -80,15 +77,15 @@ export function useProduct(
  * })
  */
 export function useCreateProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createProduct,
     onSuccess: () => {
       // Invalidate and refetch product lists
-      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
-  })
+  });
 }
 
 /**
@@ -99,17 +96,16 @@ export function useCreateProduct() {
  * updateMutation.mutate({ id: "123", data: { name: "New Name" } })
  */
 export function useUpdateProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateProduct>[1] }) =>
-      updateProduct(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateProduct>[1] }) => updateProduct(id, data),
     onSuccess: (_, variables) => {
       // Invalidate specific product and lists
-      void queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) })
-      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) });
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
-  })
+  });
 }
 
 /**
@@ -122,16 +118,16 @@ export function useUpdateProduct() {
  * })
  */
 export function useDeleteProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteProduct,
     onSuccess: (_, productId) => {
       // Remove from cache and invalidate lists
-      queryClient.removeQueries({ queryKey: productKeys.detail(productId) })
-      void queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      queryClient.removeQueries({ queryKey: productKeys.detail(productId) });
+      void queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
-  })
+  });
 }
 
 /**
@@ -140,13 +136,13 @@ export function useDeleteProduct() {
  * @example
  * const { data: brands } = useBrands()
  */
-export function useBrands(options?: Omit<UseQueryOptions<Brand[]>, "queryKey" | "queryFn">) {
+export function useBrands(options?: Omit<UseQueryOptions<Brand[]>, 'queryKey' | 'queryFn'>) {
   return useQuery({
     queryKey: productKeys.brands(),
     queryFn: getBrands,
     staleTime: 10 * 60 * 1000, // 10 minutos - brands don't change often
     ...options,
-  })
+  });
 }
 
 /**
@@ -155,11 +151,11 @@ export function useBrands(options?: Omit<UseQueryOptions<Brand[]>, "queryKey" | 
  * @example
  * const { data: categories } = useCategories()
  */
-export function useCategories(options?: Omit<UseQueryOptions<Category[]>, "queryKey" | "queryFn">) {
+export function useCategories(options?: Omit<UseQueryOptions<Category[]>, 'queryKey' | 'queryFn'>) {
   return useQuery({
     queryKey: productKeys.categories(),
     queryFn: getCategories,
     staleTime: 10 * 60 * 1000, // 10 minutos - categories don't change often
     ...options,
-  })
+  });
 }

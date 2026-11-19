@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
-import { BookOpen, Edit, Eye, Plus, Search, ThumbsDown, ThumbsUp, Users } from "lucide-react"
-import { useEffect,useState } from "react"
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { BookOpen, Edit, Eye, Plus, Search, ThumbsDown, ThumbsUp, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuth } from "@/contexts/auth-context"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/auth-context';
 import {
   type ArticleCategory,
   type ArticleStatus,
@@ -19,59 +19,61 @@ import {
   getStatusLabel,
   type KnowledgeArticle,
   searchArticles,
-} from "@/lib/features/knowledge/knowledge.service"
-import { getResourcePermissions } from "@/lib/shared/permissions"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+} from '@/lib/features/knowledge/knowledge.service';
+import { getResourcePermissions } from '@/lib/shared/permissions';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 interface ArticleListProps {
-  onView: (article: KnowledgeArticle) => void
-  onEdit?: (article: KnowledgeArticle) => void
-  onAdd?: () => void
-  showManagement?: boolean
+  onView: (article: KnowledgeArticle) => void;
+  onEdit?: (article: KnowledgeArticle) => void;
+  onAdd?: () => void;
+  showManagement?: boolean;
 }
 
 export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: ArticleListProps) {
-  const { user } = useAuth()
-  const [articles, setArticles] = useState<KnowledgeArticle[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState<ArticleCategory | "all">("all")
+  const { user } = useAuth();
+  const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<ArticleCategory | 'all'>('all');
 
   useEffect(() => {
-    loadArticles()
-  }, [searchTerm, categoryFilter, showManagement])
+    loadArticles();
+  }, [searchTerm, categoryFilter, showManagement]);
 
   const loadArticles = () => {
     if (showManagement) {
       // Show all articles for management
-      const allArticles = getArticles()
-      setArticles(allArticles)
+      const allArticles = getArticles();
+      setArticles(allArticles);
     } else {
       // Show only published articles for public view
-      if (searchTerm || categoryFilter !== "all") {
-        const filtered = searchArticles(searchTerm, categoryFilter === "all" ? undefined : categoryFilter)
-        setArticles(filtered)
+      if (searchTerm || categoryFilter !== 'all') {
+        const filtered = searchArticles(searchTerm, categoryFilter === 'all' ? undefined : categoryFilter);
+        setArticles(filtered);
       } else {
-        const published = getArticles("published")
-        setArticles(published.sort((a, b) => b.views - a.views))
+        const published = getArticles('published');
+        setArticles(published.sort((a, b) => b.views - a.views));
       }
     }
-  }
+  };
 
   const getStatusBadge = (status: ArticleStatus) => {
     const tones: Partial<Record<string, string>> = {
       draft: TONE_CLASSES.warning,
       published: TONE_CLASSES.success,
       archived: TONE_CLASSES.neutral,
-    }
+    };
 
     return (
-      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>{getStatusLabel(status)}</Badge>
-    )
-  }
+      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
+        {getStatusLabel(status)}
+      </Badge>
+    );
+  };
 
-  const categories: ArticleCategory[] = ["hardware", "software", "red", "acceso", "procedimientos", "faq"]
-  const knowledgePermissions = getResourcePermissions(user?.role, "knowledge")
-  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit
+  const categories: ArticleCategory[] = ['hardware', 'software', 'red', 'acceso', 'procedimientos', 'faq'];
+  const knowledgePermissions = getResourcePermissions(user?.role, 'knowledge');
+  const canManageKnowledge = knowledgePermissions.canCreate || knowledgePermissions.canEdit;
 
   return (
     <div className="space-y-6">
@@ -81,12 +83,12 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
             <div>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                {showManagement ? "Gestión de Artículos" : "Base de Conocimientos"}
+                {showManagement ? 'Gestión de Artículos' : 'Base de Conocimientos'}
               </CardTitle>
               <CardDescription>
                 {showManagement
-                  ? "Administra los artículos de la base de conocimientos"
-                  : "Busca soluciones y documentación técnica"}
+                  ? 'Administra los artículos de la base de conocimientos'
+                  : 'Busca soluciones y documentación técnica'}
               </CardDescription>
             </div>
             {canManageKnowledge && onAdd && (
@@ -112,7 +114,7 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
             </div>
             <Select
               value={categoryFilter}
-              onValueChange={(value) => setCategoryFilter(value as ArticleCategory | "all")}
+              onValueChange={(value) => setCategoryFilter(value as ArticleCategory | 'all')}
             >
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="Todas las categorías" />
@@ -193,8 +195,8 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            onView(article)
+                            e.stopPropagation();
+                            onView(article);
                           }}
                         >
                           <Eye className="h-4 w-4" />
@@ -204,8 +206,8 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
                             variant="outline"
                             size="sm"
                             onClick={(e) => {
-                              e.stopPropagation()
-                              onEdit(article)
+                              e.stopPropagation();
+                              onEdit(article);
                             }}
                           >
                             <Edit className="h-4 w-4" />
@@ -221,5 +223,5 @@ export function ArticleList({ onView, onEdit, onAdd, showManagement = false }: A
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

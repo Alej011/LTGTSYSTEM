@@ -2,17 +2,17 @@
  * Enhanced Permission System
  * Centralized, type-safe permissions for role-based access control
  */
-import type { UserRole } from "@/lib/features/auth/auth.service"
+import type { UserRole } from '@/lib/features/auth/auth.service';
 
 /**
  * Permission actions (CRUD operations)
  */
-export type PermissionAction = "view" | "view_details" | "create" | "edit" | "delete"
+export type PermissionAction = 'view' | 'view_details' | 'create' | 'edit' | 'delete';
 
 /**
  * Resource types in the system
  */
-export type ResourceType = "products" | "users" | "tickets" | "knowledge" | "communications" | "dashboard"
+export type ResourceType = 'products' | 'users' | 'tickets' | 'knowledge' | 'communications' | 'dashboard';
 
 /**
  * Permission definition
@@ -20,9 +20,9 @@ export type ResourceType = "products" | "users" | "tickets" | "knowledge" | "com
  */
 type PermissionMatrix = {
   [K in ResourceType]: {
-    [A in PermissionAction]?: UserRole[]
-  }
-}
+    [A in PermissionAction]?: UserRole[];
+  };
+};
 
 /**
  * Permission matrix - Single source of truth for all permissions
@@ -30,59 +30,55 @@ type PermissionMatrix = {
  */
 const PERMISSION_MATRIX: PermissionMatrix = {
   products: {
-    view: ["admin", "empleado"],
-    view_details: ["admin", "empleado"],
-    create: ["admin"],
-    edit: ["admin"],
-    delete: ["admin"],
+    view: ['admin', 'empleado'],
+    view_details: ['admin', 'empleado'],
+    create: ['admin'],
+    edit: ['admin'],
+    delete: ['admin'],
   },
   users: {
-    view: ["admin"],
-    view_details: ["admin"],
-    create: ["admin"],
-    edit: ["admin"],
-    delete: ["admin"],
+    view: ['admin'],
+    view_details: ['admin'],
+    create: ['admin'],
+    edit: ['admin'],
+    delete: ['admin'],
   },
   tickets: {
-    view: ["admin", "empleado"],
-    view_details: ["admin", "empleado"],
-    create: ["admin", "empleado"],
-    edit: ["admin", "empleado"],
-    delete: ["admin"],
+    view: ['admin', 'empleado'],
+    view_details: ['admin', 'empleado'],
+    create: ['admin', 'empleado'],
+    edit: ['admin', 'empleado'],
+    delete: ['admin'],
   },
   knowledge: {
-    view: ["admin", "empleado"],
-    view_details: ["admin", "empleado"],
-    create: ["admin"],
-    edit: ["admin"],
-    delete: ["admin"],
+    view: ['admin', 'empleado'],
+    view_details: ['admin', 'empleado'],
+    create: ['admin'],
+    edit: ['admin'],
+    delete: ['admin'],
   },
   communications: {
-    view: ["admin", "empleado"],
-    view_details: ["admin", "empleado"],
-    create: ["admin"],
-    edit: ["admin"],
-    delete: ["admin"],
+    view: ['admin', 'empleado'],
+    view_details: ['admin', 'empleado'],
+    create: ['admin'],
+    edit: ['admin'],
+    delete: ['admin'],
   },
   dashboard: {
-    view: ["admin", "empleado"],
+    view: ['admin', 'empleado'],
   },
-}
+};
 
 /**
  * Check if a role has permission for a specific action on a resource
  */
-export function hasPermission(
-  role: UserRole | undefined,
-  resource: ResourceType,
-  action: PermissionAction
-): boolean {
-  if (!role) return false
+export function hasPermission(role: UserRole | undefined, resource: ResourceType, action: PermissionAction): boolean {
+  if (!role) return false;
 
-  const allowedRoles = PERMISSION_MATRIX[resource][action]
-  if (!allowedRoles) return false
+  const allowedRoles = PERMISSION_MATRIX[resource][action];
+  if (!allowedRoles) return false;
 
-  return allowedRoles.includes(role)
+  return allowedRoles.includes(role);
 }
 
 /**
@@ -96,16 +92,16 @@ export function getResourcePermissions(role: UserRole | undefined, resource: Res
       canCreate: false,
       canEdit: false,
       canDelete: false,
-    }
+    };
   }
 
   return {
-    canView: hasPermission(role, resource, "view"),
-    canViewDetails: hasPermission(role, resource, "view_details"),
-    canCreate: hasPermission(role, resource, "create"),
-    canEdit: hasPermission(role, resource, "edit"),
-    canDelete: hasPermission(role, resource, "delete"),
-  }
+    canView: hasPermission(role, resource, 'view'),
+    canViewDetails: hasPermission(role, resource, 'view_details'),
+    canCreate: hasPermission(role, resource, 'create'),
+    canEdit: hasPermission(role, resource, 'edit'),
+    canDelete: hasPermission(role, resource, 'delete'),
+  };
 }
 
 /**
@@ -113,22 +109,22 @@ export function getResourcePermissions(role: UserRole | undefined, resource: Res
  * @deprecated Use getResourcePermissions("products") instead
  */
 export const productPermissions = {
-  canView: (role: UserRole): boolean => hasPermission(role, "products", "view"),
-  canViewDetails: (role: UserRole): boolean => hasPermission(role, "products", "view_details"),
-  canCreate: (role: UserRole): boolean => hasPermission(role, "products", "create"),
-  canEdit: (role: UserRole): boolean => hasPermission(role, "products", "edit"),
-  canDelete: (role: UserRole): boolean => hasPermission(role, "products", "delete"),
-}
+  canView: (role: UserRole): boolean => hasPermission(role, 'products', 'view'),
+  canViewDetails: (role: UserRole): boolean => hasPermission(role, 'products', 'view_details'),
+  canCreate: (role: UserRole): boolean => hasPermission(role, 'products', 'create'),
+  canEdit: (role: UserRole): boolean => hasPermission(role, 'products', 'edit'),
+  canDelete: (role: UserRole): boolean => hasPermission(role, 'products', 'delete'),
+};
 
 /**
  * Legacy user permissions (for backward compatibility)
  * @deprecated Use getResourcePermissions("users") instead
  */
 export const userPermissions = {
-  canView: (role: UserRole): boolean => hasPermission(role, "users", "view"),
-  canCreate: (role: UserRole): boolean => hasPermission(role, "users", "create"),
-  canEdit: (role: UserRole): boolean => hasPermission(role, "users", "edit"),
-}
+  canView: (role: UserRole): boolean => hasPermission(role, 'users', 'view'),
+  canCreate: (role: UserRole): boolean => hasPermission(role, 'users', 'create'),
+  canEdit: (role: UserRole): boolean => hasPermission(role, 'users', 'edit'),
+};
 
 // ====================
 // HOOKS
@@ -148,7 +144,7 @@ export function usePermissions(resource: ResourceType) {
   // Note: We can't use useAuth here directly to avoid circular dependency
   // Components should pass the role or we create a wrapper
   // For now, return a function that accepts role
-  return (role: UserRole | undefined) => getResourcePermissions(role, resource)
+  return (role: UserRole | undefined) => getResourcePermissions(role, resource);
 }
 
 /**
@@ -156,7 +152,7 @@ export function usePermissions(resource: ResourceType) {
  * @deprecated Use usePermissions("products")(role) instead
  */
 export function useProductPermissions(role: UserRole | undefined) {
-  return getResourcePermissions(role, "products")
+  return getResourcePermissions(role, 'products');
 }
 
 /**
@@ -164,33 +160,33 @@ export function useProductPermissions(role: UserRole | undefined) {
  * @deprecated Use usePermissions("users")(role) instead
  */
 export function useUserPermissions(role: UserRole | undefined) {
-  return getResourcePermissions(role, "users")
+  return getResourcePermissions(role, 'users');
 }
 
 /**
  * Hook for ticket permissions
  */
 export function useTicketPermissions(role: UserRole | undefined) {
-  return getResourcePermissions(role, "tickets")
+  return getResourcePermissions(role, 'tickets');
 }
 
 /**
  * Hook for knowledge permissions
  */
 export function useKnowledgePermissions(role: UserRole | undefined) {
-  return getResourcePermissions(role, "knowledge")
+  return getResourcePermissions(role, 'knowledge');
 }
 
 /**
  * Hook for communications permissions
  */
 export function useCommunicationsPermissions(role: UserRole | undefined) {
-  return getResourcePermissions(role, "communications")
+  return getResourcePermissions(role, 'communications');
 }
 
 /**
  * Hook for dashboard permissions
  */
 export function useDashboardPermissions(role: UserRole | undefined) {
-  return getResourcePermissions(role, "dashboard")
+  return getResourcePermissions(role, 'dashboard');
 }

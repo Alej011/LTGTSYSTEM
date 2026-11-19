@@ -1,51 +1,50 @@
-
 // URL del backend. Solo la usan las rutas BFF (servidor) y se lee al arrancar, no en el build.
-export const API_BASE_URL = process.env.API_URL || "http://localhost:4000"
+export const API_BASE_URL = process.env.API_URL || 'http://localhost:4000';
 
 // Endpoints de la API organizados por módulo
 export const API_ENDPOINTS = {
   auth: {
-    login: "/api/auth/login",
-    refresh: "/api/auth/refresh",
-    logout: "/api/auth/logout",
-    register: "/api/auth/register",
-    me: "/api/auth/me",
+    login: '/api/auth/login',
+    refresh: '/api/auth/refresh',
+    logout: '/api/auth/logout',
+    register: '/api/auth/register',
+    me: '/api/auth/me',
   },
   users: {
-    list: "/api/users/list",
-    create: "/api/users/create",
+    list: '/api/users/list',
+    create: '/api/users/create',
     detail: (id: string) => `/api/users/getById/${id}`,
     update: (id: string) => `/api/users/update/${id}`,
   },
   // Endpoints futuros (cuando conectes los otros módulos)
   tickets: {
-    list: "/api/tickets",
+    list: '/api/tickets',
     detail: (id: string) => `/api/tickets/${id}`,
-    create: "/api/tickets",
+    create: '/api/tickets',
     update: (id: string) => `/api/tickets/${id}`,
   },
   products: {
-    list: "/api/products/list",
+    list: '/api/products/list',
     detail: (id: string) => `/api/products/detail/${id}`,
-    create: "/api/products/create",
+    create: '/api/products/create',
     update: (id: string) => `/api/products/update/${id}`,
     delete: (id: string) => `/api/products/delete/${id}`,
   },
   brands: {
-    list: "/api/brands",
+    list: '/api/brands',
     detail: (id: string) => `/api/brands/${id}`,
   },
   categories: {
-    list: "/api/categories",
+    list: '/api/categories',
     detail: (id: string) => `/api/categories/${id}`,
   },
   knowledge: {
-    list: "/api/knowledge",
+    list: '/api/knowledge',
     detail: (id: string) => `/api/knowledge/${id}`,
-    create: "/api/knowledge",
+    create: '/api/knowledge',
     update: (id: string) => `/api/knowledge/${id}`,
   },
-} as const
+} as const;
 
 // Timeout por defecto para las peticiones
-export const API_TIMEOUT = 10000 // 10 segundos
+export const API_TIMEOUT = 10000; // 10 segundos

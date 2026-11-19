@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { format,formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
-import { ArrowLeft, CheckCircle, Clock, Loader2,MessageSquare, User } from "lucide-react"
-import { useEffect,useState } from "react"
+import { format, formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { ArrowLeft, CheckCircle, Clock, Loader2, MessageSquare, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
-import { useAuth } from "@/contexts/auth-context"
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/auth-context';
 import {
   addComment,
   getCategoryLabel,
@@ -23,36 +23,36 @@ import {
   type TicketComment,
   type TicketStatus,
   updateTicket,
-} from "@/lib/features/tickets/tickets.service"
+} from '@/lib/features/tickets/tickets.service';
 
 interface TicketDetailProps {
-  ticket: Ticket
-  onBack: () => void
-  onUpdate: () => void
+  ticket: Ticket;
+  onBack: () => void;
+  onUpdate: () => void;
 }
 
 export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
-  const { user } = useAuth()
-  const [comments, setComments] = useState<TicketComment[]>([])
-  const [newComment, setNewComment] = useState("")
-  const [newStatus, setNewStatus] = useState<TicketStatus>(ticket.status)
-  const [solution, setSolution] = useState(ticket.solution || "")
-  const [isLoading, setIsLoading] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
+  const { user } = useAuth();
+  const [comments, setComments] = useState<TicketComment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [newStatus, setNewStatus] = useState<TicketStatus>(ticket.status);
+  const [solution, setSolution] = useState(ticket.solution || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    loadComments()
-  }, [ticket.id])
+    loadComments();
+  }, [ticket.id]);
 
   const loadComments = () => {
-    const ticketComments = getTicketComments(ticket.id)
-    setComments(ticketComments)
-  }
+    const ticketComments = getTicketComments(ticket.id);
+    setComments(ticketComments);
+  };
 
   const handleAddComment = async () => {
-    if (!newComment.trim() || !user) return
+    if (!newComment.trim() || !user) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       await addComment({
         ticketId: ticket.id,
@@ -61,69 +61,69 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
         userRole: user.role,
         comment: newComment,
         isInternal: false,
-      })
-      setNewComment("")
-      loadComments()
+      });
+      setNewComment('');
+      loadComments();
     } catch (error) {
-      console.error("Error adding comment:", error)
+      console.error('Error adding comment:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleUpdateTicket = async () => {
-    if (!user) return
+    if (!user) return;
 
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
       const updateData: Partial<Ticket> = {
         status: newStatus,
-      }
+      };
 
       // If resolving the ticket, add solution
-      if (newStatus === "resuelto" && solution.trim()) {
-        updateData.solution = solution
+      if (newStatus === 'resuelto' && solution.trim()) {
+        updateData.solution = solution;
       }
 
       // If assigning to current user (support employee)
-      if (user.role === "empleado" && !ticket.assignedTo) {
-        updateData.assignedTo = user.id
-        updateData.assignedToName = user.name
+      if (user.role === 'empleado' && !ticket.assignedTo) {
+        updateData.assignedTo = user.id;
+        updateData.assignedToName = user.name;
       }
 
-      await updateTicket(ticket.id, updateData)
-      onUpdate()
+      await updateTicket(ticket.id, updateData);
+      onUpdate();
     } catch (error) {
-      console.error("Error updating ticket:", error)
+      console.error('Error updating ticket:', error);
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
-  const canManageTicket = user?.role === "empleado" || user?.role === "admin"
-  const isAssignedToUser = ticket.assignedTo === user?.id
-  const canUpdateStatus = canManageTicket && (isAssignedToUser || !ticket.assignedTo)
+  const canManageTicket = user?.role === 'empleado' || user?.role === 'admin';
+  const isAssignedToUser = ticket.assignedTo === user?.id;
+  const canUpdateStatus = canManageTicket && (isAssignedToUser || !ticket.assignedTo);
 
   const getPriorityBadge = () => (
     <Badge variant="outline" className={getPriorityColor(ticket.priority)}>
       <span className="capitalize">{ticket.priority}</span>
     </Badge>
-  )
+  );
 
   const getStatusBadge = () => {
     const labels = {
-      abierto: "Abierto",
-      en_progreso: "En Progreso",
-      resuelto: "Resuelto",
-      cerrado: "Cerrado",
-    }
+      abierto: 'Abierto',
+      en_progreso: 'En Progreso',
+      resuelto: 'Resuelto',
+      cerrado: 'Cerrado',
+    };
 
     return (
       <Badge variant="outline" className={getStatusColor(ticket.status)}>
         {labels[ticket.status]}
       </Badge>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -180,9 +180,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         <span className="font-medium">{comment.userName}</span>
-                        <Badge variant="outline">
-                          {comment.userRole}
-                        </Badge>
+                        <Badge variant="outline">{comment.userRole}</Badge>
                       </div>
                       <span className="text-sm text-muted-foreground">
                         {formatDistanceToNow(comment.createdAt, { addSuffix: true, locale: es })}
@@ -210,7 +208,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                       Enviando...
                     </>
                   ) : (
-                    "Agregar Comentario"
+                    'Agregar Comentario'
                   )}
                 </Button>
               </div>
@@ -242,7 +240,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Asignado a</label>
-                <p className="mt-1">{ticket.assignedToName || "Sin asignar"}</p>
+                <p className="mt-1">{ticket.assignedToName || 'Sin asignar'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Creado</label>
@@ -285,7 +283,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   </Select>
                 </div>
 
-                {newStatus === "resuelto" && (
+                {newStatus === 'resuelto' && (
                   <div>
                     <label className="text-sm font-medium">Solución</label>
                     <Textarea
@@ -305,11 +303,11 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                       Actualizando...
                     </>
                   ) : (
-                    "Actualizar Ticket"
+                    'Actualizar Ticket'
                   )}
                 </Button>
 
-                {!ticket.assignedTo && user.role === "empleado" && (
+                {!ticket.assignedTo && user.role === 'empleado' && (
                   <Alert>
                     <AlertDescription>
                       Al actualizar este ticket, se te asignará automáticamente como responsable.
@@ -322,5 +320,5 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

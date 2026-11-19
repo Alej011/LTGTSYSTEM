@@ -1,48 +1,53 @@
-"use client"
+'use client';
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { ArrowLeft, Clock, Eye, Tag,ThumbsDown, ThumbsUp, User } from "lucide-react"
-import { useEffect,useState } from "react"
-import ReactMarkdown from "react-markdown"
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { ArrowLeft, Clock, Eye, Tag, ThumbsDown, ThumbsUp, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/contexts/auth-context"
-import { getCategoryLabel,incrementViews, type KnowledgeArticle, rateArticle } from "@/lib/features/knowledge/knowledge.service"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/auth-context';
+import {
+  getCategoryLabel,
+  incrementViews,
+  type KnowledgeArticle,
+  rateArticle,
+} from '@/lib/features/knowledge/knowledge.service';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 interface ArticleViewerProps {
-  article: KnowledgeArticle
-  onBack: () => void
+  article: KnowledgeArticle;
+  onBack: () => void;
 }
 
 export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
-  const { user } = useAuth()
-  const [hasRated, setHasRated] = useState(false)
-  const [isRating, setIsRating] = useState(false)
+  const { user } = useAuth();
+  const [hasRated, setHasRated] = useState(false);
+  const [isRating, setIsRating] = useState(false);
 
   useEffect(() => {
     // Increment view count when article is opened
-    void incrementViews(article.id)
-  }, [article.id])
+    void incrementViews(article.id);
+  }, [article.id]);
 
   const handleRate = async (isHelpful: boolean) => {
-    if (!user || hasRated || isRating) return
+    if (!user || hasRated || isRating) return;
 
-    setIsRating(true)
+    setIsRating(true);
     try {
-      await rateArticle(article.id, user.id, isHelpful)
-      setHasRated(true)
+      await rateArticle(article.id, user.id, isHelpful);
+      setHasRated(true);
     } catch (error) {
-      console.error("Error rating article:", error)
+      console.error('Error rating article:', error);
     } finally {
-      setIsRating(false)
+      setIsRating(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -154,7 +159,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
                 <label className="text-sm font-medium text-muted-foreground">Creado</label>
                 <p className="mt-1 flex items-center text-sm">
                   <Clock className="h-3 w-3 mr-1" />
-                  {format(article.createdAt, "PPP", { locale: es })}
+                  {format(article.createdAt, 'PPP', { locale: es })}
                 </p>
               </div>
 
@@ -163,7 +168,7 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
                   <label className="text-sm font-medium text-muted-foreground">Actualizado</label>
                   <p className="mt-1 flex items-center text-sm">
                     <Clock className="h-3 w-3 mr-1" />
-                    {format(article.updatedAt, "PPP", { locale: es })}
+                    {format(article.updatedAt, 'PPP', { locale: es })}
                   </p>
                 </div>
               )}
@@ -208,5 +213,5 @@ export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

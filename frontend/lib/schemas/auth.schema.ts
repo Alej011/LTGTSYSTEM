@@ -1,29 +1,29 @@
 /**
  * Authentication and User schemas with Zod validation
  */
-import { z } from "zod"
+import { z } from 'zod';
 
-import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from "./common.schema"
+import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
 
 /**
  * Backend role enum: same values as Prisma Role, the backend rejects any other casing
  */
-export const BackendRoleSchema = z.enum(["ADMIN", "SUPPORT"])
-export type BackendRole = z.infer<typeof BackendRoleSchema>
+export const BackendRoleSchema = z.enum(['ADMIN', 'SUPPORT']);
+export type BackendRole = z.infer<typeof BackendRoleSchema>;
 
 /**
  * Frontend role enum (internal representation)
  */
-export const FrontendRoleSchema = z.enum(["admin", "empleado"])
-export type FrontendRole = z.infer<typeof FrontendRoleSchema>
+export const FrontendRoleSchema = z.enum(['admin', 'empleado']);
+export type FrontendRole = z.infer<typeof FrontendRoleSchema>;
 
 const BACKEND_TO_FRONTEND_ROLE: Record<BackendRole, FrontendRole> = {
-  ADMIN: "admin",
-  SUPPORT: "empleado",
-}
+  ADMIN: 'admin',
+  SUPPORT: 'empleado',
+};
 
 export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole {
-  return BACKEND_TO_FRONTEND_ROLE[backendRole]
+  return BACKEND_TO_FRONTEND_ROLE[backendRole];
 }
 
 /**
@@ -32,14 +32,14 @@ export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole
 export const UserSchema = z.object({
   id: UUIDSchema,
   email: EmailSchema,
-  name: z.string().min(1, "El nombre es requerido"),
+  name: z.string().min(1, 'El nombre es requerido'),
   role: FrontendRoleSchema,
   department: z.string().optional(),
   createdAt: DateStringSchema.optional(),
   lastLogin: DateStringSchema.optional(),
-})
+});
 
-export type User = z.infer<typeof UserSchema>
+export type User = z.infer<typeof UserSchema>;
 
 /**
  * Backend user response schema (as received from API)
@@ -52,9 +52,9 @@ export const BackendUserSchema = z.object({
   department: z.string().optional().nullable(),
   createdAt: z.string().optional(),
   lastLogin: z.string().optional().nullable(),
-})
+});
 
-export type BackendUser = z.infer<typeof BackendUserSchema>
+export type BackendUser = z.infer<typeof BackendUserSchema>;
 
 /**
  * Transform backend user to frontend user
@@ -68,7 +68,7 @@ export function mapBackendUserToFrontend(backendUser: BackendUser): User {
     department: backendUser.department || undefined,
     createdAt: backendUser.createdAt || undefined, // Keep as ISO string from backend
     lastLogin: backendUser.lastLogin || undefined, // Keep as ISO string from backend
-  }
+  };
 }
 
 /**
@@ -77,37 +77,39 @@ export function mapBackendUserToFrontend(backendUser: BackendUser): User {
 export const LoginRequestSchema = z.object({
   email: EmailSchema,
   password: PasswordSchema,
-})
+});
 
-export type LoginRequest = z.infer<typeof LoginRequestSchema>
+export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 
 /**
  * Respuesta del BFF al iniciar sesión (los tokens van en cookies HttpOnly)
  */
 export const LoginResultSchema = z.object({
   user: UserSchema,
-})
+});
 
-export type LoginResult = z.infer<typeof LoginResultSchema>
+export type LoginResult = z.infer<typeof LoginResultSchema>;
 
 /**
  * Current user response (GET /api/auth/me)
  */
-export const CurrentUserResponseSchema = BackendUserSchema
+export const CurrentUserResponseSchema = BackendUserSchema;
 
-export type CurrentUserResponse = z.infer<typeof CurrentUserResponseSchema>
+export type CurrentUserResponse = z.infer<typeof CurrentUserResponseSchema>;
 
 /**
  * Register request schema (for future use)
  */
-export const RegisterRequestSchema = z.object({
-  email: EmailSchema,
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  password: PasswordSchema,
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Las contraseñas no coinciden",
-  path: ["confirmPassword"],
-})
+export const RegisterRequestSchema = z
+  .object({
+    email: EmailSchema,
+    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    password: PasswordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  });
 
-export type RegisterRequest = z.infer<typeof RegisterRequestSchema>
+export type RegisterRequest = z.infer<typeof RegisterRequestSchema>;

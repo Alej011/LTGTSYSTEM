@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
 /**
  * Providers wrapper for the application
  * Includes React Query and other global providers
  */
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { type ReactNode,useState } from "react"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { type ReactNode, useState } from 'react';
 
 interface ProvidersProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -32,20 +32,16 @@ export function Providers({ children }: ProvidersProps) {
             retry: 0, // No reintentar mutations automáticamente
           },
         },
-      })
-  )
+      }),
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
       {/* DevTools solo en desarrollo */}
-      {process.env.NODE_ENV === "development" && (
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          position="bottom"
-          buttonPosition="top-right"
-        />
+      {process.env.NODE_ENV === 'development' && (
+        <ReactQueryDevtools initialIsOpen={false} position="bottom" buttonPosition="top-right" />
       )}
     </QueryClientProvider>
-  )
+  );
 }

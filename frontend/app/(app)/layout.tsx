@@ -1,65 +1,68 @@
-"use client"
+'use client';
 
-import { Building2, Menu } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
-import type React from "react"
-import { useCallback, useEffect, useState } from "react"
+import { Building2, Menu } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { useAuth } from "@/contexts/auth-context"
+import { Sidebar } from '@/components/sidebar';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { useAuth } from '@/contexts/auth-context';
 
-const COLLAPSED_KEY = "ltgt_sidebar_collapsed"
+const COLLAPSED_KEY = 'ltgt_sidebar_collapsed';
 
 // Layout común de las secciones: el sidebar queda fijo y solo cambia el contenido.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
-  const router = useRouter()
-  const pathname = usePathname()
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   // La preferencia se guarda en el navegador; si el almacenamiento no está disponible, se ignora
   useEffect(() => {
     try {
-      setCollapsed(localStorage.getItem(COLLAPSED_KEY) === "1")
+      setCollapsed(localStorage.getItem(COLLAPSED_KEY) === '1');
     } catch {}
-  }, [])
+  }, []);
 
   const toggleSidebar = useCallback(() => {
     setCollapsed((current) => {
       try {
-        localStorage.setItem(COLLAPSED_KEY, current ? "0" : "1")
+        localStorage.setItem(COLLAPSED_KEY, current ? '0' : '1');
       } catch {}
-      return !current
-    })
-  }, [])
+      return !current;
+    });
+  }, []);
 
   // Ctrl+B (Cmd+B en macOS) abre y cierra el sidebar
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === "b" && (event.ctrlKey || event.metaKey) && !event.altKey) {
-        event.preventDefault()
-        toggleSidebar()
+      if (event.key.toLowerCase() === 'b' && (event.ctrlKey || event.metaKey) && !event.altKey) {
+        event.preventDefault();
+        toggleSidebar();
       }
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [toggleSidebar])
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [toggleSidebar]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.replace(`/?redirect=${encodeURIComponent(pathname)}`)
-  }, [isAuthenticated, isLoading, pathname, router])
+    if (!isLoading && !isAuthenticated) router.replace(`/?redirect=${encodeURIComponent(pathname)}`);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
-  useEffect(() => setMobileOpen(false), [pathname])
+  useEffect(() => setMobileOpen(false), [pathname]);
 
   if (isLoading || !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" aria-label="Cargando" />
+        <div
+          className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary"
+          aria-label="Cargando"
+        />
       </div>
-    )
+    );
   }
 
   return (
@@ -86,5 +89,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

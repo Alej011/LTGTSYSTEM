@@ -1,46 +1,46 @@
-"use client"
+'use client';
 
-import { AlertTriangle, BookOpen, CheckCircle,Headphones, MessageSquare, Package } from "lucide-react"
+import { AlertTriangle, BookOpen, CheckCircle, Headphones, MessageSquare, Package } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { DashboardStats } from "@/lib/features/dashboard/dashboard.service"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { DashboardStats } from '@/lib/features/dashboard/dashboard.service';
 
 interface StatsCardsProps {
-  stats: DashboardStats
-  userRole: string
+  stats: DashboardStats;
+  userRole: string;
 }
 
 export function StatsCards({ stats, userRole }: StatsCardsProps) {
   const cards = [
     {
-      title: "Productos Totales",
+      title: 'Productos Totales',
       value: stats.totalProducts.toString(),
-      change: stats.lowStockProducts > 0 ? `${stats.lowStockProducts} con stock bajo` : "Stock normal",
+      change: stats.lowStockProducts > 0 ? `${stats.lowStockProducts} con stock bajo` : 'Stock normal',
       icon: Package,
-      show: ["admin", "empleado"].includes(userRole),
+      show: ['admin', 'empleado'].includes(userRole),
     },
     {
-      title: "Tickets Abiertos",
+      title: 'Tickets Abiertos',
       value: stats.openTickets.toString(),
-      change: stats.myTickets > 0 ? `${stats.myTickets} asignados a ti` : "Sin tickets asignados",
+      change: stats.myTickets > 0 ? `${stats.myTickets} asignados a ti` : 'Sin tickets asignados',
       icon: Headphones,
       show: true,
     },
     {
-      title: "Artículos KB",
+      title: 'Artículos KB',
       value: stats.knowledgeArticles.toString(),
-      change: "Soluciones disponibles",
+      change: 'Soluciones disponibles',
       icon: BookOpen,
       show: true,
     },
     {
-      title: "Comunicaciones",
+      title: 'Comunicaciones',
       value: stats.unreadCommunications.toString(),
-      change: stats.unreadCommunications > 0 ? "Sin leer" : "Todo leído",
+      change: stats.unreadCommunications > 0 ? 'Sin leer' : 'Todo leído',
       icon: MessageSquare,
       show: true,
     },
-  ]
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -57,10 +57,10 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
             <CardContent>
               <div className="text-2xl font-bold tracking-tight">{card.value}</div>
               <div className="flex items-center gap-2 mt-1">
-                {card.title === "Productos Totales" && stats.lowStockProducts > 0 && (
+                {card.title === 'Productos Totales' && stats.lowStockProducts > 0 && (
                   <AlertTriangle className="h-3 w-3 text-warning" />
                 )}
-                {card.title === "Comunicaciones" && stats.unreadCommunications === 0 && (
+                {card.title === 'Comunicaciones' && stats.unreadCommunications === 0 && (
                   <CheckCircle className="h-3 w-3 text-success" />
                 )}
                 <p className="text-xs text-muted-foreground">{card.change}</p>
@@ -69,5 +69,5 @@ export function StatsCards({ stats, userRole }: StatsCardsProps) {
           </Card>
         ))}
     </div>
-  )
+  );
 }

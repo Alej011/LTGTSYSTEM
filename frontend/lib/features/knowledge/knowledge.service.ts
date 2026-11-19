@@ -1,38 +1,38 @@
-export type ArticleStatus = "draft" | "published" | "archived"
-export type ArticleCategory = "hardware" | "software" | "red" | "acceso" | "procedimientos" | "faq"
+export type ArticleStatus = 'draft' | 'published' | 'archived';
+export type ArticleCategory = 'hardware' | 'software' | 'red' | 'acceso' | 'procedimientos' | 'faq';
 
 export interface KnowledgeArticle {
-  id: string
-  title: string
-  content: string
-  summary: string
-  category: ArticleCategory
-  tags: string[]
-  status: ArticleStatus
-  authorId: string
-  authorName: string
-  createdAt: Date
-  updatedAt: Date
-  publishedAt?: Date
-  views: number
-  helpful: number
-  notHelpful: number
-  relatedTicketId?: string
+  id: string;
+  title: string;
+  content: string;
+  summary: string;
+  category: ArticleCategory;
+  tags: string[];
+  status: ArticleStatus;
+  authorId: string;
+  authorName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt?: Date;
+  views: number;
+  helpful: number;
+  notHelpful: number;
+  relatedTicketId?: string;
 }
 
 export interface ArticleRating {
-  id: string
-  articleId: string
-  userId: string
-  isHelpful: boolean
-  createdAt: Date
+  id: string;
+  articleId: string;
+  userId: string;
+  isHelpful: boolean;
+  createdAt: Date;
 }
 
 // Mock data - In production, this would be a real database
 export const mockArticles: KnowledgeArticle[] = [
   {
-    id: "1",
-    title: "Cómo reiniciar el router de la oficina",
+    id: '1',
+    title: 'Cómo reiniciar el router de la oficina',
     content: `# Reinicio del Router Principal
 
 ## Problema
@@ -52,23 +52,23 @@ Cuando la conexión a internet está lenta o no funciona correctamente.
 
 ## Contacto
 Si el problema persiste, contactar al departamento de IT.`,
-    summary: "Pasos para reiniciar correctamente el router principal cuando hay problemas de conectividad.",
-    category: "red",
-    tags: ["router", "internet", "conectividad", "reinicio"],
-    status: "published",
-    authorId: "2",
-    authorName: "Juan Pérez",
-    createdAt: new Date("2024-03-01"),
-    updatedAt: new Date("2024-03-01"),
-    publishedAt: new Date("2024-03-01"),
+    summary: 'Pasos para reiniciar correctamente el router principal cuando hay problemas de conectividad.',
+    category: 'red',
+    tags: ['router', 'internet', 'conectividad', 'reinicio'],
+    status: 'published',
+    authorId: '2',
+    authorName: 'Juan Pérez',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-03-01'),
+    publishedAt: new Date('2024-03-01'),
     views: 45,
     helpful: 12,
     notHelpful: 1,
-    relatedTicketId: "3",
+    relatedTicketId: '3',
   },
   {
-    id: "2",
-    title: "Configuración de correo en Outlook",
+    id: '2',
+    title: 'Configuración de correo en Outlook',
     content: `# Configuración de Correo Corporativo en Outlook
 
 ## Requisitos
@@ -110,22 +110,22 @@ Si el problema persiste, contactar al departamento de IT.`,
 - **Error de autenticación**: Verificar usuario y contraseña
 - **No se conecta**: Revisar configuración de firewall
 - **Correos no se envían**: Verificar configuración SMTP`,
-    summary: "Guía completa para configurar el correo corporativo en Microsoft Outlook.",
-    category: "software",
-    tags: ["outlook", "correo", "email", "configuracion"],
-    status: "published",
-    authorId: "2",
-    authorName: "Juan Pérez",
-    createdAt: new Date("2024-02-28"),
-    updatedAt: new Date("2024-03-05"),
-    publishedAt: new Date("2024-02-28"),
+    summary: 'Guía completa para configurar el correo corporativo en Microsoft Outlook.',
+    category: 'software',
+    tags: ['outlook', 'correo', 'email', 'configuracion'],
+    status: 'published',
+    authorId: '2',
+    authorName: 'Juan Pérez',
+    createdAt: new Date('2024-02-28'),
+    updatedAt: new Date('2024-03-05'),
+    publishedAt: new Date('2024-02-28'),
     views: 78,
     helpful: 25,
     notHelpful: 3,
   },
   {
-    id: "3",
-    title: "Solución de problemas de impresora Canon",
+    id: '3',
+    title: 'Solución de problemas de impresora Canon',
     content: `# Troubleshooting Impresora Canon PIXMA
 
 ## Problemas Comunes y Soluciones
@@ -167,23 +167,23 @@ Si el problema persiste, contactar al departamento de IT.`,
 - Limpieza mensual de cabezales
 - Verificar niveles de tinta semanalmente
 - Mantener área libre de polvo`,
-    summary: "Soluciones para los problemas más comunes de las impresoras Canon PIXMA.",
-    category: "hardware",
-    tags: ["impresora", "canon", "pixma", "troubleshooting"],
-    status: "published",
-    authorId: "2",
-    authorName: "Juan Pérez",
-    createdAt: new Date("2024-03-02"),
-    updatedAt: new Date("2024-03-02"),
-    publishedAt: new Date("2024-03-02"),
+    summary: 'Soluciones para los problemas más comunes de las impresoras Canon PIXMA.',
+    category: 'hardware',
+    tags: ['impresora', 'canon', 'pixma', 'troubleshooting'],
+    status: 'published',
+    authorId: '2',
+    authorName: 'Juan Pérez',
+    createdAt: new Date('2024-03-02'),
+    updatedAt: new Date('2024-03-02'),
+    publishedAt: new Date('2024-03-02'),
     views: 32,
     helpful: 8,
     notHelpful: 0,
-    relatedTicketId: "2",
+    relatedTicketId: '2',
   },
   {
-    id: "4",
-    title: "Procedimiento de respaldo de datos",
+    id: '4',
+    title: 'Procedimiento de respaldo de datos',
     content: `# Procedimiento de Respaldo de Datos
 
 ## Frecuencia
@@ -227,125 +227,125 @@ En caso de pérdida de datos:
 Para problemas críticos de datos:
 - IT Manager: ext. 101
 - Administrador de Sistema: ext. 102`,
-    summary: "Procedimientos estándar para respaldo y restauración de datos corporativos.",
-    category: "procedimientos",
-    tags: ["respaldo", "backup", "datos", "procedimiento"],
-    status: "published",
-    authorId: "1",
-    authorName: "Administrador Sistema",
-    createdAt: new Date("2024-02-25"),
-    updatedAt: new Date("2024-02-25"),
-    publishedAt: new Date("2024-02-25"),
+    summary: 'Procedimientos estándar para respaldo y restauración de datos corporativos.',
+    category: 'procedimientos',
+    tags: ['respaldo', 'backup', 'datos', 'procedimiento'],
+    status: 'published',
+    authorId: '1',
+    authorName: 'Administrador Sistema',
+    createdAt: new Date('2024-02-25'),
+    updatedAt: new Date('2024-02-25'),
+    publishedAt: new Date('2024-02-25'),
     views: 15,
     helpful: 5,
     notHelpful: 0,
   },
-]
+];
 
 export const mockRatings: ArticleRating[] = [
-  { id: "1", articleId: "1", userId: "3", isHelpful: true, createdAt: new Date() },
-  { id: "2", articleId: "1", userId: "4", isHelpful: true, createdAt: new Date() },
-  { id: "3", articleId: "2", userId: "5", isHelpful: true, createdAt: new Date() },
-]
+  { id: '1', articleId: '1', userId: '3', isHelpful: true, createdAt: new Date() },
+  { id: '2', articleId: '1', userId: '4', isHelpful: true, createdAt: new Date() },
+  { id: '3', articleId: '2', userId: '5', isHelpful: true, createdAt: new Date() },
+];
 
 export const getArticles = (status?: ArticleStatus): KnowledgeArticle[] => {
   if (status) {
-    return mockArticles.filter((article) => article.status === status)
+    return mockArticles.filter((article) => article.status === status);
   }
-  return mockArticles
-}
+  return mockArticles;
+};
 
 export const getArticleById = (id: string): KnowledgeArticle | undefined => {
-  return mockArticles.find((article) => article.id === id)
-}
+  return mockArticles.find((article) => article.id === id);
+};
 
 export const searchArticles = (query: string, category?: ArticleCategory): KnowledgeArticle[] => {
-  let filtered = mockArticles.filter((article) => article.status === "published")
+  let filtered = mockArticles.filter((article) => article.status === 'published');
 
   if (query) {
-    const searchTerm = query.toLowerCase()
+    const searchTerm = query.toLowerCase();
     filtered = filtered.filter(
       (article) =>
         article.title.toLowerCase().includes(searchTerm) ||
         article.content.toLowerCase().includes(searchTerm) ||
         article.summary.toLowerCase().includes(searchTerm) ||
         article.tags.some((tag) => tag.toLowerCase().includes(searchTerm)),
-    )
+    );
   }
 
   if (category) {
-    filtered = filtered.filter((article) => article.category === category)
+    filtered = filtered.filter((article) => article.category === category);
   }
 
-  return filtered.sort((a, b) => b.views - a.views)
-}
+  return filtered.sort((a, b) => b.views - a.views);
+};
 
 export const createArticle = async (
-  articleData: Omit<KnowledgeArticle, "id" | "createdAt" | "updatedAt" | "views" | "helpful" | "notHelpful">,
+  articleData: Omit<KnowledgeArticle, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'helpful' | 'notHelpful'>,
 ): Promise<KnowledgeArticle> => {
   // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   const newArticle: KnowledgeArticle = {
     ...articleData,
     id: Date.now().toString(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    publishedAt: articleData.status === "published" ? new Date() : undefined,
+    publishedAt: articleData.status === 'published' ? new Date() : undefined,
     views: 0,
     helpful: 0,
     notHelpful: 0,
-  }
+  };
 
-  mockArticles.push(newArticle)
-  return newArticle
-}
+  mockArticles.push(newArticle);
+  return newArticle;
+};
 
 export const updateArticle = async (
   id: string,
   articleData: Partial<KnowledgeArticle>,
 ): Promise<KnowledgeArticle | null> => {
   // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const index = mockArticles.findIndex((a) => a.id === id)
-  if (index === -1) return null
+  const index = mockArticles.findIndex((a) => a.id === id);
+  if (index === -1) return null;
 
-  const wasPublished = mockArticles[index].status === "published"
-  const isNowPublished = articleData.status === "published"
+  const wasPublished = mockArticles[index].status === 'published';
+  const isNowPublished = articleData.status === 'published';
 
   mockArticles[index] = {
     ...mockArticles[index],
     ...articleData,
     updatedAt: new Date(),
     publishedAt: !wasPublished && isNowPublished ? new Date() : mockArticles[index].publishedAt,
-  }
+  };
 
-  return mockArticles[index]
-}
+  return mockArticles[index];
+};
 
 export const incrementViews = (id: string): Promise<void> => {
-  const article = mockArticles.find((a) => a.id === id)
+  const article = mockArticles.find((a) => a.id === id);
   if (article) {
-    article.views += 1
+    article.views += 1;
   }
-  return Promise.resolve()
-}
+  return Promise.resolve();
+};
 
 export const rateArticle = (articleId: string, userId: string, isHelpful: boolean): Promise<void> => {
   // Remove existing rating from this user
-  const existingRatingIndex = mockRatings.findIndex((r) => r.articleId === articleId && r.userId === userId)
+  const existingRatingIndex = mockRatings.findIndex((r) => r.articleId === articleId && r.userId === userId);
   if (existingRatingIndex !== -1) {
-    const existingRating = mockRatings[existingRatingIndex]
-    const article = mockArticles.find((a) => a.id === articleId)
+    const existingRating = mockRatings[existingRatingIndex];
+    const article = mockArticles.find((a) => a.id === articleId);
     if (article) {
       if (existingRating.isHelpful) {
-        article.helpful -= 1
+        article.helpful -= 1;
       } else {
-        article.notHelpful -= 1
+        article.notHelpful -= 1;
       }
     }
-    mockRatings.splice(existingRatingIndex, 1)
+    mockRatings.splice(existingRatingIndex, 1);
   }
 
   // Add new rating
@@ -355,39 +355,39 @@ export const rateArticle = (articleId: string, userId: string, isHelpful: boolea
     userId,
     isHelpful,
     createdAt: new Date(),
-  }
+  };
 
-  mockRatings.push(newRating)
+  mockRatings.push(newRating);
 
   // Update article counters
-  const article = mockArticles.find((a) => a.id === articleId)
+  const article = mockArticles.find((a) => a.id === articleId);
   if (article) {
     if (isHelpful) {
-      article.helpful += 1
+      article.helpful += 1;
     } else {
-      article.notHelpful += 1
+      article.notHelpful += 1;
     }
   }
-  return Promise.resolve()
-}
+  return Promise.resolve();
+};
 
 export const getCategoryLabel = (category: ArticleCategory): string => {
   const labels = {
-    hardware: "Hardware",
-    software: "Software",
-    red: "Red/Conectividad",
-    acceso: "Acceso/Permisos",
-    procedimientos: "Procedimientos",
-    faq: "Preguntas Frecuentes",
-  }
-  return labels[category]
-}
+    hardware: 'Hardware',
+    software: 'Software',
+    red: 'Red/Conectividad',
+    acceso: 'Acceso/Permisos',
+    procedimientos: 'Procedimientos',
+    faq: 'Preguntas Frecuentes',
+  };
+  return labels[category];
+};
 
 export const getStatusLabel = (status: ArticleStatus): string => {
   const labels = {
-    draft: "Borrador",
-    published: "Publicado",
-    archived: "Archivado",
-  }
-  return labels[status]
-}
+    draft: 'Borrador',
+    published: 'Publicado',
+    archived: 'Archivado',
+  };
+  return labels[status];
+};

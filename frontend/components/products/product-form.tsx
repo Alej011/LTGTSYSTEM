@@ -1,27 +1,15 @@
-"use client";
-import { ArrowLeft,Loader2 } from "lucide-react";
-import type React from "react";
-import { useEffect,useState } from "react";
+'use client';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import {
   type Brand,
   type Category,
@@ -30,7 +18,7 @@ import {
   getCategories,
   type Product,
   updateProduct,
-} from "@/lib/features/products/products.service";
+} from '@/lib/features/products/products.service';
 
 interface ProductFormProps {
   product?: Product;
@@ -38,28 +26,24 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
-export function ProductForm({
-  product,
-  onSuccess,
-  onCancel,
-}: ProductFormProps) {
+export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const initialFormState = (current?: Product) => ({
-    name: current?.name || "",
-    description: current?.description || "",
-    brandId: current?.brandId || current?.brand?.id || "",
-    sku: current?.sku || "",
+    name: current?.name || '',
+    description: current?.description || '',
+    brandId: current?.brandId || current?.brand?.id || '',
+    sku: current?.sku || '',
     stock: current?.stock || 0,
     price: current?.price || 0,
     // Guardamos el ID de la categoría, no el nombre
-    categoryId: current?.categories[0]?.id || "",
-    status: current?.status || ("active" as const),
+    categoryId: current?.categories[0]?.id || '',
+    status: current?.status || ('active' as const),
   });
 
   const [formData, setFormData] = useState(initialFormState(product));
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setFormData(initialFormState(product));
@@ -68,15 +52,12 @@ export function ProductForm({
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [brandsData, categoriesData] = await Promise.all([
-          getBrands(),
-          getCategories(),
-        ]);
+        const [brandsData, categoriesData] = await Promise.all([getBrands(), getCategories()]);
         setBrands(brandsData);
         setCategories(categoriesData);
       } catch (error) {
-        console.error("Error cargando datos:", error);
-        setError("Error al cargar marcas y categorías");
+        console.error('Error cargando datos:', error);
+        setError('Error al cargar marcas y categorías');
       }
     };
     void loadData();
@@ -84,7 +65,7 @@ export function ProductForm({
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setIsLoading(true);
 
     try {
@@ -104,7 +85,7 @@ export function ProductForm({
       }
       onSuccess();
     } catch {
-      setError("Error al guardar el producto. Intente nuevamente.");
+      setError('Error al guardar el producto. Intente nuevamente.');
     } finally {
       setIsLoading(false);
     }
@@ -117,11 +98,9 @@ export function ProductForm({
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{product ? "Editar Producto" : "Nuevo Producto"}</CardTitle>
+        <CardTitle>{product ? 'Editar Producto' : 'Nuevo Producto'}</CardTitle>
         <CardDescription>
-          {product
-            ? "Modifica la información del producto"
-            : "Registra un nuevo producto en el sistema"}
+          {product ? 'Modifica la información del producto' : 'Registra un nuevo producto en el sistema'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -132,7 +111,7 @@ export function ProductForm({
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Ej: Laptop Dell XPS 13"
                 required
               />
@@ -142,7 +121,7 @@ export function ProductForm({
               <Input
                 id="sku"
                 value={formData.sku}
-                onChange={(e) => handleInputChange("sku", e.target.value)}
+                onChange={(e) => handleInputChange('sku', e.target.value)}
                 placeholder="Ej: DELL-XPS13-001"
                 required
               />
@@ -154,7 +133,7 @@ export function ProductForm({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Descripción detallada del producto..."
               rows={3}
             />
@@ -163,10 +142,7 @@ export function ProductForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="brand">Marca</Label>
-              <Select
-                value={formData.brandId}
-                onValueChange={(value) => handleInputChange("brandId", value)}
-              >
+              <Select value={formData.brandId} onValueChange={(value) => handleInputChange('brandId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar marca" />
                 </SelectTrigger>
@@ -181,12 +157,7 @@ export function ProductForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Categoría</Label>
-              <Select
-                value={formData.categoryId}
-                onValueChange={(value) =>
-                  handleInputChange("categoryId", value)
-                }
-              >
+              <Select value={formData.categoryId} onValueChange={(value) => handleInputChange('categoryId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
@@ -210,12 +181,7 @@ export function ProductForm({
                 step="0.01"
                 min="0"
                 value={formData.price}
-                onChange={(e) =>
-                  handleInputChange(
-                    "price",
-                    Number.parseFloat(e.target.value) || 0
-                  )
-                }
+                onChange={(e) => handleInputChange('price', Number.parseFloat(e.target.value) || 0)}
                 required
               />
             </div>
@@ -226,21 +192,13 @@ export function ProductForm({
                 type="number"
                 min="0"
                 value={formData.stock}
-                onChange={(e) =>
-                  handleInputChange(
-                    "stock",
-                    Number.parseInt(e.target.value) || 0
-                  )
-                }
+                onChange={(e) => handleInputChange('stock', Number.parseInt(e.target.value) || 0)}
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Estado</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleInputChange("status", value)}
-              >
+              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -271,9 +229,9 @@ export function ProductForm({
                   Guardando...
                 </>
               ) : product ? (
-                "Actualizar"
+                'Actualizar'
               ) : (
-                "Crear Producto"
+                'Crear Producto'
               )}
             </Button>
           </div>

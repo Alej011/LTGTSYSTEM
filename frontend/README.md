@@ -61,20 +61,21 @@ Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt00000
 - **Modo claro:** neutros del tema (fondo y tarjetas blancas, sidebar gris claro) con el azul `oklch(0.488 0.243 264)` como color principal. Es el mismo azul que el tema usa en el modo oscuro y en las gráficas.
 - **Modo oscuro:** el del tema, sin cambios.
 - **Tipografía, radios, sombras y espaciado:** los del tema en los dos modos. La fuente es la del sistema, sin descargas.
-- **Selector de tema:** en el sidebar, en *Configuración*, con las opciones Claro, Oscuro y Sistema. La elección se guarda en el navegador.
+- **Selector de tema:** en el sidebar, en _Configuración_, con las opciones Claro, Oscuro y Sistema. La elección se guarda en el navegador.
 
 **Reglas para mantenerlo coherente:**
+
 - No uses colores fijos de Tailwind (`text-blue-600`, `bg-red-50`...), porque no cambian con el modo oscuro. Usa los tokens: `primary`, `muted-foreground`, `destructive`, `success`, `warning`, `info`.
 - Para badges de estado usa `TONE_CLASSES` de `lib/shared/tones.ts`. Elige el tono por significado (éxito, alerta, error, información), no por color.
 - Los colores cumplen contraste AA (4.5:1 en texto). Respecto al tema, en modo claro se oscurecieron un poco el texto secundario y el borde de los inputs (3:1). Si cambias un color, revisa el contraste.
 
 ## Estado de los módulos
 
-| Módulo | Origen de datos |
-|---|---|
-| Login / sesión, Usuarios, Productos (marcas y categorías) | API real vía BFF |
-| Tickets, Base de conocimiento, Comunicaciones | **Mock en memoria** — se pierden al recargar |
-| Dashboard | Datos estáticos |
+| Módulo                                                    | Origen de datos                              |
+| --------------------------------------------------------- | -------------------------------------------- |
+| Login / sesión, Usuarios, Productos (marcas y categorías) | API real vía BFF                             |
+| Tickets, Base de conocimiento, Comunicaciones             | **Mock en memoria** — se pierden al recargar |
+| Dashboard                                                 | Datos estáticos                              |
 
 ## Agregar una funcionalidad conectada al backend
 
@@ -94,16 +95,16 @@ pnpm install
 pnpm dev           # http://localhost:3000
 ```
 
-| Variable | Descripción | Ejemplo |
-|---|---|---|
-| `API_URL` | URL del backend NestJS (sin `/api`). Solo la usa el servidor y se lee al arrancar, así que la misma imagen sirve para cualquier entorno. En Docker la define `docker-compose`. | `http://localhost:4000` |
-| `JWT_ACCESS_SECRET` | **El mismo valor** que en el backend. Sin él el proxy no puede verificar la sesión | — |
-| `SESSION_COOKIE_SECURE` | Cookies solo por HTTPS. Por defecto `true` en producción; ponlo en `false` solo si sirves por HTTP | `true` |
+| Variable                | Descripción                                                                                                                                                                    | Ejemplo                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `API_URL`               | URL del backend NestJS (sin `/api`). Solo la usa el servidor y se lee al arrancar, así que la misma imagen sirve para cualquier entorno. En Docker la define `docker-compose`. | `http://localhost:4000` |
+| `JWT_ACCESS_SECRET`     | **El mismo valor** que en el backend. Sin él el proxy no puede verificar la sesión                                                                                             | —                       |
+| `SESSION_COOKIE_SECURE` | Cookies solo por HTTPS. Por defecto `true` en producción; ponlo en `false` solo si sirves por HTTP                                                                             | `true`                  |
 
-| Script | Qué hace |
-|---|---|
-| `dev` | Servidor de desarrollo |
+| Script            | Qué hace                                                            |
+| ----------------- | ------------------------------------------------------------------- |
+| `dev`             | Servidor de desarrollo                                              |
 | `build` / `start` | Build de producción (falla si hay errores de TypeScript) / servirlo |
-| `typecheck` | Revisión de tipos sin compilar |
+| `typecheck`       | Revisión de tipos sin compilar                                      |
 
 El build genera la salida `standalone` (`.next/standalone/server.js`), que es lo que ejecuta la imagen de producción.

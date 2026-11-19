@@ -1,46 +1,51 @@
-"use client"
+'use client';
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { Building2, Calendar } from "lucide-react"
-import { useEffect,useState } from "react"
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Building2, Calendar } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { QuickActions } from "@/components/dashboard/quick-actions"
-import { RecentActivityComponent } from "@/components/dashboard/recent-activity"
-import { StatsCards } from "@/components/dashboard/stats-cards"
-import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/contexts/auth-context"
-import { type DashboardStats, getDashboardStats, getRecentActivity, type RecentActivity } from "@/lib/features/dashboard/dashboard.service"
-import { TONE_CLASSES } from "@/lib/shared/tones"
+import { QuickActions } from '@/components/dashboard/quick-actions';
+import { RecentActivityComponent } from '@/components/dashboard/recent-activity';
+import { StatsCards } from '@/components/dashboard/stats-cards';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/auth-context';
+import {
+  type DashboardStats,
+  getDashboardStats,
+  getRecentActivity,
+  type RecentActivity,
+} from '@/lib/features/dashboard/dashboard.service';
+import { TONE_CLASSES } from '@/lib/shared/tones';
 
 export default function DashboardPage() {
-  const { user } = useAuth()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuth();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadDashboardData = async () => {
-      if (!user) return
+      if (!user) return;
 
       try {
-        setIsLoading(true)
-        const dashboardStats = await getDashboardStats(user.id, user.role, user.department || "")
-        const activity = getRecentActivity(user.id, user.role, user.department || "")
+        setIsLoading(true);
+        const dashboardStats = await getDashboardStats(user.id, user.role, user.department || '');
+        const activity = getRecentActivity(user.id, user.role, user.department || '');
 
-        setStats(dashboardStats)
-        setRecentActivity(activity)
+        setStats(dashboardStats);
+        setRecentActivity(activity);
       } catch (error) {
-        console.error("Error cargando datos del dashboard:", error)
+        console.error('Error cargando datos del dashboard:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    void loadDashboardData()
-  }, [user])
+    void loadDashboardData();
+  }, [user]);
 
-  if (!user) return null
+  if (!user) return null;
   if (isLoading || !stats) {
     return (
       <div className="flex h-full items-center justify-center p-6">
@@ -49,24 +54,24 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Cargando dashboard...</p>
         </div>
       </div>
-    )
+    );
   }
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Partial<Record<string, string>> = {
       admin: TONE_CLASSES.primary,
       empleado: TONE_CLASSES.info,
-    }
-    return colors[role] ?? TONE_CLASSES.info
-  }
+    };
+    return colors[role] ?? TONE_CLASSES.info;
+  };
 
   const getRoleLabel = (role: string) => {
     const labels = {
-      admin: "Administrador",
-      empleado: "Empleado de Soporte",
-    }
-    return labels[role as keyof typeof labels] || role
-  }
+      admin: 'Administrador',
+      empleado: 'Empleado de Soporte',
+    };
+    return labels[role as keyof typeof labels] || role;
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -133,5 +138,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

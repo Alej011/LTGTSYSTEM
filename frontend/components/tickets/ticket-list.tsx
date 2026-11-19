@@ -1,17 +1,17 @@
-"use client"
+'use client';
 
-import { formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
-import { Clock,Eye, Headphones, Plus, Search } from "lucide-react"
-import { useEffect,useState } from "react"
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Clock, Eye, Headphones, Plus, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuth } from "@/contexts/auth-context"
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAuth } from '@/contexts/auth-context';
 import {
   getCategoryLabel,
   getPriorityColor,
@@ -20,48 +20,48 @@ import {
   type Ticket,
   type TicketPriority,
   type TicketStatus,
-} from "@/lib/features/tickets/tickets.service"
-import { getResourcePermissions } from "@/lib/shared/permissions"
+} from '@/lib/features/tickets/tickets.service';
+import { getResourcePermissions } from '@/lib/shared/permissions';
 
 interface TicketListProps {
-  onView: (ticket: Ticket) => void
-  onAdd: () => void
+  onView: (ticket: Ticket) => void;
+  onAdd: () => void;
 }
 
 export function TicketList({ onView, onAdd }: TicketListProps) {
-  const { user } = useAuth()
-  const [tickets, setTickets] = useState<Ticket[]>([])
-  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [priorityFilter, setPriorityFilter] = useState("all")
-  const [assignmentFilter, setAssignmentFilter] = useState("all")
+  const { user } = useAuth();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [assignmentFilter, setAssignmentFilter] = useState('all');
 
   useEffect(() => {
-    loadTickets()
-  }, [])
+    loadTickets();
+  }, []);
 
   useEffect(() => {
-    filterTickets()
-  }, [tickets, searchTerm, statusFilter, priorityFilter, assignmentFilter, user])
+    filterTickets();
+  }, [tickets, searchTerm, statusFilter, priorityFilter, assignmentFilter, user]);
 
   const loadTickets = () => {
-    const ticketsData = getTickets()
-    setTickets(ticketsData)
-  }
+    const ticketsData = getTickets();
+    setTickets(ticketsData);
+  };
 
   const filterTickets = () => {
-    if (!user) return
+    if (!user) return;
 
-    let filtered = tickets
+    let filtered = tickets;
 
     // Filter by user role and permissions
-    if (user.role === "empleado") {
+    if (user.role === 'empleado') {
       // Support employees can see all tickets with special filters
-      if (assignmentFilter === "mine") {
-        filtered = filtered.filter((ticket) => ticket.assignedTo === user.id || ticket.createdBy === user.id)
-      } else if (assignmentFilter === "unassigned") {
-        filtered = filtered.filter((ticket) => !ticket.assignedTo)
+      if (assignmentFilter === 'mine') {
+        filtered = filtered.filter((ticket) => ticket.assignedTo === user.id || ticket.createdBy === user.id);
+      } else if (assignmentFilter === 'unassigned') {
+        filtered = filtered.filter((ticket) => !ticket.assignedTo);
       }
     }
 
@@ -71,45 +71,45 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
           ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
           ticket.createdByName.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+      );
     }
 
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((ticket) => ticket.status === statusFilter)
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter((ticket) => ticket.status === statusFilter);
     }
 
-    if (priorityFilter !== "all") {
-      filtered = filtered.filter((ticket) => ticket.priority === priorityFilter)
+    if (priorityFilter !== 'all') {
+      filtered = filtered.filter((ticket) => ticket.priority === priorityFilter);
     }
 
-    setFilteredTickets(filtered)
-  }
+    setFilteredTickets(filtered);
+  };
 
   const getPriorityBadge = (priority: TicketPriority) => {
     return (
       <Badge variant="outline" className={getPriorityColor(priority)}>
         <span className="capitalize">{priority}</span>
       </Badge>
-    )
-  }
+    );
+  };
 
   const getStatusBadge = (status: TicketStatus) => {
     const labels = {
-      abierto: "Abierto",
-      en_progreso: "En Progreso",
-      resuelto: "Resuelto",
-      cerrado: "Cerrado",
-    }
+      abierto: 'Abierto',
+      en_progreso: 'En Progreso',
+      resuelto: 'Resuelto',
+      cerrado: 'Cerrado',
+    };
 
     return (
       <Badge variant="outline" className={getStatusColor(status)}>
         {labels[status]}
       </Badge>
-    )
-  }
+    );
+  };
 
-  const canCreateTickets = getResourcePermissions(user?.role, "tickets").canCreate
-  const canManageTickets = user?.role === "empleado" || user?.role === "admin"
+  const canCreateTickets = getResourcePermissions(user?.role, 'tickets').canCreate;
+  const canManageTickets = user?.role === 'empleado' || user?.role === 'admin';
 
   return (
     <div className="space-y-6">
@@ -122,9 +122,9 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
                 Tickets de Soporte
               </CardTitle>
               <CardDescription>
-                {user?.role === "empleado"
-                  ? "Gestiona tus solicitudes de soporte técnico"
-                  : "Administra y da seguimiento a los tickets de soporte"}
+                {user?.role === 'empleado'
+                  ? 'Gestiona tus solicitudes de soporte técnico'
+                  : 'Administra y da seguimiento a los tickets de soporte'}
               </CardDescription>
             </div>
             {canCreateTickets && (
@@ -242,8 +242,8 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            onView(ticket)
+                            e.stopPropagation();
+                            onView(ticket);
                           }}
                         >
                           <Eye className="h-4 w-4" />
@@ -258,5 +258,5 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
