@@ -54,6 +54,14 @@ describe('apiClient', () => {
     expect(new Headers(init?.headers).get('content-type')).toBe('application/json');
   });
 
+  it.each([false, 0, ''])('sends the falsy JSON body %j instead of dropping it', async (value) => {
+    const fetchMock = mockBff({ 'PATCH /api/settings': () => ({ status: 200, body: {} }) });
+
+    await apiClient.patch('/api/settings', value);
+
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify(value));
+  });
+
   it('sends GET without a body', async () => {
     const fetchMock = mockBff({ 'GET /api/users': () => ({ status: 200, body: [] }) });
 

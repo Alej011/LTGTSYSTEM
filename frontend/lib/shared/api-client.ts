@@ -71,8 +71,8 @@ async function request<T>(method: string, endpoint: string, body?: unknown): Pro
   try {
     const response = await fetch(endpoint, {
       method,
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
+      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
       signal: controller.signal,
     });
 
