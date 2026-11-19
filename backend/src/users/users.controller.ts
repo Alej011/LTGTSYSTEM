@@ -16,7 +16,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private users: UsersService) {}
 
-  @Get('list')
+  @Get()
   @ApiOperation({ summary: 'Listar todos los usuarios (solo ADMIN)' })
   @ApiResponse({ status: 200, description: 'Lista de usuarios' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
@@ -25,7 +25,7 @@ export class UsersController {
     return this.users.findAll();
   }
 
-  @Post('create')
+  @Post()
   @ApiOperation({ summary: 'Crear un nuevo usuario (solo ADMIN)' })
   @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
@@ -36,7 +36,7 @@ export class UsersController {
     return this.users.create(createUserDto);
   }
 
-  @Get('getById/:id')
+  @Get(':id')
   @ApiOperation({ summary: 'Obtener un usuario por ID (solo ADMIN)' })
   @ApiParam({ name: 'id', description: 'ID del usuario', example: 'clxyz123abc' })
   @ApiResponse({ status: 200, description: 'Usuario encontrado' })
@@ -47,7 +47,7 @@ export class UsersController {
     return this.users.findOne(id);
   }
 
-  @Patch('update/:id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Actualizar usuario (solo ADMIN)' })
   @ApiParam({ name: 'id', description: 'ID del usuario', example: 'clxyz123abc' })
   @ApiResponse({ status: 200, description: 'Usuario actualizado' })
