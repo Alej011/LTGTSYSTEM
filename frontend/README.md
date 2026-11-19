@@ -29,29 +29,36 @@ app/
 ├── page.tsx                 # Login
 ├── (app)/                   # Secciones con sidebar fijo (el grupo no cambia las URLs)
 │   ├── layout.tsx           # Sidebar plegable (botón o Ctrl+B) + menú móvil
+│   ├── error.tsx            # Pantalla de error dentro de la app (conserva el sidebar)
 │   └── dashboard/ products/ users/ tickets/ knowledge/ communications/
-├── api/                     # Rutas BFF (auth, users, products, brands, categories)
+├── api/                     # Rutas BFF: misma ruta que el backend (auth, users, products, brands, categories)
+├── error.tsx                # Pantalla de error fuera de la app (login)
 ├── layout.tsx, providers.tsx # Layout raíz, tema (next-themes) y React Query
 ├── globals.css              # Tokens del tema
+features/
+└── products/                # Un dominio completo en una carpeta
+    ├── products.client.ts   # Interfaz para los componentes: hooks de React Query y regla de stock bajo
+    ├── products.schemas.ts  # Zod: validación del BFF (entrada y respuesta)
+    └── components/          # Vista, lista, formulario, detalle y badges
 components/
-├── <módulo>/                # Componentes de cada pantalla (lista, formulario, detalle)
+├── <módulo>/                # Componentes de los módulos que aún no pasan a features/
 ├── ui/                      # Componentes base de shadcn/ui
-└── sidebar.tsx, login-form.tsx, error-boundary.tsx
+└── sidebar.tsx, login-form.tsx, error-fallback.tsx
 contexts/auth-context.tsx    # Usuario actual, login y logout
 lib/
-├── features/<módulo>/       # Servicios: llaman al BFF (o devuelven datos mock)
-├── queries/                 # Hooks de React Query (auth, products)
-├── schemas/                 # Esquemas Zod y mapeos backend ↔ frontend
+├── features/<módulo>/       # Servicios que aún no pasan a features/ (BFF o datos mock)
+├── queries/                 # Hooks de React Query de auth
+├── schemas/                 # Esquemas Zod de auth, usuarios y comunes
 └── shared/
     ├── api-client.ts        # Cliente HTTP hacia el BFF (timeout, errores tipados, 401 → login)
-    ├── api-config.ts        # URL del backend y endpoints
+    ├── api-config.ts        # URL del backend y timeout
     ├── permissions.ts       # Matriz de permisos por rol (fuente única)
-    ├── tones.ts             # Clases de badge por significado (info, success, warning, danger...)
-    └── error-handler.ts
+    └── tones.ts             # Clases de badge por significado (info, success, warning, danger...)
 lib/server/                  # Solo servidor (import "server-only")
 ├── backend.ts               # Helper de las rutas BFF: cookie → Bearer, IP, timeout, validación Zod
 └── session.ts               # Cookies de sesión, verificación del JWT y refresh
 proxy.ts                     # Protección de rutas y renovación de sesión
+test/                        # Utilidades de test: BFF simulado sobre fetch y render con React Query
 ```
 
 ## Tema y estilos

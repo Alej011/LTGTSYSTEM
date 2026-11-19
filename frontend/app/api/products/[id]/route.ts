@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { BackendProductSchema, UpdateProductRequestSchema } from '@/lib/schemas/product.schema';
+import { ProductSchema, UpdateProductRequestSchema } from '@/features/products/products.schemas';
 import { callBackend, parseBody, proxyToBackend } from '@/lib/server/backend';
 
 type Context = { params: Promise<{ id: string }> };
@@ -9,7 +9,7 @@ export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
   return proxyToBackend({
     path: `/api/products/${id}`,
-    schema: BackendProductSchema,
+    schema: ProductSchema,
     errorMessage: 'Error al obtener producto',
   });
 }
@@ -23,7 +23,7 @@ export async function PATCH(request: Request, { params }: Context) {
     path: `/api/products/${id}`,
     method: 'PATCH',
     body: body.data,
-    schema: BackendProductSchema,
+    schema: ProductSchema,
     errorMessage: 'Error al actualizar producto',
   });
 }

@@ -1,13 +1,13 @@
 'use client';
 
 import { Box, Calendar, DollarSign, Hash, Package, Tag } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { getProductById, type Product } from '@/lib/features/products/products.service';
 import { ApiClientError } from '@/lib/shared/api-client';
-import { TONE_CLASSES } from '@/lib/shared/tones';
+
+import { useProduct } from '../products.client';
+import { ProductStatusBadge, StockBadge } from './product-badges';
 
 interface ProductDetailModalProps {
   productId: string | null;
@@ -16,69 +16,8 @@ interface ProductDetailModalProps {
 }
 
 export function ProductDetailModal({ productId, open, onOpenChange }: ProductDetailModalProps) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState('');
-
-  useEffect(() => {
-    if (productId && open) {
-      void loadProductDetails();
-    }
-  }, [productId, open]);
-
-  const loadProductDetails = async () => {
-    if (!productId) return;
-
-    setIsLoading(true);
-    setLoadError('');
-    setProduct(null);
-    try {
-      setProduct(await getProductById(productId));
-    } catch (error) {
-      setLoadError(
-        error instanceof ApiClientError ? error.getUserMessage() : 'No se pudo cargar la información del producto',
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const tones: Partial<Record<string, string>> = {
-      active: TONE_CLASSES.success,
-      inactive: TONE_CLASSES.neutral,
-      discontinued: TONE_CLASSES.danger,
-    };
-
-    const labels = {
-      active: 'Activo',
-      inactive: 'Inactivo',
-      discontinued: 'Descontinuado',
-    };
-
-    return (
-      <Badge variant="outline" className={tones[status] ?? TONE_CLASSES.neutral}>
-        {labels[status as keyof typeof labels] || status}
-      </Badge>
-    );
-  };
-
-  const getStockBadge = (stock: number) => {
-    if (stock === 0) {
-      return (
-        <Badge variant="outline" className={TONE_CLASSES.danger}>
-          Sin stock
-        </Badge>
-      );
-    } else if (stock <= 5) {
-      return (
-        <Badge variant="outline" className={TONE_CLASSES.warning}>
-          Stock bajo
-        </Badge>
-      );
-    }
-    return <Badge variant="outline">{stock} unidades</Badge>;
-  };
+  const product = useProduct(open ? productId : null);
+  const item = product.data;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,18 +30,24 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
           <DialogDescription>Información completa del producto</DialogDescription>
         </DialogHeader>
 
-        {isLoading ? (
+        {product.isError ? (
+          <div role="alert" className="text-center py-8 text-destructive">
+            {product.error instanceof ApiClientError
+              ? product.error.getUserMessage()
+              : 'No se pudo cargar la información del producto'}
+          </div>
+        ) : product.isPending ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
             <span className="text-muted-foreground">Cargando detalles...</span>
           </div>
-        ) : product ? (
+        ) : item ? (
           <div className="space-y-6">
             {/* Información básica */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{product.description}</p>
+                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -111,7 +56,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
                     <Hash className="h-4 w-4" />
                     <span>SKU</span>
                   </div>
-                  <p className="font-mono text-sm font-medium">{product.sku}</p>
+                  <p className="font-mono text-sm font-medium">{item.sku}</p>
                 </div>
 
                 <div className="space-y-1">
@@ -119,7 +64,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
                     <Tag className="h-4 w-4" />
                     <span>Marca</span>
                   </div>
-                  <p className="text-sm font-medium">{product.brand?.name}</p>
+                  <p className="text-sm font-medium">{item.brand.name}</p>
                 </div>
               </div>
             </div>
@@ -131,7 +76,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
                   <DollarSign className="h-4 w-4" />
                   <span>Precio</span>
                 </div>
-                <p className="text-2xl font-bold">${product.price.toFixed(2)}</p>
+                <p className="text-2xl font-bold">Q{item.price.toFixed(2)}</p>
               </div>
 
               <div className="space-y-1">
@@ -139,7 +84,9 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
                   <Box className="h-4 w-4" />
                   <span>Stock</span>
                 </div>
-                <div className="mt-2">{getStockBadge(product.stock)}</div>
+                <div className="mt-2">
+                  <StockBadge stock={item.stock} />
+                </div>
               </div>
             </div>
 
@@ -148,7 +95,7 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Categorías</h4>
                 <div className="flex gap-2 flex-wrap">
-                  {product.categories.map((cat) => (
+                  {item.categories.map((cat) => (
                     <Badge key={cat.id} variant="outline">
                       {cat.name}
                     </Badge>
@@ -158,7 +105,9 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Estado</h4>
-                <div>{getStatusBadge(product.status)}</div>
+                <div>
+                  <ProductStatusBadge status={item.status} />
+                </div>
               </div>
             </div>
 
@@ -166,17 +115,13 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
             <div className="pt-4 border-t space-y-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                <span>Creado: {new Date(product.createdAt).toLocaleDateString('es-ES')}</span>
+                <span>Creado: {new Date(item.createdAt).toLocaleDateString('es-ES')}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                <span>Actualizado: {new Date(product.updatedAt).toLocaleDateString('es-ES')}</span>
+                <span>Actualizado: {new Date(item.updatedAt).toLocaleDateString('es-ES')}</span>
               </div>
             </div>
-          </div>
-        ) : loadError ? (
-          <div role="alert" className="text-center py-8 text-destructive">
-            {loadError}
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">El producto no existe o fue eliminado</div>

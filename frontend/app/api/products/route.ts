@@ -1,11 +1,11 @@
 import type { NextRequest } from 'next/server';
 
 import {
-  BackendProductSchema,
   CreateProductRequestSchema,
   PaginatedProductsSchema,
   ProductFiltersSchema,
-} from '@/lib/schemas/product.schema';
+  ProductSchema,
+} from '@/features/products/products.schemas';
 import { errorResponse, parseBody, proxyToBackend } from '@/lib/server/backend';
 
 const NUMERIC_FILTERS = new Set(['maxStock', 'page', 'limit']);
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     path: '/api/products',
     method: 'POST',
     body: body.data,
-    schema: BackendProductSchema,
+    schema: ProductSchema,
     status: 201,
     errorMessage: 'Error al crear producto',
   });

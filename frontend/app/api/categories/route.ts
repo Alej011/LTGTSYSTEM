@@ -1,4 +1,4 @@
-import { CategoriesResponseSchema } from '@/lib/schemas/product.schema';
+import { CategoriesResponseSchema } from '@/features/products/products.schemas';
 import { proxyToBackend } from '@/lib/server/backend';
 
 export function GET() {

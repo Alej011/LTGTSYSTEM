@@ -1,4 +1,4 @@
-import { BrandsResponseSchema } from '@/lib/schemas/product.schema';
+import { BrandsResponseSchema } from '@/features/products/products.schemas';
 import { proxyToBackend } from '@/lib/server/backend';
 
 export function GET() {
