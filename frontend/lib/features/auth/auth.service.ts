@@ -3,20 +3,11 @@ import { apiClient, ApiClientError } from '@/lib/shared/api-client';
 /**
  * Re-export types from schemas for convenience
  */
-export type { BackendRole, LoginRequest, LoginResult, User, FrontendRole as UserRole } from '@/lib/schemas/auth.schema';
+export type { BackendRole, LoginRequest, User, FrontendRole as UserRole } from '@/lib/schemas/auth.schema';
 export { mapBackendRoleToFrontend, mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
 
 // Import types for local use in this file
 import type { FrontendRole as UserRole, User } from '@/lib/schemas/auth.schema';
-
-/**
- * Estado de autenticación
- */
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
 
 /**
  * Inicia sesión a través del BFF. Los tokens quedan en cookies HttpOnly;

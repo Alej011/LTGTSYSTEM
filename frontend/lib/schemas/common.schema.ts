@@ -4,17 +4,6 @@
 import { z } from 'zod';
 
 /**
- * API Response wrapper
- */
-export const ApiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
-  z.object({
-    data: dataSchema.optional(),
-    message: z.string().optional(),
-    error: z.string().optional(),
-    statusCode: z.number().optional(),
-  });
-
-/**
  * Pagination metadata (matches backend response exactly)
  */
 export const PaginationMetadataSchema = z.object({
@@ -27,27 +16,6 @@ export const PaginationMetadataSchema = z.object({
 });
 
 export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>;
-
-/**
- * Paginated response wrapper
- */
-export const PaginatedResponseSchema = <T extends z.ZodType>(itemSchema: T) =>
-  z.object({
-    data: z.array(itemSchema),
-    meta: PaginationMetadataSchema,
-  });
-
-/**
- * Common error response
- */
-export const ErrorResponseSchema = z.object({
-  message: z.string(),
-  error: z.string().optional(),
-  statusCode: z.number(),
-  field: z.string().optional(), // For validation errors
-});
-
-export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
 /**
  * Date string that transforms to Date object

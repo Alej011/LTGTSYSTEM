@@ -50,23 +50,6 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 /**
- * Obtiene un usuario por ID
- * Now calls BFF endpoint which validates with Zod and transforms roles
- */
-export const getUserById = async (id: string): Promise<User | null> => {
-  try {
-    // Call BFF endpoint (same domain) - already validated and transformed
-    const response = await apiClient.get<User>(`/api/users/getById/${id}`);
-    return response;
-  } catch (error) {
-    if (error instanceof ApiClientError) {
-      console.error(`Error al obtener usuario ${id}:`, error.message);
-    }
-    return null;
-  }
-};
-
-/**
  * Crea un nuevo usuario
  * Now calls BFF endpoint which validates with Zod and transforms roles
  */
