@@ -7,7 +7,7 @@ import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from 
 import { EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
 
 /**
- * Backend user response schema (from /api/users/list)
+ * Backend user response schema (GET /api/users)
  */
 export const BackendUserListItemSchema = z.object({
   id: UUIDSchema, // CUID from backend

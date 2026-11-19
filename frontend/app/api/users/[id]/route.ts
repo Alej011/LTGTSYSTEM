@@ -4,7 +4,6 @@ import {
   UpdateUserRequestSchema,
 } from '@/lib/schemas/user.schema';
 import { parseBody, proxyToBackend } from '@/lib/server/backend';
-import { API_ENDPOINTS } from '@/lib/shared/api-config';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,7 +11,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (body.response) return body.response;
 
   return proxyToBackend({
-    path: API_ENDPOINTS.users.update(id),
+    path: `/api/users/${id}`,
     method: 'PATCH',
     body: body.data,
     schema: BackendUserListItemSchema,

@@ -2,14 +2,13 @@ import { NextResponse } from 'next/server';
 
 import { BackendProductSchema, UpdateProductRequestSchema } from '@/lib/schemas/product.schema';
 import { callBackend, parseBody, proxyToBackend } from '@/lib/server/backend';
-import { API_ENDPOINTS } from '@/lib/shared/api-config';
 
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
   return proxyToBackend({
-    path: API_ENDPOINTS.products.detail(id),
+    path: `/api/products/${id}`,
     schema: BackendProductSchema,
     errorMessage: 'Error al obtener producto',
   });
@@ -21,7 +20,7 @@ export async function PATCH(request: Request, { params }: Context) {
   if (body.response) return body.response;
 
   return proxyToBackend({
-    path: API_ENDPOINTS.products.update(id),
+    path: `/api/products/${id}`,
     method: 'PATCH',
     body: body.data,
     schema: BackendProductSchema,
@@ -32,7 +31,7 @@ export async function PATCH(request: Request, { params }: Context) {
 export async function DELETE(_request: Request, { params }: Context) {
   const { id } = await params;
   const result = await callBackend({
-    path: API_ENDPOINTS.products.delete(id),
+    path: `/api/products/${id}`,
     method: 'DELETE',
     errorMessage: 'Error al eliminar producto',
   });
