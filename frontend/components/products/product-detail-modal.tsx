@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { getProductById,type Product } from "@/lib/features/products/products.service"
+import { ApiClientError } from "@/lib/shared/api-client"
 import { TONE_CLASSES } from "@/lib/shared/tones"
 
 interface ProductDetailModalProps {
@@ -23,6 +24,7 @@ interface ProductDetailModalProps {
 export function ProductDetailModal({ productId, open, onOpenChange }: ProductDetailModalProps) {
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState("")
 
   useEffect(() => {
     if (productId && open) {
@@ -33,12 +35,15 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
   const loadProductDetails = async () => {
     if (!productId) return
 
+    setIsLoading(true)
+    setLoadError("")
+    setProduct(null)
     try {
-      setIsLoading(true)
-      const data = await getProductById(productId)
-      setProduct(data)
+      setProduct(await getProductById(productId))
     } catch (error) {
-      console.error("Error cargando detalles del producto:", error)
+      setLoadError(
+        error instanceof ApiClientError ? error.getUserMessage() : "No se pudo cargar la información del producto",
+      )
     } finally {
       setIsLoading(false)
     }
@@ -167,10 +172,12 @@ export function ProductDetailModal({ productId, open, onOpenChange }: ProductDet
               </div>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No se pudo cargar la información del producto
+        ) : loadError ? (
+          <div role="alert" className="text-center py-8 text-destructive">
+            {loadError}
           </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">El producto no existe o fue eliminado</div>
         )}
       </DialogContent>
     </Dialog>
