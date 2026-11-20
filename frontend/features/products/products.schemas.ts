@@ -4,6 +4,7 @@
 import { z } from 'zod';
 
 import { PaginationMetadataSchema, UUIDSchema } from '@/lib/schemas/common.schema';
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
 /**
  * Product status enum
@@ -17,59 +18,51 @@ export const ProductSortBySchema = z.enum(['name', 'price', 'stock', 'createdAt'
 
 export const SortOrderSchema = z.enum(['asc', 'desc']);
 
-/**
- * Brand schema (CUIDs from backend)
- */
-export const BrandSchema = z.object({
-  id: z.string().min(1), // CUID
-  name: z.string().min(1, 'El nombre de la marca es requerido'),
-  description: z.string().optional(),
-  createdAt: z.string(), // ISO string from backend
-  updatedAt: z.string(), // ISO string from backend
-});
+// Respuestas del backend que valida el BFF; cada una está atada a su tipo del contrato
 
-/**
- * Category schema (CUIDs from backend)
- */
-export const CategorySchema = z.object({
-  id: z.string().min(1), // CUID
-  name: z.string().min(1, 'El nombre de la categoría es requerido'),
-  description: z.string().optional(),
-});
-
-/**
- * Product as the backend returns it; the BFF validates every response with it
- */
-export const ProductSchema = z.object({
-  id: z.string().min(1), // CUID from backend
-  name: z.string().min(1),
-  description: z.string(),
-  sku: z.string().min(1),
-  price: z.number().nonnegative(),
-  stock: z.number().int().nonnegative(),
-  status: ProductStatusSchema,
-  brandId: z.string().min(1), // CUID
-  brand: z.object({
-    id: z.string().min(1), // CUID
-    name: z.string(),
+export const BrandSchema = matchesContract<ApiSchemas['BrandDto']>()(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
   }),
-  categories: z.array(
-    z.object({
-      id: z.string().min(1), // CUID
-      name: z.string(),
-    }),
-  ),
-  createdAt: z.string(), // ISO 8601 string from backend
-  updatedAt: z.string(), // ISO 8601 string from backend
-});
+);
 
-/**
- * Paginated products response
- */
-export const PaginatedProductsSchema = z.object({
-  data: z.array(ProductSchema),
-  meta: PaginationMetadataSchema,
-});
+export const CategorySchema = matchesContract<ApiSchemas['CategoryDto']>()(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+);
+
+export const ProductSchema = matchesContract<ApiSchemas['ProductResponseDto']>()(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string(),
+    sku: z.string().min(1),
+    price: z.number().nonnegative(),
+    stock: z.number().int().nonnegative(),
+    status: ProductStatusSchema,
+    brandId: z.string().min(1),
+    brand: z.object({ id: z.string().min(1), name: z.string() }),
+    categories: z.array(z.object({ id: z.string().min(1), name: z.string() })),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+);
+
+export const PaginatedProductsSchema = matchesContract<ApiSchemas['PaginatedProductsDto']>()(
+  z.object({
+    data: z.array(ProductSchema),
+    meta: PaginationMetadataSchema,
+  }),
+);
 
 /**
  * Product filters schema
@@ -114,12 +107,6 @@ export const UpdateProductRequestSchema = z.object({
   categoryIds: z.array(z.string().min(1)).min(1, 'Debe seleccionar al menos una categoría').optional(), // CUIDs
 });
 
-/**
- * Brands list response schema
- */
 export const BrandsResponseSchema = z.array(BrandSchema);
 
-/**
- * Categories list response schema
- */
 export const CategoriesResponseSchema = z.array(CategorySchema);

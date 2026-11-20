@@ -3,19 +3,18 @@
  */
 import { z } from 'zod';
 
-/**
- * Pagination metadata (matches backend response exactly)
- */
-export const PaginationMetadataSchema = z.object({
-  page: z.number().int().positive(),
-  limit: z.number().int().positive(),
-  total: z.number().int().nonnegative(),
-  totalPages: z.number().int().nonnegative(),
-  hasPrevPage: z.boolean(),
-  hasNextPage: z.boolean(),
-});
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
-export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>;
+export const PaginationMetadataSchema = matchesContract<ApiSchemas['PaginationMetadata']>()(
+  z.object({
+    page: z.number().int().positive(),
+    limit: z.number().int().positive(),
+    total: z.number().int().nonnegative(),
+    totalPages: z.number().int().nonnegative(),
+    hasPrevPage: z.boolean(),
+    hasNextPage: z.boolean(),
+  }),
+);
 
 /**
  * Date string that transforms to Date object

@@ -5,6 +5,7 @@ import type { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { API_BASE_URL } from '@/lib/shared/api-config';
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 import { ROLES } from '@/lib/shared/roles';
 
 export const ACCESS_COOKIE = 'ltgt_access_token';
@@ -23,18 +24,20 @@ const AccessPayloadSchema = z.object({
 
 export type AccessPayload = z.infer<typeof AccessPayloadSchema>;
 
-export const SessionTokensSchema = z.object({
-  accessToken: z.string(),
-  accessTokenExpiresAt: z.iso.datetime(),
-  refreshToken: z.string().optional(),
-  refreshTokenExpiresAt: z.iso.datetime().optional(),
-  user: z.object({
-    id: z.string(),
-    email: z.string(),
-    name: z.string(),
-    role: z.enum(ROLES),
+export const SessionTokensSchema = matchesContract<ApiSchemas['SessionTokensDto']>()(
+  z.object({
+    accessToken: z.string(),
+    accessTokenExpiresAt: z.iso.datetime(),
+    refreshToken: z.string().optional(),
+    refreshTokenExpiresAt: z.iso.datetime().optional(),
+    user: z.object({
+      id: z.string(),
+      email: z.string(),
+      name: z.string(),
+      role: z.enum(ROLES),
+    }),
   }),
-});
+);
 
 export type SessionTokens = z.infer<typeof SessionTokensSchema>;
 

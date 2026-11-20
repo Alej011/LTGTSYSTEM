@@ -5,16 +5,17 @@ import { z } from 'zod';
 
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
 import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
-/**
- * Backend user response schema (GET /api/users)
- */
-export const BackendUserListItemSchema = z.object({
-  id: UUIDSchema, // CUID from backend
-  email: EmailSchema,
-  name: z.string().min(1),
-  role: BackendRoleSchema, // ADMIN or SUPPORT from backend
-});
+/** Usuario como lo devuelve el backend en /users */
+export const BackendUserListItemSchema = matchesContract<ApiSchemas['UserDto']>()(
+  z.object({
+    id: UUIDSchema,
+    email: EmailSchema,
+    name: z.string().min(1),
+    role: BackendRoleSchema,
+  }),
+);
 
 export type BackendUserListItem = z.infer<typeof BackendUserListItemSchema>;
 
