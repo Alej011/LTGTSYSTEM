@@ -7,7 +7,7 @@ import { ArticleList } from '@/components/knowledge/article-list';
 import { ArticleViewer } from '@/components/knowledge/article-viewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { KnowledgeArticle } from '@/lib/features/knowledge/knowledge.service';
-import { useCan } from '@/lib/shared/use-can';
+import { useCan } from '@/shared/use-can';
 
 type View = 'browse' | 'manage' | 'form' | 'view';
 

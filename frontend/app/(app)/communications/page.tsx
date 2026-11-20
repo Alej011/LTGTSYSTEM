@@ -7,7 +7,7 @@ import { CommunicationList } from '@/components/communications/communication-lis
 import { CommunicationViewer } from '@/components/communications/communication-viewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Communication } from '@/lib/features/communications/communications.service';
-import { useCan } from '@/lib/shared/use-can';
+import { useCan } from '@/shared/use-can';
 
 type View = 'browse' | 'manage' | 'form' | 'view';
 

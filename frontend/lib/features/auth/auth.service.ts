@@ -1,4 +1,4 @@
-import { apiClient, ApiClientError } from '@/lib/shared/api-client';
+import { apiClient, ApiClientError } from '@/shared/api/api-client';
 
 /**
  * Re-export types from schemas for convenience

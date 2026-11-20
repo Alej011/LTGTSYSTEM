@@ -32,9 +32,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/auth-context';
-import type { Resource } from '@/lib/shared/permissions';
-import { useCan } from '@/lib/shared/use-can';
-import { cn } from '@/lib/shared/utils';
+import { cn } from '@/shared/lib/utils';
+import type { Resource } from '@/shared/permissions';
+import { useCan } from '@/shared/use-can';
 
 const navigation: { name: string; href: string; icon: typeof Package; resource: Resource }[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, resource: 'dashboard' },

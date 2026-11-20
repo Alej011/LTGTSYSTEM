@@ -21,7 +21,7 @@ import {
   type KnowledgeArticle,
   updateArticle,
 } from '@/lib/features/knowledge/knowledge.service';
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 
 interface ArticleFormProps {
   article?: KnowledgeArticle;

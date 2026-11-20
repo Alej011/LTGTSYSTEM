@@ -21,7 +21,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from '@/lib/features/tickets/tickets.service';
-import { useCan } from '@/lib/shared/use-can';
+import { useCan } from '@/shared/use-can';
 
 interface TicketListProps {
   onView: (ticket: Ticket) => void;

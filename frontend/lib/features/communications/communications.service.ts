@@ -1,4 +1,4 @@
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 export type CommunicationType = 'anuncio' | 'politica' | 'evento' | 'urgente' | 'general';
 export type CommunicationStatus = 'draft' | 'published' | 'archived';
 

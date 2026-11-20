@@ -1,4 +1,4 @@
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 export type TicketStatus = 'abierto' | 'en_progreso' | 'resuelto' | 'cerrado';
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 export type TicketCategory = 'hardware' | 'software' | 'red' | 'acceso' | 'otro';

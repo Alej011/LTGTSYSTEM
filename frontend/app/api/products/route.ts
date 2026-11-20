@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import { PaginatedProductsSchema, ProductSchema } from '@/features/products/products.schemas';
-import { proxyToBackend, readJsonBody } from '@/lib/server/backend';
+import { proxyToBackend, readJsonBody } from '@/shared/api/bff.server';
 
 // Los filtros llegan tal cual al backend, que los valida con QueryProductsDto
 export function GET(request: NextRequest) {

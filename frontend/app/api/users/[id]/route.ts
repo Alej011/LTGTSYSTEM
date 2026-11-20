@@ -1,5 +1,5 @@
 import { BackendUserListItemSchema, mapBackendUserListItemToFrontend } from '@/features/users/users.schemas';
-import { proxyToBackend, readJsonBody } from '@/lib/server/backend';
+import { proxyToBackend, readJsonBody } from '@/shared/api/bff.server';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

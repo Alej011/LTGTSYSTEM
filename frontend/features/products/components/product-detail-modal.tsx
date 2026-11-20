@@ -4,7 +4,7 @@ import { Box, Calendar, DollarSign, Hash, Package, Tag } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ApiClientError } from '@/lib/shared/api-client';
+import { ApiClientError } from '@/shared/api/api-client';
 
 import { useProduct } from '../products.client';
 import { ProductStatusBadge, StockBadge } from './product-badges';

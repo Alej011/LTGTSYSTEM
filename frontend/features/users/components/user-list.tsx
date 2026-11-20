@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ApiClientError } from '@/lib/shared/api-client';
-import { TONE_CLASSES } from '@/lib/shared/tones';
-import { useCan } from '@/lib/shared/use-can';
+import { ApiClientError } from '@/shared/api/api-client';
+import { TONE_CLASSES } from '@/shared/lib/tones';
+import { useCan } from '@/shared/use-can';
 
 import { type User, useUsers } from '../users.client';
 

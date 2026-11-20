@@ -1,5 +1,5 @@
 import { CategoriesResponseSchema } from '@/features/products/products.schemas';
-import { proxyToBackend } from '@/lib/server/backend';
+import { proxyToBackend } from '@/shared/api/bff.server';
 
 export function GET() {
   return proxyToBackend({

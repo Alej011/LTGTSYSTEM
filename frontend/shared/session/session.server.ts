@@ -4,9 +4,9 @@ import { jwtVerify } from 'jose';
 import type { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { API_BASE_URL } from '@/lib/shared/api-config';
-import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
-import { ROLES } from '@/lib/shared/roles';
+import { API_BASE_URL } from '@/shared/api/api-config';
+import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
+import { ROLES } from '@/shared/roles';
 
 export const ACCESS_COOKIE = 'ltgt_access_token';
 export const REFRESH_COOKIE = 'ltgt_refresh_token';

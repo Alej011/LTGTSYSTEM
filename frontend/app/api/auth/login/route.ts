@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import { mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
-import { callBackend, readJsonBody } from '@/lib/server/backend';
-import { SessionTokensSchema, setSessionCookies } from '@/lib/server/session';
+import { callBackend, readJsonBody } from '@/shared/api/bff.server';
+import { SessionTokensSchema, setSessionCookies } from '@/shared/session/session.server';
 
 export async function POST(request: Request) {
   const body = await readJsonBody(request);

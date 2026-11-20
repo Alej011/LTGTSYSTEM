@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { canOpenPage } from '@/shared/permissions';
 import {
   ACCESS_COOKIE,
   type AccessPayload,
@@ -11,8 +12,7 @@ import {
   type SessionTokens,
   setSessionCookies,
   verifyAccessToken,
-} from '@/lib/server/session';
-import { canOpenPage } from '@/lib/shared/permissions';
+} from '@/shared/session/session.server';
 
 const PROTECTED_ROUTES = ['/dashboard', '/products', '/users', '/tickets', '/knowledge', '/communications'];
 // Rutas BFF que gestionan la sesión por sí mismas

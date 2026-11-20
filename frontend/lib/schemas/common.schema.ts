@@ -3,7 +3,7 @@
  */
 import { z } from 'zod';
 
-import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
+import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
 
 export const PaginationMetadataSchema = matchesContract<ApiSchemas['PaginationMetadata']>()(
   z.object({

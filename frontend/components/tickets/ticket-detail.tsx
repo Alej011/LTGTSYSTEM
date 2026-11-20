@@ -24,7 +24,7 @@ import {
   type TicketStatus,
   updateTicket,
 } from '@/lib/features/tickets/tickets.service';
-import { useCan } from '@/lib/shared/use-can';
+import { useCan } from '@/shared/use-can';
 
 interface TicketDetailProps {
   ticket: Ticket;

@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
 import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
-import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
+import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
 
 /** Usuario como lo devuelve el backend en /users */
 export const BackendUserListItemSchema = matchesContract<ApiSchemas['UserDto']>()(

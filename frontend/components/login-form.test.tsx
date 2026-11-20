@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useAuth } from '@/contexts/auth-context';
-import { ApiClientError } from '@/lib/shared/api-client';
+import { ApiClientError } from '@/shared/api/api-client';
 
 import { LoginForm } from './login-form';
 

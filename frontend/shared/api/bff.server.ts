@@ -4,9 +4,8 @@ import { cookies, headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { z } from 'zod';
 
-import { API_BASE_URL, API_TIMEOUT } from '@/lib/shared/api-config';
-
-import { ACCESS_COOKIE, getClientIp } from './session';
+import { API_BASE_URL, API_TIMEOUT } from '@/shared/api/api-config';
+import { ACCESS_COOKIE, getClientIp } from '@/shared/session/session.server';
 
 type BackendErrorBody = { message?: string | string[]; error?: string };
 

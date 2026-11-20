@@ -7,7 +7,7 @@ import { Building2, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
 import type { UserRole } from '@/lib/features/auth/auth.service';
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 
 import { getDashboardStats, getRecentActivity } from '../dashboard.data';
 import { QuickActions } from './quick-actions';

@@ -3,8 +3,8 @@
  */
 import { z } from 'zod';
 
-import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
-import { ROLES } from '@/lib/shared/roles';
+import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
+import { ROLES } from '@/shared/roles';
 
 import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
 

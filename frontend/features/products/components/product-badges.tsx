@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 
 import { type ProductStatus, stockLevel } from '../products.client';
 

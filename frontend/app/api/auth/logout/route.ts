@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-import { callBackend } from '@/lib/server/backend';
-import { clearSessionCookies, REFRESH_COOKIE } from '@/lib/server/session';
+import { callBackend } from '@/shared/api/bff.server';
+import { clearSessionCookies, REFRESH_COOKIE } from '@/shared/session/session.server';
 
 export async function POST() {
   const refreshToken = (await cookies()).get(REFRESH_COOKIE)?.value;

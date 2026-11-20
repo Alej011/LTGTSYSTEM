@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { ProductSchema } from '@/features/products/products.schemas';
-import { callBackend, proxyToBackend, readJsonBody } from '@/lib/server/backend';
+import { callBackend, proxyToBackend, readJsonBody } from '@/shared/api/bff.server';
 
 type Context = { params: Promise<{ id: string }> };
 

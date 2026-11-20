@@ -18,7 +18,7 @@ import {
   type KnowledgeArticle,
   rateArticle,
 } from '@/lib/features/knowledge/knowledge.service';
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 
 interface ArticleViewerProps {
   article: KnowledgeArticle;

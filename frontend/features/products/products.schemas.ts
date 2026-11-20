@@ -5,7 +5,7 @@
 import { z } from 'zod';
 
 import { PaginationMetadataSchema } from '@/lib/schemas/common.schema';
-import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
+import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
 
 export const ProductStatusSchema = matchesContract<ApiSchemas['ProductStatus']>()(
   z.enum(['active', 'inactive', 'discontinued']),

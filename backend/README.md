@@ -37,7 +37,7 @@ Cada módulo sigue el patrón `controller` (rutas + Swagger) → `service` (lóg
 
 ## Contrato OpenAPI
 
-`openapi.json` es el contrato con el frontend: de él salen los tipos que usa el BFF (`frontend/lib/shared/api-schema.d.ts`). Se genera desde los controladores y DTOs con `pnpm openapi`, sin base de datos ni servidor.
+`openapi.json` es el contrato con el frontend: de él salen los tipos que usa el BFF (`frontend/shared/api/schema.d.ts`). Se genera desde los controladores y DTOs con `pnpm openapi`, sin base de datos ni servidor.
 
 - El plugin de `@nestjs/swagger` (en `nest-cli.json`) lee los tipos de los archivos `*.dto.ts`: un campo con `?` es opcional y uno con `| null` admite null. Los decoradores solo hacen falta para ejemplos, enums con nombre (`enumName`) o formatos.
 - Cada ruta declara su DTO de respuesta como tipo de retorno del controlador y en el `@ApiResponse` de éxito.

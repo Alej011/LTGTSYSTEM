@@ -3,7 +3,7 @@ import {
   mapBackendUserListItemToFrontend,
   UsersListResponseSchema,
 } from '@/features/users/users.schemas';
-import { proxyToBackend, readJsonBody } from '@/lib/server/backend';
+import { proxyToBackend, readJsonBody } from '@/shared/api/bff.server';
 
 export function GET() {
   return proxyToBackend({

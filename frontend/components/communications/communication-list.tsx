@@ -21,8 +21,8 @@ import {
   isRead,
   markAsRead,
 } from '@/lib/features/communications/communications.service';
-import { TONE_CLASSES } from '@/lib/shared/tones';
-import { useCan } from '@/lib/shared/use-can';
+import { TONE_CLASSES } from '@/shared/lib/tones';
+import { useCan } from '@/shared/use-can';
 
 interface CommunicationListProps {
   onView: (communication: Communication) => void;
