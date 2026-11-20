@@ -34,6 +34,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/shared/lib/utils';
 import type { Resource } from '@/shared/permissions';
+import { ROLE_LABELS } from '@/shared/roles';
 import { useCan } from '@/shared/use-can';
 
 const navigation: { name: string; href: string; icon: typeof Package; resource: Resource }[] = [
@@ -50,8 +51,6 @@ const THEME_OPTIONS = [
   { value: 'dark', label: 'Oscuro', icon: Moon },
   { value: 'system', label: 'Sistema', icon: Monitor },
 ];
-
-const ROLE_LABELS: Record<string, string> = { admin: 'Administrador', empleado: 'Soporte' };
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -161,7 +160,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
       <div className={cn('space-y-1 border-t border-sidebar-border', collapsed ? 'p-2' : 'p-3')}>
         {collapsed ? (
-          <WithTooltip label={`${user.name} · ${ROLE_LABELS[user.role] ?? user.role}`} show>
+          <WithTooltip label={`${user.name} · ${ROLE_LABELS[user.role]}`} show>
             <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
               {initials(user.name)}
             </div>
@@ -170,7 +169,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
           <div className="mb-2 px-3 py-2">
             <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            <p className="text-xs text-muted-foreground">{ROLE_LABELS[user.role] ?? user.role}</p>
+            <p className="text-xs text-muted-foreground">{ROLE_LABELS[user.role]}</p>
           </div>
         )}
 

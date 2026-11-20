@@ -8,35 +8,8 @@ import { ROLES } from '@/shared/roles';
 
 import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
 
-/**
- * Backend role enum: same values as Prisma Role, the backend rejects any other casing
- */
-export const BackendRoleSchema = z.enum(ROLES);
-export type BackendRole = z.infer<typeof BackendRoleSchema>;
-
-/**
- * Frontend role enum (internal representation)
- */
-export const FrontendRoleSchema = z.enum(['admin', 'empleado']);
-export type FrontendRole = z.infer<typeof FrontendRoleSchema>;
-
-const BACKEND_TO_FRONTEND_ROLE: Record<BackendRole, FrontendRole> = {
-  ADMIN: 'admin',
-  SUPPORT: 'empleado',
-};
-
-export function mapBackendRoleToFrontend(backendRole: BackendRole): FrontendRole {
-  return BACKEND_TO_FRONTEND_ROLE[backendRole];
-}
-
-const FRONTEND_TO_BACKEND_ROLE: Record<FrontendRole, BackendRole> = {
-  admin: 'ADMIN',
-  empleado: 'SUPPORT',
-};
-
-export function mapFrontendRoleToBackend(frontendRole: FrontendRole): BackendRole {
-  return FRONTEND_TO_BACKEND_ROLE[frontendRole];
-}
+/** Roles del backend; el frontend usa el mismo vocabulario */
+export const RoleSchema = z.enum(ROLES);
 
 /**
  * User schema (frontend representation)
@@ -45,7 +18,7 @@ export const UserSchema = z.object({
   id: UUIDSchema,
   email: EmailSchema,
   name: z.string().min(1, 'El nombre es requerido'),
-  role: FrontendRoleSchema,
+  role: RoleSchema,
   department: z.string().optional(),
   createdAt: DateStringSchema.optional(),
   lastLogin: DateStringSchema.optional(),
@@ -59,7 +32,7 @@ export const BackendUserSchema = matchesContract<ApiSchemas['CurrentUserDto']>()
     id: UUIDSchema,
     email: EmailSchema,
     name: z.string(),
-    role: BackendRoleSchema,
+    role: RoleSchema,
     createdAt: z.string(),
   }),
 );
@@ -70,7 +43,7 @@ export function mapBackendUserToFrontend(backendUser: ApiSchemas['UserDto'] & { 
     id: backendUser.id,
     email: backendUser.email,
     name: backendUser.name,
-    role: mapBackendRoleToFrontend(backendUser.role),
+    role: backendUser.role,
     createdAt: backendUser.createdAt,
   };
 }

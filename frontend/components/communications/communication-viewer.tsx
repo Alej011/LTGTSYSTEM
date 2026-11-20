@@ -17,6 +17,7 @@ import {
   getTypeLabel,
   markAsRead,
 } from '@/lib/features/communications/communications.service';
+import { roleLabel } from '@/shared/roles';
 
 interface CommunicationViewerProps {
   communication: Communication;
@@ -105,7 +106,7 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
                   <User className="h-3 w-3 mr-1" />
                   {communication.authorName}
                 </p>
-                <p className="text-xs text-muted-foreground capitalize">{communication.authorRole}</p>
+                <p className="text-xs text-muted-foreground">{roleLabel(communication.authorRole)}</p>
               </div>
 
               <div>
@@ -115,7 +116,9 @@ export function CommunicationViewer({ communication, onBack }: CommunicationView
                   {communication.targetDepartments.join(', ')}
                 </p>
                 {communication.targetRoles.length > 0 && (
-                  <p className="text-xs text-muted-foreground">Roles: {communication.targetRoles.join(', ')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Roles: {communication.targetRoles.map(roleLabel).join(', ')}
+                  </p>
                 )}
               </div>
 

@@ -17,8 +17,8 @@ describe('useCan', () => {
     vi.resetAllMocks();
   });
 
-  it('applies the policy to the signed-in user, whose role arrives in the frontend vocabulary', () => {
-    const can = canFor({ id: 'u2', email: 'soporte@ltgt.com', name: 'Soporte', role: 'empleado' });
+  it('applies the policy to the role of the signed-in user', () => {
+    const can = canFor({ id: 'u2', email: 'soporte@ltgt.com', name: 'Soporte', role: 'SUPPORT' });
 
     expect(can('products', 'view')).toBe(true);
     expect(can('products', 'create')).toBe(false);

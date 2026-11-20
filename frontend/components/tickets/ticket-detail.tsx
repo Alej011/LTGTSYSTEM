@@ -24,6 +24,7 @@ import {
   type TicketStatus,
   updateTicket,
 } from '@/lib/features/tickets/tickets.service';
+import { roleLabel } from '@/shared/roles';
 import { useCan } from '@/shared/use-can';
 
 interface TicketDetailProps {
@@ -88,7 +89,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
       }
 
       // If assigning to current user (support employee)
-      if (user.role === 'empleado' && !ticket.assignedTo) {
+      if (user.role === 'SUPPORT' && !ticket.assignedTo) {
         updateData.assignedTo = user.id;
         updateData.assignedToName = user.name;
       }
@@ -182,7 +183,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         <span className="font-medium">{comment.userName}</span>
-                        <Badge variant="outline">{comment.userRole}</Badge>
+                        <Badge variant="outline">{roleLabel(comment.userRole)}</Badge>
                       </div>
                       <span className="text-sm text-muted-foreground">
                         {formatDistanceToNow(comment.createdAt, { addSuffix: true, locale: es })}
@@ -309,7 +310,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
                   )}
                 </Button>
 
-                {!ticket.assignedTo && user?.role === 'empleado' && (
+                {!ticket.assignedTo && user?.role === 'SUPPORT' && (
                   <Alert>
                     <AlertDescription>
                       Al actualizar este ticket, se te asignará automáticamente como responsable.

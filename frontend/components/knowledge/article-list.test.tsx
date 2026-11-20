@@ -7,7 +7,7 @@ import { ArticleList } from './article-list';
 
 vi.mock('@/contexts/auth-context', () => ({ useAuth: vi.fn() }));
 
-function renderAs(role: 'admin' | 'empleado' | undefined) {
+function renderAs(role: 'ADMIN' | 'SUPPORT' | undefined) {
   vi.mocked(useAuth).mockReturnValue({
     user: role ? { id: 'u1', email: 'user@ltgt.com', name: 'Usuario', role } : null,
   } as ReturnType<typeof useAuth>);
@@ -20,12 +20,12 @@ describe('ArticleList permissions', () => {
   });
 
   it('lets admin create articles', () => {
-    renderAs('admin');
+    renderAs('ADMIN');
     expect(screen.getByRole('button', { name: /Nuevo Artículo/ })).toBeInTheDocument();
   });
 
-  it('hides article creation from empleado, as the permission matrix defines', () => {
-    renderAs('empleado');
+  it('hides article creation from SUPPORT, as the permission matrix defines', () => {
+    renderAs('SUPPORT');
     expect(screen.queryByRole('button', { name: /Nuevo Artículo/ })).not.toBeInTheDocument();
   });
 

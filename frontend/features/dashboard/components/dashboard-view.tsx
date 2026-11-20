@@ -6,18 +6,15 @@ import { Building2, Calendar } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
-import type { UserRole } from '@/lib/features/auth/auth.service';
 import { TONE_CLASSES } from '@/shared/lib/tones';
+import { type Role, ROLE_LABELS } from '@/shared/roles';
 
 import { getDashboardStats, getRecentActivity } from '../dashboard.data';
 import { QuickActions } from './quick-actions';
 import { RecentActivityComponent } from './recent-activity';
 import { StatsCards } from './stats-cards';
 
-const ROLE_BADGES: Record<UserRole, { label: string; tone: string }> = {
-  admin: { label: 'Administrador', tone: TONE_CLASSES.primary },
-  empleado: { label: 'Empleado de Soporte', tone: TONE_CLASSES.info },
-};
+const ROLE_TONES: Record<Role, string> = { ADMIN: TONE_CLASSES.primary, SUPPORT: TONE_CLASSES.info };
 
 export function DashboardView() {
   const { user } = useAuth();
@@ -40,8 +37,8 @@ export function DashboardView() {
           </div>
         </div>
         <div className="sm:text-right">
-          <Badge variant="outline" className={ROLE_BADGES[user.role].tone}>
-            {ROLE_BADGES[user.role].label}
+          <Badge variant="outline" className={ROLE_TONES[user.role]}>
+            {ROLE_LABELS[user.role]}
           </Badge>
           <p className="text-sm text-muted-foreground mt-1">{user.department}</p>
         </div>

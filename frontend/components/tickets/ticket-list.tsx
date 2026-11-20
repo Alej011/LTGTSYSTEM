@@ -56,7 +56,7 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
     let filtered = tickets;
 
     // Filter by user role and permissions
-    if (user.role === 'empleado') {
+    if (user.role === 'SUPPORT') {
       // Support employees can see all tickets with special filters
       if (assignmentFilter === 'mine') {
         filtered = filtered.filter((ticket) => ticket.assignedTo === user.id || ticket.createdBy === user.id);
@@ -123,7 +123,7 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
                 Tickets de Soporte
               </CardTitle>
               <CardDescription>
-                {user?.role === 'empleado'
+                {user?.role === 'SUPPORT'
                   ? 'Gestiona tus solicitudes de soporte técnico'
                   : 'Administra y da seguimiento a los tickets de soporte'}
               </CardDescription>

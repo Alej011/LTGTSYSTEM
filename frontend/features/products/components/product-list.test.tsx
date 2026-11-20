@@ -23,7 +23,7 @@ function renderList() {
 describe('ProductList', () => {
   beforeEach(() => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 'u1', email: 'admin@ltgt.com', name: 'Admin', role: 'admin' },
+      user: { id: 'u1', email: 'admin@ltgt.com', name: 'Admin', role: 'ADMIN' },
     } as ReturnType<typeof useAuth>);
   });
 
@@ -47,7 +47,7 @@ describe('ProductList', () => {
 
   it('lets support staff only view details', async () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 'u2', email: 'soporte@ltgt.com', name: 'Soporte', role: 'empleado' },
+      user: { id: 'u2', email: 'soporte@ltgt.com', name: 'Soporte', role: 'SUPPORT' },
     } as ReturnType<typeof useAuth>);
     mockBff({
       'GET /api/products': () => ({ status: 200, body: page([product]) }),

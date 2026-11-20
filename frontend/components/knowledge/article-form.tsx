@@ -22,6 +22,7 @@ import {
   updateArticle,
 } from '@/lib/features/knowledge/knowledge.service';
 import { TONE_CLASSES } from '@/shared/lib/tones';
+import { roleLabel } from '@/shared/roles';
 
 interface ArticleFormProps {
   article?: KnowledgeArticle;
@@ -219,7 +220,7 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                     <strong>Nombre:</strong> {user?.name}
                   </p>
                   <p>
-                    <strong>Rol:</strong> {user?.role}
+                    <strong>Rol:</strong> {user && roleLabel(user.role)}
                   </p>
                   <p>
                     <strong>Departamento:</strong> {user?.department}

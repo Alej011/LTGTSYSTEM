@@ -47,7 +47,7 @@ export function getRecentActivity(user: User): RecentActivity[] {
   // Recent tickets
   const tickets = getTickets()
     .filter((t) => {
-      if (user.role === 'empleado') return t.createdBy === user.id || t.assignedTo === user.id;
+      if (user.role === 'SUPPORT') return t.createdBy === user.id || t.assignedTo === user.id;
       return true;
     })
     .slice(0, 3);
