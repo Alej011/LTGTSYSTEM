@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { ProductSchema, UpdateProductRequestSchema } from '@/features/products/products.schemas';
-import { callBackend, parseBody, proxyToBackend } from '@/lib/server/backend';
+import { ProductSchema } from '@/features/products/products.schemas';
+import { callBackend, proxyToBackend, readJsonBody } from '@/lib/server/backend';
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -16,7 +16,7 @@ export async function GET(_request: Request, { params }: Context) {
 
 export async function PATCH(request: Request, { params }: Context) {
   const { id } = await params;
-  const body = await parseBody(request, UpdateProductRequestSchema, 'Datos del producto inválidos', { partial: true });
+  const body = await readJsonBody(request);
   if (body.response) return body.response;
 
   return proxyToBackend({

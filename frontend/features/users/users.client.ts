@@ -7,12 +7,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { z } from 'zod';
 
 import { apiClient } from '@/lib/shared/api-client';
+import type { ApiSchemas } from '@/lib/shared/contract';
 
-import type { CreateUserRequestSchema, UpdateUserRequestSchema, UserListItemSchema } from './users.schemas';
+import type { UserListItemSchema } from './users.schemas';
 
 export type User = z.infer<typeof UserListItemSchema>;
-export type NewUserInput = z.infer<typeof CreateUserRequestSchema>;
-export type UserChanges = z.infer<typeof UpdateUserRequestSchema>;
+export type NewUserInput = ApiSchemas['CreateUserDto'];
+export type UserChanges = ApiSchemas['UpdateUserDto'];
 
 /** Crear lleva email y contraseña; editar solo cambia nombre y rol de un usuario existente. */
 export type SaveUserVariables = { input: NewUserInput } | { id: string; changes: UserChanges };

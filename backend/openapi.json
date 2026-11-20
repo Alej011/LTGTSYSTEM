@@ -1,0 +1,1448 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTokensDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          },
+          "429": {
+            "description": "Demasiados intentos, espera un minuto"
+          }
+        },
+        "summary": "Iniciar sesión",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "description": "Rota el refresh token. Si se reutiliza uno ya rotado fuera de la ventana de gracia, se revocan todas las sesiones del usuario.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nuevo access token (y refresh token, salvo reintento dentro de la ventana de gracia)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionTokensDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Refresh token inválido, expirado o revocado"
+          }
+        },
+        "summary": "Renovar la sesión",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Sesión cerrada"
+          }
+        },
+        "summary": "Cerrar sesión (revoca el refresh token)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Datos del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener información del usuario actual",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar todos los usuarios (solo ADMIN)",
+        "tags": [
+          "users"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "409": {
+            "description": "El email ya está registrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Crear un nuevo usuario (solo ADMIN)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID del usuario",
+            "schema": {
+              "example": "clxyz123abc",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener un usuario por ID (solo ADMIN)",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID del usuario",
+            "schema": {
+              "example": "clxyz123abc",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o campos no permitidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Actualizar usuario (solo ADMIN)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/products": {
+      "get": {
+        "description": "\n      Obtiene productos con soporte para:\n      - Búsqueda por nombre, SKU o marca\n      - Filtros por categoría, estado o marca\n      - Paginación con metadata\n      - Ordenamiento customizable\n\n      **Optimizado con índices de PostgreSQL para 2000+ productos**\n    ",
+        "operationId": "ProductsController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Buscar por nombre, SKU o marca",
+            "schema": {
+              "example": "Dell",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por categoría (nombre)",
+            "schema": {
+              "example": "Laptops",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por estado",
+            "schema": {
+              "$ref": "#/components/schemas/ProductStatus"
+            }
+          },
+          {
+            "name": "brandId",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por ID de marca",
+            "schema": {
+              "example": "clxyz123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxStock",
+            "required": false,
+            "in": "query",
+            "description": "Solo productos con stock menor o igual a este valor",
+            "schema": {
+              "minimum": 0,
+              "example": 5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Número de página (empieza en 1)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Cantidad de items por página",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Campo por el cual ordenar",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "name",
+                "price",
+                "stock",
+                "createdAt"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Dirección del ordenamiento",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Productos paginados con metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedProductsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar productos con paginación y filtros",
+        "tags": [
+          "products"
+        ]
+      },
+      "post": {
+        "operationId": "ProductsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Crear un nuevo producto",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "operationId": "ProductsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos"
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener detalles de un producto por ID",
+        "tags": [
+          "products"
+        ]
+      },
+      "patch": {
+        "operationId": "ProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto actualizado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Actualizar un producto existente",
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "operationId": "ProductsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto eliminado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Eliminar un producto",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/brands": {
+      "get": {
+        "operationId": "BrandsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de marcas ordenadas alfabéticamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrandDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar todas las marcas",
+        "tags": [
+          "brands"
+        ]
+      }
+    },
+    "/api/brands/{id}": {
+      "get": {
+        "operationId": "BrandsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marca encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "404": {
+            "description": "Marca no encontrada"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener una marca por ID",
+        "tags": [
+          "brands"
+        ]
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "operationId": "CategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de categorías ordenadas alfabéticamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Listar todas las categorías",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoría encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "No tiene permisos de ADMIN"
+          },
+          "404": {
+            "description": "Categoría no encontrada"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Obtener una categoría por ID",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API y base de datos disponibles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Base de datos no disponible"
+          }
+        },
+        "summary": "Estado de la API y de la conexión a la base de datos",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "LTGT System API",
+    "description": "API para sistema de gestión de tickets, productos y base de conocimiento",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Endpoints de autenticación"
+    },
+    {
+      "name": "users",
+      "description": "Endpoints de gestión de usuarios"
+    },
+    {
+      "name": "products",
+      "description": "Endpoints de gestión de productos"
+    },
+    {
+      "name": "brands",
+      "description": "Endpoints de gestión de marcas"
+    },
+    {
+      "name": "categories",
+      "description": "Endpoints de gestión de categorías"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Ingresa tu token JWT",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@ltgt.local",
+            "description": "Email del usuario"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "Admin123!",
+            "description": "Contraseña (mínimo 6 caracteres)"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "ADMIN",
+          "SUPPORT"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "id",
+          "email",
+          "name"
+        ]
+      },
+      "SessionTokensDto": {
+        "type": "object",
+        "properties": {
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Ausente cuando el refresh se reintenta dentro de la ventana de gracia"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        },
+        "required": [
+          "accessTokenExpiresAt",
+          "accessToken",
+          "user"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "minLength": 43,
+            "maxLength": 43,
+            "description": "Refresh token recibido en el login o en el último refresh"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CurrentUserDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "id",
+          "email",
+          "name",
+          "createdAt"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "usuario@ltgt.local",
+            "description": "Email del usuario (debe ser único)"
+          },
+          "name": {
+            "type": "string",
+            "example": "Usuario Apellido",
+            "description": "Nombre completo del usuario"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "Password123!",
+            "description": "Contraseña del usuario (mínimo 6 caracteres)"
+          },
+          "role": {
+            "example": "SUPPORT",
+            "description": "Rol del usuario en el sistema",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "password",
+          "role"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Usuario Apellido",
+            "description": "Nombre completo del usuario"
+          },
+          "role": {
+            "example": "SUPPORT",
+            "description": "Rol del usuario en el sistema",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ]
+          }
+        }
+      },
+      "ProductStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive",
+          "discontinued"
+        ]
+      },
+      "BrandSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "name": {
+            "type": "string",
+            "example": "Dell"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "CategorySummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz456"
+          },
+          "name": {
+            "type": "string",
+            "example": "Laptops"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ProductResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "clxyz789"
+          },
+          "name": {
+            "type": "string",
+            "example": "Laptop Dell XPS 13"
+          },
+          "description": {
+            "type": "string",
+            "example": "Laptop ultrabook con procesador Intel i7..."
+          },
+          "sku": {
+            "type": "string",
+            "example": "DELL-XPS13-001"
+          },
+          "price": {
+            "type": "number",
+            "example": 1299.99
+          },
+          "stock": {
+            "type": "number",
+            "example": 25
+          },
+          "status": {
+            "example": "active",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductStatus"
+              }
+            ]
+          },
+          "brandId": {
+            "type": "string",
+            "example": "clx1brand000001"
+          },
+          "brand": {
+            "$ref": "#/components/schemas/BrandSummaryDto"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategorySummaryDto"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-15T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-15T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "sku",
+          "price",
+          "stock",
+          "status",
+          "brandId",
+          "brand",
+          "categories",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginationMetadata": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "description": "Página actual",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "description": "Items por página",
+            "example": 20
+          },
+          "total": {
+            "type": "number",
+            "description": "Total de items",
+            "example": 150
+          },
+          "totalPages": {
+            "type": "number",
+            "description": "Total de páginas",
+            "example": 8
+          },
+          "hasPrevPage": {
+            "type": "boolean",
+            "description": "Hay página anterior",
+            "example": false
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "description": "Hay página siguiente",
+            "example": true
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total",
+          "totalPages",
+          "hasPrevPage",
+          "hasNextPage"
+        ]
+      },
+      "PaginatedProductsDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Lista de productos",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductResponseDto"
+            }
+          },
+          "meta": {
+            "description": "Metadata de paginación",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaginationMetadata"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Laptop Dell XPS 13"
+          },
+          "description": {
+            "type": "string",
+            "example": "Laptop ultrabook con procesador Intel i7..."
+          },
+          "sku": {
+            "type": "string",
+            "example": "DELL-XPS13-001"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "example": 1299.99
+          },
+          "stock": {
+            "type": "number",
+            "minimum": 0,
+            "example": 25
+          },
+          "status": {
+            "example": "active",
+            "default": "active",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductStatus"
+              }
+            ]
+          },
+          "brandId": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "categoryIds": {
+            "uniqueItems": true,
+            "minItems": 1,
+            "example": [
+              "clcat123",
+              "clcat456"
+            ],
+            "description": "IDs de categorías (al menos una requerida)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "sku",
+          "price",
+          "stock",
+          "brandId",
+          "categoryIds"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Laptop Dell XPS 13"
+          },
+          "description": {
+            "type": "string",
+            "example": "Laptop ultrabook con procesador Intel i7..."
+          },
+          "sku": {
+            "type": "string",
+            "example": "DELL-XPS13-001"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "example": 1299.99
+          },
+          "stock": {
+            "type": "number",
+            "minimum": 0,
+            "example": 25
+          },
+          "status": {
+            "example": "active",
+            "default": "active",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductStatus"
+              }
+            ]
+          },
+          "brandId": {
+            "type": "string",
+            "example": "clxyz123"
+          },
+          "categoryIds": {
+            "uniqueItems": true,
+            "minItems": 1,
+            "example": [
+              "clcat123",
+              "clcat456"
+            ],
+            "description": "IDs de categorías (al menos una requerida)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MessageDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "BrandDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "HealthDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "database": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "database"
+        ]
+      }
+    }
+  }
+}

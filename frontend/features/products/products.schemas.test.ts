@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  CreateProductRequestSchema,
-  PaginatedProductsSchema,
-  ProductSchema,
-  UpdateProductRequestSchema,
-} from './products.schemas';
+import { PaginatedProductsSchema, ProductFormSchema, ProductSchema } from './products.schemas';
 
 const backendProduct = {
   id: 'clprod1',
@@ -34,8 +29,8 @@ describe('ProductSchema', () => {
   });
 });
 
-describe('CreateProductRequestSchema', () => {
-  const request = {
+describe('ProductFormSchema', () => {
+  const input = {
     name: 'Cable HDMI',
     sku: 'HDMI-001',
     price: 0,
@@ -45,17 +40,23 @@ describe('CreateProductRequestSchema', () => {
     categoryIds: ['clcat1'],
   };
 
-  it('accepts price 0 and no description, like the backend DTO', () => {
-    expect(CreateProductRequestSchema.safeParse(request).success).toBe(true);
+  it('accepts price 0 and no description, like CreateProductDto', () => {
+    expect(ProductFormSchema.safeParse(input).success).toBe(true);
+    expect(ProductFormSchema.safeParse({ ...input, description: '' }).success).toBe(true);
   });
 
-  it('rejects a negative price', () => {
-    expect(CreateProductRequestSchema.safeParse({ ...request, price: -1 }).success).toBe(false);
+  it.each([
+    [{ price: -1 }, 'El precio no puede ser negativo'],
+    [{ price: 10.005 }, 'El precio admite hasta 2 decimales'],
+    [{ stock: 1.5 }, 'El stock debe ser un número entero'],
+    [{ name: '   ' }, 'Ingresa el nombre del producto'],
+    [{ categoryIds: [] }, 'Selecciona una categoría'],
+  ])('rejects %j with a message for the user', (change, message) => {
+    const result = ProductFormSchema.safeParse({ ...input, ...change });
+    expect(result.error?.issues[0]?.message).toBe(message);
   });
-});
 
-describe('UpdateProductRequestSchema', () => {
-  it('accepts clearing the description and setting price 0', () => {
-    expect(UpdateProductRequestSchema.safeParse({ description: '', price: 0 }).success).toBe(true);
+  it('accepts a price with two decimals', () => {
+    expect(ProductFormSchema.safeParse({ ...input, price: 1299.99 }).success).toBe(true);
   });
 });

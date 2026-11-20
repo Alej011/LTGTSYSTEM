@@ -10,29 +10,19 @@ import { ACCESS_COOKIE, getClientIp } from './session';
 
 type BackendErrorBody = { message?: string | string[]; error?: string };
 
-export function errorResponse(status: number, message: string, error: string, details?: unknown) {
-  return NextResponse.json({ message, error, ...(details ? { details } : {}) }, { status });
+export function errorResponse(status: number, message: string, error: string) {
+  return NextResponse.json({ message, error }, { status });
 }
 
-function dropNullish(value: unknown): unknown {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
-  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined && v !== null));
-}
-
-// Valida el cuerpo JSON de la petición. Devuelve los datos o la respuesta 400 lista para retornar.
-// partial: ignora campos null, como envían los formularios de edición.
-export async function parseBody<S extends z.ZodType>(
+// Lee el cuerpo JSON para reenviarlo. Las reglas de entrada las valida el backend con sus DTOs.
+export async function readJsonBody(
   request: Request,
-  schema: S,
-  message: string,
-  { partial = false }: { partial?: boolean } = {},
-): Promise<{ data: z.infer<S>; response?: never } | { data?: never; response: NextResponse }> {
-  const raw: unknown = await request.json().catch(() => undefined);
-  const result = schema.safeParse(partial ? dropNullish(raw) : raw);
-  if (!result.success) {
-    return { response: errorResponse(400, message, 'VALIDATION_ERROR', result.error.issues) };
+): Promise<{ data: unknown; response?: never } | { data?: never; response: NextResponse }> {
+  try {
+    return { data: await request.json() };
+  } catch {
+    return { response: errorResponse(400, 'El cuerpo de la petición no es JSON válido', 'INVALID_JSON') };
   }
-  return { data: result.data };
 }
 
 type CallOptions<S extends z.ZodType> = {

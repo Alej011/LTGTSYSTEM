@@ -4,3 +4,5 @@ coverage
 src/generated
 pnpm-lock.yaml
 prisma/migrations
+dist-openapi
+openapi.json

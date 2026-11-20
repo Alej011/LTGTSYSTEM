@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } f
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Roles } from '../common/decorators/roles.decorator';
+import { MessageDto } from '../common/dto/message.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -95,11 +96,12 @@ export class ProductsController {
   @ApiResponse({
     status: 200,
     description: 'Producto eliminado exitosamente',
+    type: MessageDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
   @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado' })
-  async remove(@Param('id') id: string): Promise<{ message: string }> {
+  async remove(@Param('id') id: string): Promise<MessageDto> {
     await this.productsService.remove(id);
     return { message: 'Producto eliminado exitosamente' };
   }

@@ -7,20 +7,24 @@ API REST en **NestJS 11 + Prisma 7 + PostgreSQL 16** sobre Node 24 LTS. Todas la
 ```
 src/
 ├── main.ts              # Arranque: helmet, CORS, validación y filtro de errores globales, Swagger
+├── openapi.ts           # Documento OpenAPI: lo usan Swagger UI y el generador de openapi.json
 ├── app.module.ts        # Registro de módulos
 ├── generated/prisma/    # Cliente de Prisma generado (no se versiona: pnpm prisma:generate)
 ├── prisma/              # PrismaModule global con PrismaService
 ├── common/
 │   ├── guards/          # JwtAuthGuard, RolesGuard
 │   ├── decorators/      # @Roles(...), @User()
+│   ├── dto/             # Respuestas comunes (MessageDto)
 │   └── filters/         # Traducción de errores de Prisma a códigos HTTP
 ├── health/              # GET /api/health (estado de la API y la BD)
-├── auth/                # Login (con límites de intentos), refresh, logout, registro, /me, estrategia JWT
+├── auth/                # Login (con límites de intentos), refresh, logout, /me, estrategia JWT
 ├── config/              # Validación de variables de entorno
-├── users/               # CRUD de usuarios (solo ADMIN)
+├── users/               # Usuarios (solo ADMIN): único camino de alta
 ├── products/            # CRUD de productos + DTOs de paginación/filtros
 ├── brands/              # Lectura de marcas
 └── categories/          # Lectura de categorías
+scripts/generate-openapi.ts  # Escribe openapi.json sin levantar el servidor
+openapi.json             # Contrato con el frontend (generado, se versiona)
 prisma.config.ts         # Configuración de Prisma: URL de la BD, migraciones y seed
 prisma/
 ├── schema.prisma        # Modelo de datos
@@ -29,7 +33,15 @@ prisma/
 └── seed-data.ts         # Datos del catálogo: marcas, categorías y productos
 ```
 
-Cada módulo sigue el patrón `controller` (rutas + Swagger) → `service` (lógica + Prisma) → `dto/` (validación con class-validator).
+Cada módulo sigue el patrón `controller` (rutas + Swagger) → `service` (lógica + Prisma) → `dto/` (entrada validada con class-validator y DTOs de respuesta).
+
+## Contrato OpenAPI
+
+`openapi.json` es el contrato con el frontend: de él salen los tipos que usa el BFF (`frontend/lib/shared/api-schema.d.ts`). Se genera desde los controladores y DTOs con `pnpm openapi`, sin base de datos ni servidor.
+
+- El plugin de `@nestjs/swagger` (en `nest-cli.json`) lee los tipos de los archivos `*.dto.ts`: un campo con `?` es opcional y uno con `| null` admite null. Los decoradores solo hacen falta para ejemplos, enums con nombre (`enumName`) o formatos.
+- Cada ruta declara su DTO de respuesta como tipo de retorno del controlador y en el `@ApiResponse` de éxito.
+- Al cambiar una ruta o un DTO: `pnpm openapi` aquí y en `frontend/`, y versiona los dos archivos generados. Si el cambio rompe al frontend, este deja de compilar.
 
 ## Variables de entorno
 
@@ -71,6 +83,7 @@ Desde tu máquina, con la BD de Docker, antepón `DATABASE_URL=postgresql://app:
 | `prisma:deploy`               | Aplica migraciones pendientes (CI / producción)                                                                                             |
 | `db:seed`                     | Crea usuarios (desde `.env`), marcas, categorías y 30 productos. Se puede ejecutar varias veces: no duplica ni sobrescribe datos existentes |
 | `build:seed` / `db:seed:prod` | Compila el seed a `dist-seed/` / lo ejecuta con Node (usado en la imagen de producción)                                                     |
+| `openapi`                     | Regenera `openapi.json`. Compila en `dist-openapi/`, así no toca el `dist/` que usa el contenedor de desarrollo                             |
 
 ## Base de datos
 
@@ -136,7 +149,6 @@ Para **renombrar** tablas o columnas, usa `--create-only` y cambia el `DROP` + `
 | POST   | `/api/auth/login`                        | Público                                                                                                               |
 | POST   | `/api/auth/refresh`                      | Público (requiere refresh token)                                                                                      |
 | POST   | `/api/auth/logout`                       | Público (requiere refresh token)                                                                                      |
-| POST   | `/api/auth/register`                     | ADMIN                                                                                                                 |
 | GET    | `/api/auth/me`                           | Autenticado                                                                                                           |
 | GET    | `/api/users`                             | ADMIN                                                                                                                 |
 | POST   | `/api/users`                             | ADMIN                                                                                                                 |

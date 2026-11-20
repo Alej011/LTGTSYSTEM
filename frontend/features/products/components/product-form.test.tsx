@@ -47,6 +47,35 @@ describe('ProductForm', () => {
     expect(sent).toMatchObject({ stock: 8, categoryIds: ['c1'], brandId: 'b1' });
   });
 
+  it('explains each missing field next to it and sends nothing', async () => {
+    const fetchMock = mockBff(catalog);
+    const user = userEvent.setup();
+    renderWithQuery(<ProductForm onSuccess={() => undefined} onCancel={() => undefined} />);
+
+    await user.type(screen.getByLabelText('Nombre del Producto'), 'Cable HDMI');
+    await user.click(screen.getByRole('button', { name: 'Crear Producto' }));
+
+    expect(await screen.findByText('Ingresa el SKU')).toBeInTheDocument();
+    expect(screen.getByText('Selecciona una marca')).toBeInTheDocument();
+    expect(screen.getByText('Selecciona una categoría')).toBeInTheDocument();
+    expect(screen.getByLabelText('Marca')).toHaveAttribute('aria-invalid', 'true');
+    expect(bffCalls(fetchMock).filter((call) => call.startsWith('POST'))).toEqual([]);
+  });
+
+  it('clears the message of a field once it is corrected', async () => {
+    mockBff(catalog);
+    const user = userEvent.setup();
+    renderWithQuery(<ProductForm onSuccess={() => undefined} onCancel={() => undefined} />);
+
+    await user.click(screen.getByRole('button', { name: 'Crear Producto' }));
+    expect(await screen.findByText('Ingresa el SKU')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('SKU'), 'HDMI-001');
+
+    expect(screen.queryByText('Ingresa el SKU')).not.toBeInTheDocument();
+    expect(screen.getByText('Ingresa el nombre del producto')).toBeInTheDocument();
+  });
+
   it('shows the backend reason when saving fails', async () => {
     mockBff({
       ...catalog,

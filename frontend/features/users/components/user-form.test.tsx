@@ -62,6 +62,34 @@ describe('UserForm', () => {
     expect(sent).toEqual({ name: 'Soporte 2', role: 'SUPPORT' });
   });
 
+  it('explains invalid fields next to them and sends nothing', async () => {
+    const fetchMock = mockBff({});
+    const user = userEvent.setup();
+    renderWithQuery(<UserForm onSuccess={() => undefined} onCancel={() => undefined} />);
+
+    await user.type(screen.getByLabelText('Email'), 'ana@ltgt');
+    await user.type(screen.getByLabelText('Contraseña'), '123');
+    await user.click(screen.getByRole('button', { name: 'Crear Usuario' }));
+
+    expect(await screen.findByText('Ingresa el nombre')).toBeInTheDocument();
+    expect(screen.getByText('Email inválido')).toBeInTheDocument();
+    expect(screen.getByText('La contraseña debe tener al menos 6 caracteres')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toHaveAttribute('aria-invalid', 'true');
+    expect(bffCalls(fetchMock)).toEqual([]);
+  });
+
+  it('does not save an edit that leaves the name empty', async () => {
+    const fetchMock = mockBff({});
+    const user = userEvent.setup();
+    renderWithQuery(<UserForm user={support} onSuccess={() => undefined} onCancel={() => undefined} />);
+
+    await user.clear(screen.getByLabelText('Nombre Completo'));
+    await user.click(screen.getByRole('button', { name: 'Actualizar' }));
+
+    expect(await screen.findByText('Ingresa el nombre')).toBeInTheDocument();
+    expect(bffCalls(fetchMock)).toEqual([]);
+  });
+
   it('shows the backend reason when saving fails', async () => {
     mockBff({ 'POST /api/users': () => ({ status: 409, body: { message: 'El email ya está registrado' } }) });
     const onSuccess = vi.fn();

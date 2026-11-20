@@ -15,36 +15,15 @@ export class UsersService {
     return this.prisma.user.findMany({ select: USER_SELECT });
   }
 
-  async create(createUserDto: CreateUserDto) {
-    // Verificar si el email ya existe
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email },
+  // Único camino de alta de usuarios: el email repetido responde 409
+  async create({ password, ...data }: CreateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+    if (existingUser) throw new ConflictException('El email ya está registrado');
+
+    return this.prisma.user.create({
+      data: { ...data, password: await bcrypt.hash(password, 10) },
+      select: USER_SELECT,
     });
-
-    if (existingUser) {
-      throw new ConflictException('El email ya está registrado');
-    }
-
-    // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    // Crear el usuario
-    const user = await this.prisma.user.create({
-      data: {
-        email: createUserDto.email,
-        name: createUserDto.name,
-        password: hashedPassword,
-        role: createUserDto.role,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-      },
-    });
-
-    return user;
   }
 
   async findOne(id: string) {

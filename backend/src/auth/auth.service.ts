@@ -1,26 +1,17 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 import type { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
+import type { UserDto } from '../users/dto/user.dto';
 import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_REUSE_GRACE_MS, REFRESH_TOKEN_TTL_SECONDS } from './auth.constants';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import type { CurrentUserDto, SessionTokensDto } from './dto/session.dto';
 
 export type AccessTokenPayload = { sub: string; role: Role; email: string; name: string };
-
-type SessionUser = { id: string; email: string; name: string; role: Role };
-
-type SessionTokens = {
-  accessToken: string;
-  accessTokenExpiresAt: string;
-  refreshToken?: string;
-  refreshTokenExpiresAt?: string;
-  user: SessionUser;
-};
 
 const USER_SELECT = { id: true, email: true, name: true, role: true } as const;
 
@@ -35,17 +26,7 @@ export class AuthService {
     private jwt: JwtService,
   ) {}
 
-  async register(dto: RegisterDto) {
-    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new BadRequestException('Email already in use');
-    const password = await bcrypt.hash(dto.password, 10);
-    return this.prisma.user.create({
-      data: { email: dto.email, password, name: dto.name, role: dto.role },
-      select: { ...USER_SELECT, createdAt: true },
-    });
-  }
-
-  async login(dto: LoginDto): Promise<SessionTokens> {
+  async login(dto: LoginDto): Promise<SessionTokensDto> {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
@@ -53,13 +34,13 @@ export class AuthService {
 
     await this.prisma.refreshToken.deleteMany({ where: { userId: user.id, expiresAt: { lt: new Date() } } });
 
-    const session: SessionUser = { id: user.id, email: user.email, name: user.name, role: user.role };
+    const session: UserDto = { id: user.id, email: user.email, name: user.name, role: user.role };
     const refresh = await this.createRefreshToken(user.id);
     return { ...(await this.createAccessToken(session)), ...refresh.response, user: session };
   }
 
   // Rota el refresh token: el presentado queda revocado y se emite uno nuevo.
-  async refresh(token: string): Promise<SessionTokens> {
+  async refresh(token: string): Promise<SessionTokensDto> {
     const now = new Date();
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash: hashToken(token) },
@@ -104,14 +85,17 @@ export class AuthService {
     });
   }
 
-  me(user: { id: string }) {
-    return this.prisma.user.findUnique({
+  async me(user: { id: string }): Promise<CurrentUserDto> {
+    const current = await this.prisma.user.findUnique({
       where: { id: user.id },
       select: { ...USER_SELECT, createdAt: true },
     });
+    // El token sigue siendo válido pero el usuario ya no existe
+    if (!current) throw new UnauthorizedException('Invalid session');
+    return current;
   }
 
-  private async createAccessToken(user: SessionUser) {
+  private async createAccessToken(user: UserDto) {
     const payload: AccessTokenPayload = { sub: user.id, role: user.role, email: user.email, name: user.name };
     return {
       accessToken: await this.jwt.signAsync(payload),

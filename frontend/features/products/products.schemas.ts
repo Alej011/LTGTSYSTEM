@@ -1,125 +1,80 @@
 /**
- * Product, Brand, and Category schemas with Zod validation
+ * Schemas Zod del dominio de productos, cada uno atado a su tipo del contrato:
+ * las respuestas que valida el BFF y el formulario que valida el navegador antes de enviar.
  */
 import { z } from 'zod';
 
-import { PaginationMetadataSchema, UUIDSchema } from '@/lib/schemas/common.schema';
+import { PaginationMetadataSchema } from '@/lib/schemas/common.schema';
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
-/**
- * Product status enum
- */
-export const ProductStatusSchema = z.enum(['active', 'inactive', 'discontinued']);
+export const ProductStatusSchema = matchesContract<ApiSchemas['ProductStatus']>()(
+  z.enum(['active', 'inactive', 'discontinued']),
+);
 
-/**
- * Sort options for products
- */
-export const ProductSortBySchema = z.enum(['name', 'price', 'stock', 'createdAt']);
-
-export const SortOrderSchema = z.enum(['asc', 'desc']);
-
-/**
- * Brand schema (CUIDs from backend)
- */
-export const BrandSchema = z.object({
-  id: z.string().min(1), // CUID
-  name: z.string().min(1, 'El nombre de la marca es requerido'),
-  description: z.string().optional(),
-  createdAt: z.string(), // ISO string from backend
-  updatedAt: z.string(), // ISO string from backend
-});
-
-/**
- * Category schema (CUIDs from backend)
- */
-export const CategorySchema = z.object({
-  id: z.string().min(1), // CUID
-  name: z.string().min(1, 'El nombre de la categoría es requerido'),
-  description: z.string().optional(),
-});
-
-/**
- * Product as the backend returns it; the BFF validates every response with it
- */
-export const ProductSchema = z.object({
-  id: z.string().min(1), // CUID from backend
-  name: z.string().min(1),
-  description: z.string(),
-  sku: z.string().min(1),
-  price: z.number().nonnegative(),
-  stock: z.number().int().nonnegative(),
-  status: ProductStatusSchema,
-  brandId: z.string().min(1), // CUID
-  brand: z.object({
-    id: z.string().min(1), // CUID
-    name: z.string(),
+export const BrandSchema = matchesContract<ApiSchemas['BrandDto']>()(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
   }),
-  categories: z.array(
-    z.object({
-      id: z.string().min(1), // CUID
-      name: z.string(),
-    }),
-  ),
-  createdAt: z.string(), // ISO 8601 string from backend
-  updatedAt: z.string(), // ISO 8601 string from backend
-});
+);
 
-/**
- * Paginated products response
- */
-export const PaginatedProductsSchema = z.object({
-  data: z.array(ProductSchema),
-  meta: PaginationMetadataSchema,
-});
+export const CategorySchema = matchesContract<ApiSchemas['CategoryDto']>()(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+);
 
-/**
- * Product filters schema
- */
-export const ProductFiltersSchema = z.object({
-  search: z.string().optional(),
-  category: z.string().optional(),
-  status: ProductStatusSchema.optional(),
-  brandId: UUIDSchema.optional(),
-  maxStock: z.number().int().nonnegative().optional(),
-  page: z.number().int().positive().optional(),
-  limit: z.number().int().positive().max(100).optional(),
-  sortBy: ProductSortBySchema.optional(),
-  sortOrder: SortOrderSchema.optional(),
-});
+export const ProductSchema = matchesContract<ApiSchemas['ProductResponseDto']>()(
+  z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    description: z.string(),
+    sku: z.string().min(1),
+    price: z.number().nonnegative(),
+    stock: z.number().int().nonnegative(),
+    status: ProductStatusSchema,
+    brandId: z.string().min(1),
+    brand: z.object({ id: z.string().min(1), name: z.string() }),
+    categories: z.array(z.object({ id: z.string().min(1), name: z.string() })),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  }),
+);
 
-/**
- * Create product request schema (matches backend DTO exactly)
- */
-export const CreateProductRequestSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
-  description: z.string().optional(),
-  sku: z.string().min(1, 'El SKU es requerido').max(50, 'Máximo 50 caracteres'),
-  price: z.number().nonnegative('El precio no puede ser negativo'),
-  stock: z.number().int().nonnegative('El stock no puede ser negativo'),
-  status: ProductStatusSchema,
-  brandId: z.string().min(1, 'Debe seleccionar una marca'), // CUID, not UUID
-  categoryIds: z.array(z.string().min(1)).min(1, 'Debe seleccionar al menos una categoría'), // CUIDs
-});
+export const PaginatedProductsSchema = matchesContract<ApiSchemas['PaginatedProductsDto']>()(
+  z.object({
+    data: z.array(ProductSchema),
+    meta: PaginationMetadataSchema,
+  }),
+);
 
-/**
- * Update product request schema (all fields optional, same as Create but partial)
- */
-export const UpdateProductRequestSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres').optional(),
-  description: z.string().optional(),
-  sku: z.string().min(1, 'El SKU es requerido').max(50, 'Máximo 50 caracteres').optional(),
-  price: z.number().nonnegative('El precio no puede ser negativo').optional(),
-  stock: z.number().int().nonnegative('El stock no puede ser negativo').optional(),
-  status: ProductStatusSchema.optional(),
-  brandId: z.string().min(1, 'Debe seleccionar una marca').optional(), // CUID
-  categoryIds: z.array(z.string().min(1)).min(1, 'Debe seleccionar al menos una categoría').optional(), // CUIDs
-});
+// Mismas reglas que CreateProductDto, con mensajes para el usuario; el backend no debería rechazar lo que pasa aquí
+export const ProductFormSchema = matchesContract<ApiSchemas['CreateProductDto']>()(
+  z.object({
+    name: z.string().trim().min(1, 'Ingresa el nombre del producto'),
+    description: z.string().optional(),
+    sku: z.string().trim().min(1, 'Ingresa el SKU'),
+    price: z
+      .number('Ingresa el precio')
+      .nonnegative('El precio no puede ser negativo')
+      .refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-6, 'El precio admite hasta 2 decimales'),
+    stock: z
+      .number('Ingresa el stock')
+      .int('El stock debe ser un número entero')
+      .nonnegative('El stock no puede ser negativo'),
+    status: ProductStatusSchema.optional(),
+    brandId: z.string().min(1, 'Selecciona una marca'),
+    categoryIds: z.array(z.string().min(1, 'Selecciona una categoría')).min(1, 'Selecciona una categoría'),
+  }),
+);
 
-/**
- * Brands list response schema
- */
 export const BrandsResponseSchema = z.array(BrandSchema);
 
-/**
- * Categories list response schema
- */
 export const CategoriesResponseSchema = z.array(CategorySchema);

@@ -8,7 +8,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['.next/', 'out/', 'coverage/', 'next-env.d.ts', '*.config.mjs'],
+    ignores: ['.next/', 'out/', 'coverage/', 'next-env.d.ts', 'lib/shared/api-schema.d.ts', '*.config.mjs'],
   },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,

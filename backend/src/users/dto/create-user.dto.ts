@@ -32,6 +32,7 @@ export class CreateUserDto {
 
   @ApiProperty({
     enum: Role,
+    enumName: 'Role',
     example: 'SUPPORT',
     description: 'Rol del usuario en el sistema',
   })

@@ -3,6 +3,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 
+import { FieldError, fieldErrorProps, fieldErrorsOf } from '@/components/field-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ApiClientError } from '@/lib/shared/api-client';
 
 import { type Product, type ProductStatus, useBrands, useCategories, useSaveProduct } from '../products.client';
+import { ProductFormSchema } from '../products.schemas';
 import { PRODUCT_STATUSES, productStatusLabel } from './product-badges';
 
 interface ProductFormProps {
@@ -36,10 +38,12 @@ function initialFormState(product?: Product) {
 }
 
 type FormState = ReturnType<typeof initialFormState>;
+type FieldErrors = Partial<Record<keyof FormState, string>>;
 
 // Quien lo usa debe darle un key por producto para reiniciar el estado al cambiar de producto
 export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const [formData, setFormData] = useState(() => initialFormState(product));
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const brands = useBrands();
   const categories = useCategories();
   const saveProduct = useSaveProduct();
@@ -55,11 +59,17 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { categoryId, ...rest } = formData;
-    saveProduct.mutate({ id: product?.id, input: { ...rest, categoryIds: [categoryId] } }, { onSuccess });
+    const input = ProductFormSchema.safeParse({ ...rest, categoryIds: categoryId ? [categoryId] : [] });
+    if (!input.success) {
+      setFieldErrors(fieldErrorsOf<keyof FormState>(input.error.issues, { categoryIds: 'categoryId' }));
+      return;
+    }
+    saveProduct.mutate({ id: product?.id, input: input.data }, { onSuccess });
   };
 
   const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   return (
@@ -71,7 +81,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre del Producto</Label>
@@ -81,7 +91,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Ej: Laptop Dell XPS 13"
                 required
+                {...fieldErrorProps('name', fieldErrors.name)}
               />
+              <FieldError id="name" message={fieldErrors.name} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="sku">SKU</Label>
@@ -91,7 +103,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 onChange={(e) => handleInputChange('sku', e.target.value)}
                 placeholder="Ej: DELL-XPS13-001"
                 required
+                {...fieldErrorProps('sku', fieldErrors.sku)}
               />
+              <FieldError id="sku" message={fieldErrors.sku} />
             </div>
           </div>
 
@@ -110,7 +124,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             <div className="space-y-2">
               <Label htmlFor="brand">Marca</Label>
               <Select value={formData.brandId} onValueChange={(value) => handleInputChange('brandId', value)}>
-                <SelectTrigger id="brand">
+                <SelectTrigger id="brand" {...fieldErrorProps('brand', fieldErrors.brandId)}>
                   <SelectValue placeholder="Seleccionar marca" />
                 </SelectTrigger>
                 <SelectContent>
@@ -121,11 +135,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   ))}
                 </SelectContent>
               </Select>
+              <FieldError id="brand" message={fieldErrors.brandId} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Categoría</Label>
               <Select value={formData.categoryId} onValueChange={(value) => handleInputChange('categoryId', value)}>
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" {...fieldErrorProps('category', fieldErrors.categoryId)}>
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
@@ -136,6 +151,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   ))}
                 </SelectContent>
               </Select>
+              <FieldError id="category" message={fieldErrors.categoryId} />
             </div>
           </div>
 
@@ -150,7 +166,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', Number.parseFloat(e.target.value) || 0)}
                 required
+                {...fieldErrorProps('price', fieldErrors.price)}
               />
+              <FieldError id="price" message={fieldErrors.price} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="stock">Stock</Label>
@@ -161,7 +179,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 value={formData.stock}
                 onChange={(e) => handleInputChange('stock', Number.parseInt(e.target.value) || 0)}
                 required
+                {...fieldErrorProps('stock', fieldErrors.stock)}
               />
+              <FieldError id="stock" message={fieldErrors.stock} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Estado</Label>

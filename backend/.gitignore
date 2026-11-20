@@ -19,3 +19,4 @@ dist
 src/generated
 dist-seed
 coverage
+dist-openapi

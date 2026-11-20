@@ -3,6 +3,7 @@
  */
 import { z } from 'zod';
 
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 import { ROLES } from '@/lib/shared/roles';
 
 import { DateStringSchema, EmailSchema, PasswordSchema, UUIDSchema } from './common.schema';
@@ -52,43 +53,35 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>;
 
-/**
- * Backend user response schema (as received from API)
- */
-export const BackendUserSchema = z.object({
-  id: UUIDSchema,
-  email: EmailSchema,
-  name: z.string(),
-  role: BackendRoleSchema,
-  department: z.string().optional().nullable(),
-  createdAt: z.string().optional(),
-  lastLogin: z.string().optional().nullable(),
-});
+/** Usuario de la sesión como lo devuelve el backend en /auth/me */
+export const BackendUserSchema = matchesContract<ApiSchemas['CurrentUserDto']>()(
+  z.object({
+    id: UUIDSchema,
+    email: EmailSchema,
+    name: z.string(),
+    role: BackendRoleSchema,
+    createdAt: z.string(),
+  }),
+);
 
-export type BackendUser = z.infer<typeof BackendUserSchema>;
-
-/**
- * Transform backend user to frontend user
- */
-export function mapBackendUserToFrontend(backendUser: BackendUser): User {
+/** Convierte el usuario del backend al del frontend. El login lo trae sin createdAt; /auth/me lo incluye. */
+export function mapBackendUserToFrontend(backendUser: ApiSchemas['UserDto'] & { createdAt?: string }): User {
   return {
     id: backendUser.id,
     email: backendUser.email,
     name: backendUser.name,
     role: mapBackendRoleToFrontend(backendUser.role),
-    department: backendUser.department || undefined,
-    createdAt: backendUser.createdAt || undefined, // Keep as ISO string from backend
-    lastLogin: backendUser.lastLogin || undefined, // Keep as ISO string from backend
+    createdAt: backendUser.createdAt,
   };
 }
 
-/**
- * Login request schema
- */
-export const LoginRequestSchema = z.object({
-  email: EmailSchema,
-  password: PasswordSchema,
-});
+/** Validación del formulario de login con las mismas reglas que LoginDto */
+export const LoginRequestSchema = matchesContract<ApiSchemas['LoginDto']>()(
+  z.object({
+    email: EmailSchema,
+    password: PasswordSchema,
+  }),
+);
 
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 

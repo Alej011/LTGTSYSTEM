@@ -5,16 +5,17 @@ import { z } from 'zod';
 
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
 import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
+import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
-/**
- * Backend user response schema (GET /api/users)
- */
-export const BackendUserListItemSchema = z.object({
-  id: UUIDSchema, // CUID from backend
-  email: EmailSchema,
-  name: z.string().min(1),
-  role: BackendRoleSchema, // ADMIN or SUPPORT from backend
-});
+/** Usuario como lo devuelve el backend en /users */
+export const BackendUserListItemSchema = matchesContract<ApiSchemas['UserDto']>()(
+  z.object({
+    id: UUIDSchema,
+    email: EmailSchema,
+    name: z.string().min(1),
+    role: BackendRoleSchema,
+  }),
+);
 
 export type BackendUserListItem = z.infer<typeof BackendUserListItemSchema>;
 
@@ -47,24 +48,14 @@ export function mapBackendUserListItemToFrontend(backendUser: BackendUserListIte
   };
 }
 
-/**
- * Create user request schema
- */
-export const CreateUserRequestSchema = z.object({
-  email: EmailSchema,
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
-  password: PasswordSchema,
-  role: BackendRoleSchema, // ADMIN or SUPPORT
-});
+// Mismas reglas que CreateUserDto, con mensajes para el usuario; editar solo cambia nombre y rol
+export const NewUserFormSchema = matchesContract<ApiSchemas['CreateUserDto']>()(
+  z.object({
+    email: EmailSchema,
+    name: z.string().trim().min(1, 'Ingresa el nombre'),
+    password: PasswordSchema,
+    role: BackendRoleSchema,
+  }),
+);
 
-export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
-
-/**
- * Update user request schema (all fields optional)
- */
-export const UpdateUserRequestSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100).optional(),
-  role: BackendRoleSchema.optional(), // ADMIN or SUPPORT
-});
-
-export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;
+export const UserChangesFormSchema = NewUserFormSchema.pick({ name: true, role: true });

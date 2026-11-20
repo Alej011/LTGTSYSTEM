@@ -4,27 +4,17 @@
  * Un solo modo de error: toda falla llega como ApiClientError (en `error` o en el rechazo de la mutación).
  */
 import { keepPreviousData, skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { z } from 'zod';
 
-import type { PaginationMetadataSchema } from '@/lib/schemas/common.schema';
 import { apiClient, ApiClientError } from '@/lib/shared/api-client';
+import type { ApiPaths, ApiSchemas } from '@/lib/shared/contract';
 
-import type {
-  BrandSchema,
-  CategorySchema,
-  CreateProductRequestSchema,
-  ProductFiltersSchema,
-  ProductSchema,
-} from './products.schemas';
-
-export type Product = z.infer<typeof ProductSchema>;
-export type ProductStatus = Product['status'];
-export type Brand = z.infer<typeof BrandSchema>;
-export type Category = z.infer<typeof CategorySchema>;
-export type ProductFilters = z.infer<typeof ProductFiltersSchema>;
-export type ProductInput = z.infer<typeof CreateProductRequestSchema>;
-export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>;
-export type ProductPage = { data: Product[]; meta: PaginationMetadata };
+export type Product = ApiSchemas['ProductResponseDto'];
+export type ProductStatus = ApiSchemas['ProductStatus'];
+export type Brand = ApiSchemas['BrandDto'];
+export type Category = ApiSchemas['CategoryDto'];
+export type ProductFilters = NonNullable<ApiPaths['/api/products']['get']['parameters']['query']>;
+export type ProductInput = ApiSchemas['CreateProductDto'];
+export type ProductPage = ApiSchemas['PaginatedProductsDto'];
 
 export const LOW_STOCK_THRESHOLD = 5;
 

@@ -43,7 +43,6 @@ describe('HTTP routes', () => {
   it('expose resources with REST paths', () => {
     expect(routeTable()).toEqual(
       [
-        'POST /auth/register',
         'POST /auth/login',
         'POST /auth/refresh',
         'POST /auth/logout',

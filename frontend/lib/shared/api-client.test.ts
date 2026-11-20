@@ -25,10 +25,10 @@ describe('ApiClientError.getUserMessage', () => {
     expect(new ApiClientError('detalle del backend', status).getUserMessage()).toBe(message);
   });
 
-  it.each([400, 422])('shows the backend detail for validation errors (HTTP %i)', (status) => {
-    expect(new ApiClientError('name must be a string', status).getUserMessage()).toBe(
-      'Error de validación: name must be a string',
-    );
+  it.each([400, 422])('hides the technical backend detail of validation errors (HTTP %i)', (status) => {
+    const error = new ApiClientError('brandId should not be empty', status);
+    expect(error.getUserMessage()).toBe('Algunos datos no son válidos. Revisa el formulario e intenta de nuevo.');
+    expect(error.message).toBe('brandId should not be empty');
   });
 
   it('falls back to the backend message for other status codes', () => {
