@@ -6,16 +6,22 @@
 
 import { API_TIMEOUT } from './api-config';
 
+// 400 y 422 no muestran el detalle del backend: es técnico y en inglés. Los formularios validan antes de enviar,
+// así que llegar aquí indica un desajuste con el backend, no un dato que el usuario pueda corregir leyendo el detalle.
+const VALIDATION_MESSAGE = 'Algunos datos no son válidos. Revisa el formulario e intenta de nuevo.';
+
 const ERROR_MESSAGES: Partial<Record<number, string>> = {
   0: 'No se pudo conectar con el servidor. Verifica tu conexión.',
+  400: VALIDATION_MESSAGE,
   401: 'Sesión expirada. Por favor inicia sesión nuevamente.',
   403: 'No tienes permisos para realizar esta acción.',
   404: 'El recurso solicitado no existe.',
   408: 'La petición tardó demasiado. Verifica tu conexión.',
+  422: VALIDATION_MESSAGE,
   429: 'Demasiados intentos. Espera un minuto e intenta de nuevo.',
 };
 
-/** statusCode es el HTTP de la respuesta; 0 indica falla de red y 408 timeout. */
+/** statusCode es el HTTP de la respuesta; 0 indica falla de red y 408 timeout. message conserva el detalle del backend. */
 export class ApiClientError extends Error {
   statusCode: number;
 
@@ -27,19 +33,11 @@ export class ApiClientError extends Error {
 
   /** Mensaje para mostrar al usuario */
   getUserMessage(): string {
-    if (this.isValidationError()) {
-      return `Error de validación: ${this.message}`;
-    }
-
     if (this.isServerError()) {
       return 'Error del servidor. Por favor intenta nuevamente.';
     }
 
     return ERROR_MESSAGES[this.statusCode] ?? (this.message || 'Ocurrió un error inesperado.');
-  }
-
-  isValidationError(): boolean {
-    return this.statusCode === 422 || this.statusCode === 400;
   }
 
   isServerError(): boolean {
