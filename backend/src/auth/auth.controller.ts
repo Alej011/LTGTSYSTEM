@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { CurrentUserDto, SessionTokensDto } from './dto/session.dto';
 import { LoginThrottlerGuard } from './guards/login-throttler.guard';
 import type { AuthUser } from './strategies/jwt.strategy';
 
@@ -19,22 +20,10 @@ export class AuthController {
   @UseGuards(LoginThrottlerGuard)
   @ApiOperation({ summary: 'Iniciar sesión' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Login exitoso',
-    schema: {
-      example: {
-        accessToken: 'eyJhbGciOiJIUzI1NiIs...',
-        accessTokenExpiresAt: '2026-01-01T00:15:00.000Z',
-        refreshToken: 'q9Xh...43 caracteres',
-        refreshTokenExpiresAt: '2026-01-08T00:00:00.000Z',
-        user: { id: 'abc123', email: 'admin@ltgt.local', name: 'Admin', role: 'ADMIN' },
-      },
-    },
-  })
+  @ApiResponse({ status: 200, description: 'Login exitoso', type: SessionTokensDto })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
   @ApiResponse({ status: 429, description: 'Demasiados intentos, espera un minuto' })
-  login(@Body() dto: LoginDto) {
+  login(@Body() dto: LoginDto): Promise<SessionTokensDto> {
     return this.auth.login(dto);
   }
 
@@ -49,9 +38,10 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Nuevo access token (y refresh token, salvo reintento dentro de la ventana de gracia)',
+    type: SessionTokensDto,
   })
   @ApiResponse({ status: 401, description: 'Refresh token inválido, expirado o revocado' })
-  refresh(@Body() dto: RefreshTokenDto) {
+  refresh(@Body() dto: RefreshTokenDto): Promise<SessionTokensDto> {
     return this.auth.refresh(dto.refreshToken);
   }
 
@@ -60,7 +50,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Cerrar sesión (revoca el refresh token)' })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({ status: 204, description: 'Sesión cerrada' })
-  async logout(@Body() dto: RefreshTokenDto) {
+  async logout(@Body() dto: RefreshTokenDto): Promise<void> {
     await this.auth.logout(dto.refreshToken);
   }
 
@@ -68,9 +58,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Obtener información del usuario actual' })
-  @ApiResponse({ status: 200, description: 'Datos del usuario' })
+  @ApiResponse({ status: 200, description: 'Datos del usuario', type: CurrentUserDto })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  me(@User() user: AuthUser) {
+  me(@User() user: AuthUser): Promise<CurrentUserDto> {
     return this.auth.me(user);
   }
 }

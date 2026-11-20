@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class BrandResponseDto {
+import { ProductStatus } from '../../generated/prisma/enums';
+
+export class BrandSummaryDto {
   @ApiProperty({ example: 'clxyz123' })
   id: string;
 
@@ -8,7 +10,7 @@ export class BrandResponseDto {
   name: string;
 }
 
-export class CategoryResponseDto {
+export class CategorySummaryDto {
   @ApiProperty({ example: 'clxyz456' })
   id: string;
 
@@ -35,17 +37,17 @@ export class ProductResponseDto {
   @ApiProperty({ example: 25 })
   stock: number;
 
-  @ApiProperty({ enum: ['active', 'inactive', 'discontinued'], example: 'active' })
-  status: string;
+  @ApiProperty({ enum: ProductStatus, enumName: 'ProductStatus', example: 'active' })
+  status: ProductStatus;
 
   @ApiProperty({ example: 'clx1brand000001' })
   brandId: string;
 
-  @ApiProperty({ type: BrandResponseDto })
-  brand: BrandResponseDto;
+  @ApiProperty({ type: BrandSummaryDto })
+  brand: BrandSummaryDto;
 
-  @ApiProperty({ type: [CategoryResponseDto] })
-  categories: CategoryResponseDto[];
+  @ApiProperty({ type: [CategorySummaryDto] })
+  categories: CategorySummaryDto[];
 
   @ApiProperty({ example: '2024-01-15T00:00:00.000Z' })
   createdAt: Date;

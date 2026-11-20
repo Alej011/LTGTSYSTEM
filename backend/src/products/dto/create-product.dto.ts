@@ -40,7 +40,13 @@ export class CreateProductDto {
   @Min(0)
   stock: number;
 
-  @ApiProperty({ enum: ProductStatus, example: 'active', required: false, default: 'active' })
+  @ApiProperty({
+    enum: ProductStatus,
+    enumName: 'ProductStatus',
+    example: 'active',
+    required: false,
+    default: 'active',
+  })
   @IsEnum(ProductStatus)
   @IsOptional()
   status?: ProductStatus;

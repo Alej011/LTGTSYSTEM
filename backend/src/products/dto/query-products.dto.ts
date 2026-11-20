@@ -1,6 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+
+import { ProductStatus } from '../../generated/prisma/enums';
 
 /**
  * DTO para query parameters al listar productos
@@ -27,12 +29,13 @@ export class QueryProductsDto {
 
   @ApiPropertyOptional({
     description: 'Filtrar por estado',
-    enum: ['active', 'inactive', 'discontinued'],
+    enum: ProductStatus,
+    enumName: 'ProductStatus',
     example: 'active',
   })
   @IsOptional()
-  @IsIn(['active', 'inactive', 'discontinued'])
-  status?: 'active' | 'inactive' | 'discontinued';
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 
   @ApiPropertyOptional({
     description: 'Filtrar por ID de marca',
