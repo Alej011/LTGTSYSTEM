@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
-    "openapi": "openapi-typescript ../backend/openapi.json -o lib/shared/api-schema.d.ts"
+    "openapi": "openapi-typescript ../backend/openapi.json -o lib/shared/api-schema.d.ts --default-non-nullable false"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "1.1.4",

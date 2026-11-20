@@ -421,7 +421,7 @@ export interface components {
              * @default active
              * @example active
              */
-            status: components["schemas"]["ProductStatus"];
+            status?: components["schemas"]["ProductStatus"];
             /** @example clxyz123 */
             brandId: string;
             /**
@@ -448,7 +448,7 @@ export interface components {
              * @default active
              * @example active
              */
-            status: components["schemas"]["ProductStatus"];
+            status?: components["schemas"]["ProductStatus"];
             /** @example clxyz123 */
             brandId?: string;
             /**
