@@ -1,11 +1,10 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 import { callBackend } from '@/shared/api/bff.server';
-import { clearSessionCookies, REFRESH_COOKIE } from '@/shared/session/session.server';
+import { endSession, getRefreshToken } from '@/shared/session/session.server';
 
 export async function POST() {
-  const refreshToken = (await cookies()).get(REFRESH_COOKIE)?.value;
+  const refreshToken = await getRefreshToken();
 
   if (refreshToken) {
     const result = await callBackend({
@@ -20,6 +19,6 @@ export async function POST() {
   }
 
   const response = new NextResponse(null, { status: 204 });
-  clearSessionCookies(response);
+  endSession(response);
   return response;
 }
