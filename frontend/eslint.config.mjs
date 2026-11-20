@@ -36,8 +36,8 @@ export default tseslint.config(
     },
   },
   {
-    // features/ already uses React Query hooks; these folders still load data in useEffect until C.7 (session) and C.8 (mock modules)
-    files: ['app/**', 'components/**', 'contexts/**'],
+    // The mock modules (tickets, knowledge, communications) still load data in useEffect until C.8
+    files: ['components/communications/**', 'components/knowledge/**', 'components/tickets/**'],
     rules: {
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/immutability': 'warn',

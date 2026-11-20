@@ -19,7 +19,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -51,6 +51,11 @@ const THEME_OPTIONS = [
   { value: 'dark', label: 'Oscuro', icon: Moon },
   { value: 'system', label: 'Sistema', icon: Monitor },
 ];
+
+// Saber si ya se renderiza en el cliente, sin un efecto que cambie estado
+const subscribeToNothing = () => () => undefined;
+const onClient = () => true;
+const onServer = () => false;
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -89,8 +94,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   // El tema guardado solo se conoce en el cliente; evita un desajuste de hidratación
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeToNothing, onClient, onServer);
 
   if (!user) return null;
 
