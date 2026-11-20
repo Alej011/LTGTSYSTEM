@@ -7,11 +7,12 @@ Aplicación web en **Next.js 16 (App Router) + React 19** con React Query, Zod 4
 ```
 Componente ──► hook del dominio (features/<dominio>/<dominio>.client.ts, React Query)
            ──► api-client (lib/shared/api-client.ts)
-           ──► ruta BFF de Next (app/api/**/route.ts)   valida con Zod y adapta los datos
+           ──► ruta BFF de Next (app/api/**/route.ts)   valida la respuesta con Zod y adapta los datos
            ──► API NestJS (http://backend:4000/api)
 ```
 
-- **BFF (Backend for Frontend):** las rutas de `app/api/` reenvían cada petición al backend, validan entrada y salida con Zod y traducen el formato (p. ej. roles `ADMIN`/`SUPPORT` del backend ↔ `admin`/`empleado` en el frontend).
+- **BFF (Backend for Frontend):** las rutas de `app/api/` reenvían cada petición al backend, que valida la entrada con sus DTOs. El BFF valida la respuesta con Zod y traduce el formato (p. ej. roles `ADMIN`/`SUPPORT` del backend ↔ `admin`/`empleado` en el frontend).
+- **Contrato:** los tipos del backend se generan desde `backend/openapi.json` en `lib/shared/api-schema.d.ts` (`pnpm openapi`); no se escriben a mano. Cada schema Zod de respuesta se declara con `matchesContract<ApiSchemas['XDto']>()` (`lib/shared/contract.ts`): si el backend agrega, quita o cambia un campo, el frontend deja de compilar.
 - **Sesión:**
   - El BFF guarda el access token (15 min) y el refresh token (7 días) en las cookies HttpOnly `ltgt_access_token` y `ltgt_refresh_token`, con `SameSite=Lax` y `Secure` en producción. Cada cookie dura lo mismo que su token.
   - El JavaScript del navegador nunca ve los tokens: las rutas BFF leen la cookie y añaden `Authorization: Bearer` al llamar al backend.
@@ -38,11 +39,11 @@ app/
 features/                    # Un dominio completo por carpeta
 ├── products/
 │   ├── products.client.ts   # Interfaz para los componentes: hooks de React Query y regla de stock bajo
-│   ├── products.schemas.ts  # Zod: validación del BFF (entrada y respuesta)
+│   ├── products.schemas.ts  # Zod: respuestas que valida el BFF, atadas al contrato
 │   └── components/          # Vista, lista, formulario, detalle y badges
 ├── users/
 │   ├── users.client.ts      # useUsers y useSaveUser
-│   ├── users.schemas.ts     # Zod: validación del BFF y traducción de roles
+│   ├── users.schemas.ts     # Zod: respuestas que valida el BFF y traducción de roles
 │   └── components/          # Vista, lista y formulario
 └── dashboard/
     ├── dashboard.data.ts    # Cifras y actividad de los módulos que aún son mock
@@ -59,12 +60,14 @@ lib/
 └── shared/
     ├── api-client.ts        # Cliente HTTP hacia el BFF (timeout, errores tipados, 401 → login)
     ├── api-config.ts        # URL del backend y timeout
+    ├── api-schema.d.ts      # Tipos generados desde backend/openapi.json (no editar)
+    ├── contract.ts          # ApiSchemas, ApiPaths y matchesContract
     ├── permissions.ts       # Política única: can(rol, recurso, acción) y canOpenPage; la usan proxy.ts y los layouts
     ├── use-can.ts           # can() con el rol del usuario actual, para los componentes
     ├── roles.ts             # Roles del backend (ADMIN, SUPPORT)
     └── tones.ts             # Clases de badge por significado (info, success, warning, danger...)
 lib/server/                  # Solo servidor (import "server-only")
-├── backend.ts               # Helper de las rutas BFF: cookie → Bearer, IP, timeout, validación Zod
+├── backend.ts               # Helper de las rutas BFF: cookie → Bearer, IP, timeout, validación Zod de la respuesta
 └── session.ts               # Cookies de sesión, verificación del JWT y refresh
 proxy.ts                     # Protección de rutas y renovación de sesión
 test/                        # Utilidades de test: BFF simulado sobre fetch y render con React Query
@@ -95,11 +98,12 @@ Base: tema **ltgtsystem** de [tweakcn](https://tweakcn.com/themes/cmw8k4lvt00000
 
 ## Agregar una funcionalidad conectada al backend
 
-1. Esquema Zod de petición/respuesta en `features/<dominio>/<dominio>.schemas.ts`.
-2. Ruta BFF en `app/api/<dominio>/.../route.ts`, con la misma ruta que el backend, usando `proxyToBackend` (o `callBackend` si necesitas manipular la respuesta) de `lib/server/backend.ts`. Si la respuesta del backend no cumple el esquema, el BFF responde `502` en lugar de reenviar datos sin validar.
-3. Hook en `features/<dominio>/<dominio>.client.ts`: los componentes no conocen URLs ni query keys, y toda falla llega como `ApiClientError`. Las mutaciones invalidan las queries que dependen de ellas.
-4. Test del hook contra el BFF simulado de `test/mock-bff.ts`.
-5. Si requiere permisos, regístralo en `lib/shared/permissions.ts` y úsalo con `useCan()`; no compares roles en los componentes. `backend/src/permissions.spec.ts` falla si la política no coincide con los `@Roles` del backend.
+1. En el backend, el DTO de respuesta y `pnpm openapi`; aquí, `pnpm openapi` para regenerar los tipos.
+2. Esquema Zod de la respuesta en `features/<dominio>/<dominio>.schemas.ts`, declarado con `matchesContract<ApiSchemas['XDto']>()`. Los tipos que usan los hooks salen de `ApiSchemas` y `ApiPaths`, no de interfaces propias.
+3. Ruta BFF en `app/api/<dominio>/.../route.ts`, con la misma ruta que el backend, usando `proxyToBackend` (o `callBackend` si necesitas manipular la respuesta) de `lib/server/backend.ts`. El cuerpo se reenvía con `readJsonBody`, sin reglas propias: las valida el backend. Si la respuesta del backend no cumple el esquema, el BFF responde `502` en lugar de reenviar datos sin validar.
+4. Hook en `features/<dominio>/<dominio>.client.ts`: los componentes no conocen URLs ni query keys, y toda falla llega como `ApiClientError`. Las mutaciones invalidan las queries que dependen de ellas.
+5. Test del hook contra el BFF simulado de `test/mock-bff.ts`.
+6. Si requiere permisos, regístralo en `lib/shared/permissions.ts` y úsalo con `useCan()`; no compares roles en los componentes. `backend/src/permissions.spec.ts` falla si la política no coincide con los `@Roles` del backend.
 
 ## Desarrollo local
 
@@ -122,5 +126,6 @@ pnpm dev           # http://localhost:3000
 | `dev`             | Servidor de desarrollo                                              |
 | `build` / `start` | Build de producción (falla si hay errores de TypeScript) / servirlo |
 | `typecheck`       | Revisión de tipos sin compilar                                      |
+| `openapi`         | Regenera `lib/shared/api-schema.d.ts` desde `backend/openapi.json`  |
 
 El build genera la salida `standalone` (`.next/standalone/server.js`), que es lo que ejecuta la imagen de producción.
