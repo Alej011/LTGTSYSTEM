@@ -1,12 +1,13 @@
 import 'server-only';
 
-import { cookies, headers } from 'next/headers';
+import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { z } from 'zod';
 
-import { API_BASE_URL, API_TIMEOUT } from '@/lib/shared/api-config';
+import { API_BASE_URL, API_TIMEOUT } from '@/shared/api/api-config';
+import { getAccessToken } from '@/shared/session/session.server';
 
-import { ACCESS_COOKIE, getClientIp } from './session';
+import { getClientIp } from './client-ip';
 
 type BackendErrorBody = { message?: string | string[]; error?: string };
 
@@ -51,7 +52,7 @@ export async function callBackend<S extends z.ZodType = z.ZodUnknown>({
   const requestHeaders = new Headers({ 'Content-Type': 'application/json' });
 
   if (auth) {
-    const token = (await cookies()).get(ACCESS_COOKIE)?.value;
+    const token = await getAccessToken();
     if (!token) {
       return { ok: false, status: 401, response: errorResponse(401, 'Sesión no iniciada o expirada', 'UNAUTHORIZED') };
     }

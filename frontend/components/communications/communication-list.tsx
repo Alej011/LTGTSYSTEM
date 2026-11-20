@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAuth } from '@/contexts/auth-context';
 import {
   type Communication,
   type CommunicationType,
@@ -21,8 +20,12 @@ import {
   isRead,
   markAsRead,
 } from '@/lib/features/communications/communications.service';
-import { TONE_CLASSES } from '@/lib/shared/tones';
-import { useCan } from '@/lib/shared/use-can';
+import { TONE_CLASSES } from '@/shared/lib/tones';
+import { useSession } from '@/shared/session/session.client';
+import { useCan } from '@/shared/use-can';
+
+// El backend no tiene departamentos de usuario; con un departamento vacío el mock no filtra por él
+const NO_DEPARTMENT = '';
 
 interface CommunicationListProps {
   onView: (communication: Communication) => void;
@@ -32,7 +35,7 @@ interface CommunicationListProps {
 }
 
 export function CommunicationList({ onView, onEdit, onAdd, showManagement = false }: CommunicationListProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<CommunicationType | 'all'>('all');
@@ -51,7 +54,7 @@ export function CommunicationList({ onView, onEdit, onAdd, showManagement = fals
       filtered = getAllCommunications();
     } else {
       // Show only relevant communications for the user
-      filtered = getCommunications(user.id, user.role, user.department || '');
+      filtered = getCommunications(user.id, user.role, NO_DEPARTMENT);
     }
 
     // Apply filters

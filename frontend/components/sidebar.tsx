@@ -19,7 +19,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,10 +31,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAuth } from '@/contexts/auth-context';
-import type { Resource } from '@/lib/shared/permissions';
-import { useCan } from '@/lib/shared/use-can';
-import { cn } from '@/lib/shared/utils';
+import { cn } from '@/shared/lib/utils';
+import type { Resource } from '@/shared/permissions';
+import { ROLE_LABELS } from '@/shared/roles';
+import { useLogout, useSession } from '@/shared/session/session.client';
+import { useCan } from '@/shared/use-can';
 
 const navigation: { name: string; href: string; icon: typeof Package; resource: Resource }[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, resource: 'dashboard' },
@@ -51,7 +52,10 @@ const THEME_OPTIONS = [
   { value: 'system', label: 'Sistema', icon: Monitor },
 ];
 
-const ROLE_LABELS: Record<string, string> = { admin: 'Administrador', empleado: 'Soporte' };
+// Saber si ya se renderiza en el cliente, sin un efecto que cambie estado
+const subscribeToNothing = () => () => undefined;
+const onClient = () => true;
+const onServer = () => false;
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -84,13 +88,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
-  const { user, logout } = useAuth();
+  const { user } = useSession();
+  const logout = useLogout();
   const can = useCan();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   // El tema guardado solo se conoce en el cliente; evita un desajuste de hidratación
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeToNothing, onClient, onServer);
 
   if (!user) return null;
 
@@ -161,7 +165,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
       <div className={cn('space-y-1 border-t border-sidebar-border', collapsed ? 'p-2' : 'p-3')}>
         {collapsed ? (
-          <WithTooltip label={`${user.name} · ${ROLE_LABELS[user.role] ?? user.role}`} show>
+          <WithTooltip label={`${user.name} · ${ROLE_LABELS[user.role]}`} show>
             <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
               {initials(user.name)}
             </div>
@@ -170,7 +174,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
           <div className="mb-2 px-3 py-2">
             <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            <p className="text-xs text-muted-foreground">{ROLE_LABELS[user.role] ?? user.role}</p>
+            <p className="text-xs text-muted-foreground">{ROLE_LABELS[user.role]}</p>
           </div>
         )}
 
@@ -213,7 +217,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
               'hover:bg-destructive/10 hover:text-destructive',
               collapsed ? 'mx-auto flex' : 'w-full justify-start',
             )}
-            onClick={logout}
+            onClick={() => logout.mutate()}
           >
             <LogOut className="h-4 w-4" />
             {!collapsed && 'Cerrar sesión'}

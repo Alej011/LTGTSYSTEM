@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAuth } from '@/contexts/auth-context';
 import {
   getCategoryLabel,
   getPriorityColor,
@@ -21,7 +20,8 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from '@/lib/features/tickets/tickets.service';
-import { useCan } from '@/lib/shared/use-can';
+import { useSession } from '@/shared/session/session.client';
+import { useCan } from '@/shared/use-can';
 
 interface TicketListProps {
   onView: (ticket: Ticket) => void;
@@ -29,7 +29,7 @@ interface TicketListProps {
 }
 
 export function TicketList({ onView, onAdd }: TicketListProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,7 +56,7 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
     let filtered = tickets;
 
     // Filter by user role and permissions
-    if (user.role === 'empleado') {
+    if (user.role === 'SUPPORT') {
       // Support employees can see all tickets with special filters
       if (assignmentFilter === 'mine') {
         filtered = filtered.filter((ticket) => ticket.assignedTo === user.id || ticket.createdBy === user.id);
@@ -123,7 +123,7 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
                 Tickets de Soporte
               </CardTitle>
               <CardDescription>
-                {user?.role === 'empleado'
+                {user?.role === 'SUPPORT'
                   ? 'Gestiona tus solicitudes de soporte técnico'
                   : 'Administra y da seguimiento a los tickets de soporte'}
               </CardDescription>

@@ -9,9 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/auth-context';
-import { getLoginErrorMessage } from '@/lib/features/auth/auth.service';
-import { LoginRequestSchema } from '@/lib/schemas/auth.schema';
+import { loginErrorMessage, LoginFormSchema, useLogin } from '@/shared/session/session.client';
 
 // Solo rutas internas: evita redirecciones abiertas a otros dominios
 function safeRedirect(target: string | null): string {
@@ -30,7 +28,7 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
-  const { login, isLoading } = useAuth();
+  const login = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -40,7 +38,7 @@ export function LoginForm() {
     setValidationErrors({});
 
     // Client-side validation with Zod
-    const validation = LoginRequestSchema.safeParse({ email, password });
+    const validation = LoginFormSchema.safeParse({ email, password });
 
     if (!validation.success) {
       const errors: { email?: string; password?: string } = {};
@@ -56,10 +54,10 @@ export function LoginForm() {
     }
 
     try {
-      await login(email, password);
+      await login.mutateAsync({ email, password });
       router.push(redirectTo);
     } catch (err) {
-      setError(getLoginErrorMessage(err));
+      setError(loginErrorMessage(err));
     }
   };
 
@@ -76,7 +74,7 @@ export function LoginForm() {
           <CardDescription>Sistema de Gestión Empresarial</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-4">
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>
@@ -127,8 +125,8 @@ export function LoginForm() {
             )}
 
             {/* Botón submit */}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="w-full" disabled={login.isPending}>
+              {login.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Iniciando sesión...

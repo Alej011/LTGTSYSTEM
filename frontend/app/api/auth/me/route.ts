@@ -1,11 +1,10 @@
-import { CurrentUserResponseSchema, mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
-import { proxyToBackend } from '@/lib/server/backend';
+import { proxyToBackend } from '@/shared/api/bff.server';
+import { CurrentUserSchema } from '@/shared/session/session.server';
 
 export function GET() {
   return proxyToBackend({
     path: '/api/auth/me',
-    schema: CurrentUserResponseSchema,
-    map: mapBackendUserToFrontend,
+    schema: CurrentUserSchema,
     errorMessage: 'Error al obtener usuario',
   });
 }

@@ -11,8 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type BackendRole, mapFrontendRoleToBackend } from '@/lib/schemas/auth.schema';
-import { ApiClientError } from '@/lib/shared/api-client';
+import { ApiClientError } from '@/shared/api/api-client';
+import type { Role } from '@/shared/roles';
 
 import { type User, useSaveUser } from '../users.client';
 import { NewUserFormSchema, UserChangesFormSchema } from '../users.schemas';
@@ -28,7 +28,7 @@ function initialFormState(user?: User) {
     name: user?.name ?? '',
     email: user?.email ?? '',
     password: '',
-    role: user ? mapFrontendRoleToBackend(user.role) : ('SUPPORT' as BackendRole),
+    role: user?.role ?? 'SUPPORT',
   };
 }
 
@@ -127,7 +127,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="role">Rol</Label>
-            <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value as BackendRole)}>
+            <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value as Role)}>
               <SelectTrigger id="role">
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>

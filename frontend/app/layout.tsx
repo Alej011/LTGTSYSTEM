@@ -6,7 +6,6 @@ import { Suspense } from 'react';
 
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from '@/contexts/auth-context';
 
 import { Providers } from './providers';
 
@@ -26,9 +25,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <Suspense fallback={null}>
-            <Providers>
-              <AuthProvider>{children}</AuthProvider>
-            </Providers>
+            <Providers>{children}</Providers>
           </Suspense>
           <Toaster position="top-right" richColors closeButton />
         </ThemeProvider>

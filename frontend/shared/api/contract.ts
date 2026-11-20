@@ -4,7 +4,7 @@
  */
 import type { z } from 'zod';
 
-import type { components, paths } from './api-schema';
+import type { components, paths } from './schema';
 
 export type ApiSchemas = components['schemas'];
 export type ApiPaths = paths;

@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { LoginForm } from '@/components/login-form';
-import { useAuth } from '@/contexts/auth-context';
+import { useSession } from '@/shared/session/session.client';
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useSession();
+  const isAuthenticated = user !== null;
   const router = useRouter();
 
   useEffect(() => {

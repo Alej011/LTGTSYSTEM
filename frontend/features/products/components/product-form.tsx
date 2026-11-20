@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ApiClientError } from '@/lib/shared/api-client';
+import { ApiClientError } from '@/shared/api/api-client';
 
 import { type Product, type ProductStatus, useBrands, useCategories, useSaveProduct } from '../products.client';
 import { ProductFormSchema } from '../products.schemas';

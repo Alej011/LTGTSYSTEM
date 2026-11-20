@@ -20,8 +20,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ApiClientError } from '@/lib/shared/api-client';
-import { useCan } from '@/lib/shared/use-can';
+import { ApiClientError } from '@/shared/api/api-client';
+import { useCan } from '@/shared/use-can';
 
 import { type Product, type ProductStatus, useCategories, useDeleteProduct, useProducts } from '../products.client';
 import { PRODUCT_STATUSES, ProductStatusBadge, productStatusLabel, StockBadge } from './product-badges';

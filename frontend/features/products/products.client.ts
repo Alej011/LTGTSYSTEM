@@ -5,8 +5,8 @@
  */
 import { keepPreviousData, skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { apiClient, ApiClientError } from '@/lib/shared/api-client';
-import type { ApiPaths, ApiSchemas } from '@/lib/shared/contract';
+import { apiClient, ApiClientError } from '@/shared/api/api-client';
+import type { ApiPaths, ApiSchemas } from '@/shared/api/contract';
 
 export type Product = ApiSchemas['ProductResponseDto'];
 export type ProductStatus = ApiSchemas['ProductStatus'];

@@ -1,18 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import {
-  ACCESS_COOKIE,
-  type AccessPayload,
-  clearSessionCookies,
-  getClientIp,
-  REFRESH_COOKIE,
-  refreshSession,
-  type SessionTokens,
-  setSessionCookies,
-  verifyAccessToken,
-} from '@/lib/server/session';
-import { canOpenPage } from '@/lib/shared/permissions';
+import { canOpenPage } from '@/shared/permissions';
+import { resolveSession } from '@/shared/session/session.server';
 
 const PROTECTED_ROUTES = ['/dashboard', '/products', '/users', '/tickets', '/knowledge', '/communications'];
 // Rutas BFF que gestionan la sesión por sí mismas
@@ -39,40 +29,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let session: AccessPayload | null = await verifyAccessToken(request.cookies.get(ACCESS_COOKIE)?.value);
-  let refreshed: SessionTokens | null = null;
-  const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
+  const { session, next, apply } = await resolveSession(request);
 
-  if (!session && refreshToken) {
-    refreshed = await refreshSession(refreshToken, getClientIp(request.headers));
-    session = refreshed ? await verifyAccessToken(refreshed.accessToken) : null;
-  }
-
-  if (!session) {
-    const hadSession = request.cookies.has(ACCESS_COOKIE) || !!refreshToken;
-    let response: NextResponse;
-    if (isApi) {
-      // La ruta BFF responde 401 al no encontrar la cookie
-      request.cookies.delete(ACCESS_COOKIE);
-      response = NextResponse.next({ request: { headers: request.headers } });
-    } else {
-      response = redirectTo(request, '/', { redirect: pathname });
-    }
-    if (hadSession) clearSessionCookies(response);
-    return response;
-  }
+  // Sin sesión, la ruta BFF responde 401 por sí misma; una página lleva al login
+  if (!session) return isApi ? next() : apply(redirectTo(request, '/', { redirect: pathname }));
 
   if (isProtectedPage && !canOpenPage(session.role, pathname)) {
-    return redirectTo(request, '/dashboard');
+    return apply(redirectTo(request, '/dashboard'));
   }
 
-  if (!refreshed) return NextResponse.next();
-
-  // La ruta o página de esta misma petición debe ver ya el token renovado
-  request.cookies.set(ACCESS_COOKIE, refreshed.accessToken);
-  const response = NextResponse.next({ request: { headers: request.headers } });
-  setSessionCookies(response, refreshed);
-  return response;
+  return next();
 }
 
 export const config = {

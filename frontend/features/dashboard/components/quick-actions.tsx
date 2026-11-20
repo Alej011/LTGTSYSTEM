@@ -15,7 +15,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCan } from '@/lib/shared/use-can';
+import { useCan } from '@/shared/use-can';
 
 export function QuickActions() {
   const can = useCan();

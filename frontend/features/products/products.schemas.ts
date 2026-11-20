@@ -4,8 +4,18 @@
  */
 import { z } from 'zod';
 
-import { PaginationMetadataSchema } from '@/lib/schemas/common.schema';
-import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
+import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
+
+export const PaginationMetadataSchema = matchesContract<ApiSchemas['PaginationMetadata']>()(
+  z.object({
+    page: z.number().int().positive(),
+    limit: z.number().int().positive(),
+    total: z.number().int().nonnegative(),
+    totalPages: z.number().int().nonnegative(),
+    hasPrevPage: z.boolean(),
+    hasNextPage: z.boolean(),
+  }),
+);
 
 export const ProductStatusSchema = matchesContract<ApiSchemas['ProductStatus']>()(
   z.enum(['active', 'inactive', 'discontinued']),

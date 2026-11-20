@@ -13,7 +13,7 @@ export default defineConfig({
     exclude: ['node_modules', '.next'],
     coverage: {
       provider: 'v8',
-      include: ['app/**', 'components/**', 'contexts/**', 'hooks/**', 'lib/**'],
+      include: ['app/**', 'components/**', 'contexts/**', 'features/**', 'hooks/**', 'lib/**', 'shared/**', 'proxy.ts'],
       exclude: ['components/ui/**', '**/*.test.{ts,tsx}'],
     },
   },

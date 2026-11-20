@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useSession } from '@/shared/session/session.client';
 
 import { ArticleList } from './article-list';
 
-vi.mock('@/contexts/auth-context', () => ({ useAuth: vi.fn() }));
+vi.mock('@/shared/session/session.client', () => ({ useSession: vi.fn() }));
 
-function renderAs(role: 'admin' | 'empleado' | undefined) {
-  vi.mocked(useAuth).mockReturnValue({
+function renderAs(role: 'ADMIN' | 'SUPPORT' | undefined) {
+  vi.mocked(useSession).mockReturnValue({
     user: role ? { id: 'u1', email: 'user@ltgt.com', name: 'Usuario', role } : null,
-  } as ReturnType<typeof useAuth>);
+  } as ReturnType<typeof useSession>);
   render(<ArticleList onView={() => undefined} onAdd={() => undefined} showManagement />);
 }
 
@@ -20,12 +20,12 @@ describe('ArticleList permissions', () => {
   });
 
   it('lets admin create articles', () => {
-    renderAs('admin');
+    renderAs('ADMIN');
     expect(screen.getByRole('button', { name: /Nuevo Artículo/ })).toBeInTheDocument();
   });
 
-  it('hides article creation from empleado, as the permission matrix defines', () => {
-    renderAs('empleado');
+  it('hides article creation from SUPPORT, as the permission matrix defines', () => {
+    renderAs('SUPPORT');
     expect(screen.queryByRole('button', { name: /Nuevo Artículo/ })).not.toBeInTheDocument();
   });
 

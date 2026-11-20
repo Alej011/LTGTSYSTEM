@@ -3,10 +3,13 @@
  * (tickets, conocimiento, comunicaciones). Los totales de productos vienen de useStockSummary.
  * En C.8 estos módulos pasan a hooks asíncronos y estas funciones se reemplazan.
  */
-import type { User } from '@/lib/features/auth/auth.service';
 import { getCommunications, getUnreadCount } from '@/lib/features/communications/communications.service';
 import { getArticles } from '@/lib/features/knowledge/knowledge.service';
 import { getTickets } from '@/lib/features/tickets/tickets.service';
+import type { SessionUser } from '@/shared/session/session.client';
+
+// El backend no tiene departamentos de usuario; con un departamento vacío el mock no filtra por él
+const NO_DEPARTMENT = '';
 
 export interface DashboardStats {
   openTickets: number;
@@ -25,10 +28,10 @@ export interface RecentActivity {
   priority?: string;
 }
 
-export function getDashboardStats(user: User): DashboardStats {
+export function getDashboardStats(user: SessionUser): DashboardStats {
   const tickets = getTickets();
   const articles = getArticles('published');
-  const unreadComms = getUnreadCount(user.id, user.role, user.department ?? '');
+  const unreadComms = getUnreadCount(user.id, user.role, NO_DEPARTMENT);
 
   const openTickets = tickets.filter((t) => t.status === 'abierto' || t.status === 'en_progreso').length;
   const myTickets = tickets.filter((t) => t.createdBy === user.id || t.assignedTo === user.id).length;
@@ -41,13 +44,13 @@ export function getDashboardStats(user: User): DashboardStats {
   };
 }
 
-export function getRecentActivity(user: User): RecentActivity[] {
+export function getRecentActivity(user: SessionUser): RecentActivity[] {
   const activities: RecentActivity[] = [];
 
   // Recent tickets
   const tickets = getTickets()
     .filter((t) => {
-      if (user.role === 'empleado') return t.createdBy === user.id || t.assignedTo === user.id;
+      if (user.role === 'SUPPORT') return t.createdBy === user.id || t.assignedTo === user.id;
       return true;
     })
     .slice(0, 3);
@@ -65,7 +68,7 @@ export function getRecentActivity(user: User): RecentActivity[] {
   });
 
   // Recent communications
-  const communications = getCommunications(user.id, user.role, user.department ?? '').slice(0, 2);
+  const communications = getCommunications(user.id, user.role, NO_DEPARTMENT).slice(0, 2);
   communications.forEach((comm) => {
     activities.push({
       id: comm.id,

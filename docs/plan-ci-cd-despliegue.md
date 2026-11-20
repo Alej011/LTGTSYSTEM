@@ -219,13 +219,15 @@ frontend/
 │   │   └── products.schemas.ts   Zod: formularios y validación de respuestas, tipados
 │   │                             contra los tipos generados
 │   ├── users/  dashboard/
-│   ├── auth/                     Hook de sesión del cliente (login, logout, usuario actual)
 │   └── tickets/  knowledge/  communications/
 │       ├── *.client.ts           Misma interfaz asíncrona que productos
 │       └── *.mock.ts             Adaptador en memoria; luego se reemplaza por el BFF
 ├── shared/
 │   ├── api/                      Cliente HTTP, helper del BFF, tipos generados
-│   ├── session/                  Módulo de sesión del servidor: verificar, refrescar, cookies
+│   ├── session/                  Sesión: en el servidor verificar, refrescar y cookies
+│   │                             (session.server.ts); en el cliente useSession, useLogin
+│   │                             y useLogout (session.client.ts). Está en shared/ porque
+│   │                             la usan useCan y varias features
 │   ├── permissions.ts            Única política de permisos (rol × recurso × acción)
 │   └── lib/                      utils, tonos de color
 └── components/
@@ -237,7 +239,7 @@ Reglas:
 
 - `app/` no contiene lógica: importa de `features/`.
 - Una feature no importa de otra; lo común va en `shared/`.
-- `*.server.ts` y `shared/api/session.ts` llevan `import "server-only"`.
+- Los archivos `*.server.ts` llevan `import "server-only"`.
 - Los componentes nunca llaman `fetch` ni `useEffect` para datos: usan los hooks de `*.client.ts`.
 - Un solo modo de error: los hooks siempre lanzan `ApiClientError`; nunca devuelven `null`, `false` ni `[]` para indicar un fallo.
 - Solo `shared/session/` conoce los nombres de las cookies y el flujo de refresh.

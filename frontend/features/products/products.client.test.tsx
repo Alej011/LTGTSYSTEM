@@ -1,7 +1,7 @@
 import { act, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ApiClientError } from '@/lib/shared/api-client';
+import { ApiClientError } from '@/shared/api/api-client';
 import { bffCalls, mockBff } from '@/test/mock-bff';
 import { renderHookWithQuery } from '@/test/render';
 

@@ -1,4 +1,4 @@
-import { TONE_CLASSES } from '@/lib/shared/tones';
+import { TONE_CLASSES } from '@/shared/lib/tones';
 export type TicketStatus = 'abierto' | 'en_progreso' | 'resuelto' | 'cerrado';
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 export type TicketCategory = 'hardware' | 'software' | 'red' | 'acceso' | 'otro';
@@ -83,7 +83,7 @@ export const mockComments: TicketComment[] = [
     ticketId: '2',
     userId: '2',
     userName: 'Juan Pérez',
-    userRole: 'empleado',
+    userRole: 'SUPPORT',
     comment: 'He revisado la impresora. Parece ser un problema de conectividad. Voy a revisar los cables.',
     isInternal: false,
     createdAt: new Date('2024-03-10T08:00:00'),
@@ -93,7 +93,7 @@ export const mockComments: TicketComment[] = [
     ticketId: '3',
     userId: '2',
     userName: 'Juan Pérez',
-    userRole: 'empleado',
+    userRole: 'SUPPORT',
     comment: 'Problema resuelto. Se reinició el router y se optimizó la configuración.',
     isInternal: false,
     createdAt: new Date('2024-03-09T16:30:00'),

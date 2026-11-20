@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useSession } from '@/shared/session/session.client';
 import { mockBff } from '@/test/mock-bff';
 import { renderWithQuery } from '@/test/render';
 
@@ -10,10 +10,10 @@ import type { User } from '../users.client';
 import { admin, support } from '../users.fixtures';
 import { UserList } from './user-list';
 
-vi.mock('@/contexts/auth-context', () => ({ useAuth: vi.fn() }));
+vi.mock('@/shared/session/session.client', () => ({ useSession: vi.fn() }));
 
 function signedInAs(user: User) {
-  vi.mocked(useAuth).mockReturnValue({ user } as ReturnType<typeof useAuth>);
+  vi.mocked(useSession).mockReturnValue({ user } as ReturnType<typeof useSession>);
 }
 
 describe('UserList', () => {

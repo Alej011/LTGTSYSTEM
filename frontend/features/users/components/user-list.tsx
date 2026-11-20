@@ -8,18 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ApiClientError } from '@/lib/shared/api-client';
-import { TONE_CLASSES } from '@/lib/shared/tones';
-import { useCan } from '@/lib/shared/use-can';
+import { ApiClientError } from '@/shared/api/api-client';
+import { TONE_CLASSES } from '@/shared/lib/tones';
+import { type Role, ROLE_LABELS } from '@/shared/roles';
+import { useCan } from '@/shared/use-can';
 
 import { type User, useUsers } from '../users.client';
 
 const COLUMNS = 4;
 
-const ROLE_BADGES: Record<User['role'], { label: string; tone: string }> = {
-  admin: { label: 'Administrador', tone: TONE_CLASSES.primary },
-  empleado: { label: 'Soporte', tone: TONE_CLASSES.info },
-};
+const ROLE_TONES: Record<Role, string> = { ADMIN: TONE_CLASSES.primary, SUPPORT: TONE_CLASSES.info };
 
 function matches(user: User, query: string): boolean {
   const needle = query.toLowerCase();
@@ -115,8 +113,8 @@ export function UserList({ onEdit, onAdd }: UserListProps) {
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={ROLE_BADGES[user.role].tone}>
-                          {ROLE_BADGES[user.role].label}
+                        <Badge variant="outline" className={ROLE_TONES[user.role]}>
+                          {ROLE_LABELS[user.role]}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">

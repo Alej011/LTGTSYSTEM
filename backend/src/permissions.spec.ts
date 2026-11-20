@@ -1,8 +1,8 @@
 import { RequestMethod, type Type } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 
-import { type Action, ACTIONS, can, type Resource } from '../../frontend/lib/shared/permissions';
-import { ROLES } from '../../frontend/lib/shared/roles';
+import { type Action, ACTIONS, can, type Resource } from '../../frontend/shared/permissions';
+import { ROLES } from '../../frontend/shared/roles';
 import { type AppRole, ROLES_KEY } from './common/decorators/roles.decorator';
 import { ProductsController } from './products/products.controller';
 import { UsersController } from './users/users.controller';
@@ -44,7 +44,7 @@ function backendRoles(controller: Type): Map<Action, AppRole[]> {
   return rules;
 }
 
-// frontend/lib/shared/permissions.ts decide qué muestra la interfaz; @Roles decide qué acepta la API
+// frontend/shared/permissions.ts decide qué muestra la interfaz; @Roles decide qué acepta la API
 describe.each(RESOURCES)('permissions for %s', (resource, controller) => {
   const rules = backendRoles(controller);
 

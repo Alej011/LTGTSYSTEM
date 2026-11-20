@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/auth-context';
 import {
   type Communication,
   type CommunicationStatus,
@@ -21,6 +20,8 @@ import {
   getTypeLabel,
   updateCommunication,
 } from '@/lib/features/communications/communications.service';
+import { ROLE_LABELS, ROLES } from '@/shared/roles';
+import { useSession } from '@/shared/session/session.client';
 
 interface CommunicationFormProps {
   communication?: Communication;
@@ -29,7 +30,7 @@ interface CommunicationFormProps {
 }
 
 export function CommunicationForm({ communication, onSuccess, onCancel }: CommunicationFormProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [formData, setFormData] = useState({
     title: communication?.title || '',
     content: communication?.content || '',
@@ -111,7 +112,6 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
   const types: CommunicationType[] = ['anuncio', 'politica', 'evento', 'urgente', 'general'];
   const statuses: CommunicationStatus[] = ['draft', 'published', 'archived'];
   const departments = ['IT', 'Recursos Humanos', 'Gerencia', 'Ventas', 'Soporte Técnico', 'Administración'];
-  const roles = ['empleado', 'admin'];
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -252,16 +252,14 @@ export function CommunicationForm({ communication, onSuccess, onCancel }: Commun
               <div className="space-y-3">
                 <Label>Roles Objetivo (Opcional)</Label>
                 <div className="space-y-2">
-                  {roles.map((role) => (
+                  {ROLES.map((role) => (
                     <div key={role} className="flex items-center space-x-2">
                       <Checkbox
                         id={`role-${role}`}
                         checked={formData.targetRoles.includes(role)}
                         onCheckedChange={(checked) => handleRoleChange(role, checked as boolean)}
                       />
-                      <Label htmlFor={`role-${role}`} className="capitalize">
-                        {role}
-                      </Label>
+                      <Label htmlFor={`role-${role}`}>{ROLE_LABELS[role]}</Label>
                     </div>
                   ))}
                 </div>
