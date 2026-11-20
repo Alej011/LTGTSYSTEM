@@ -3,14 +3,13 @@
  */
 import { z } from 'zod';
 
-import { RoleSchema } from '@/lib/schemas/auth.schema';
-import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
 import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
+import { EmailSchema, IdSchema, PasswordSchema, RoleSchema } from '@/shared/schemas';
 
 /** Usuario como lo devuelve el backend en /users */
 export const UserSchema = matchesContract<ApiSchemas['UserDto']>()(
   z.object({
-    id: UUIDSchema,
+    id: IdSchema,
     email: EmailSchema,
     name: z.string().min(1),
     role: RoleSchema,

@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/auth-context';
 import {
   type ArticleCategory,
   type ArticleStatus,
@@ -23,6 +22,7 @@ import {
 } from '@/lib/features/knowledge/knowledge.service';
 import { TONE_CLASSES } from '@/shared/lib/tones';
 import { roleLabel } from '@/shared/roles';
+import { useSession } from '@/shared/session/session.client';
 
 interface ArticleFormProps {
   article?: KnowledgeArticle;
@@ -31,7 +31,7 @@ interface ArticleFormProps {
 }
 
 export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [formData, setFormData] = useState({
     title: article?.title || '',
     summary: article?.summary || '',
@@ -221,9 +221,6 @@ export function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) 
                   </p>
                   <p>
                     <strong>Rol:</strong> {user && roleLabel(user.role)}
-                  </p>
-                  <p>
-                    <strong>Departamento:</strong> {user?.department}
                   </p>
                 </div>
               </div>

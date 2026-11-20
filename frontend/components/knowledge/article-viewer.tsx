@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/auth-context';
 import {
   getCategoryLabel,
   incrementViews,
@@ -19,6 +18,7 @@ import {
   rateArticle,
 } from '@/lib/features/knowledge/knowledge.service';
 import { TONE_CLASSES } from '@/shared/lib/tones';
+import { useSession } from '@/shared/session/session.client';
 
 interface ArticleViewerProps {
   article: KnowledgeArticle;
@@ -26,7 +26,7 @@ interface ArticleViewerProps {
 }
 
 export function ArticleViewer({ article, onBack }: ArticleViewerProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [hasRated, setHasRated] = useState(false);
   const [isRating, setIsRating] = useState(false);
 

@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/auth-context';
 import {
   type Communication,
   type CommunicationStatus,
@@ -22,6 +21,7 @@ import {
   updateCommunication,
 } from '@/lib/features/communications/communications.service';
 import { ROLE_LABELS, ROLES } from '@/shared/roles';
+import { useSession } from '@/shared/session/session.client';
 
 interface CommunicationFormProps {
   communication?: Communication;
@@ -30,7 +30,7 @@ interface CommunicationFormProps {
 }
 
 export function CommunicationForm({ communication, onSuccess, onCancel }: CommunicationFormProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [formData, setFormData] = useState({
     title: communication?.title || '',
     content: communication?.content || '',

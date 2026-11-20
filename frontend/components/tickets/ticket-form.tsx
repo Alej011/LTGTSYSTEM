@@ -11,13 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/auth-context';
 import {
   createTicket,
   getCategoryLabel,
   type TicketCategory,
   type TicketPriority,
 } from '@/lib/features/tickets/tickets.service';
+import { useSession } from '@/shared/session/session.client';
 
 interface TicketFormProps {
   onSuccess: () => void;
@@ -25,7 +25,7 @@ interface TicketFormProps {
 }
 
 export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -140,9 +140,6 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
               </p>
               <p>
                 <strong>Email:</strong> {user?.email}
-              </p>
-              <p>
-                <strong>Departamento:</strong> {user?.department}
               </p>
             </div>
           </div>

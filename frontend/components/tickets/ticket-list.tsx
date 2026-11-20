@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAuth } from '@/contexts/auth-context';
 import {
   getCategoryLabel,
   getPriorityColor,
@@ -21,6 +20,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from '@/lib/features/tickets/tickets.service';
+import { useSession } from '@/shared/session/session.client';
 import { useCan } from '@/shared/use-can';
 
 interface TicketListProps {
@@ -29,7 +29,7 @@ interface TicketListProps {
 }
 
 export function TicketList({ onView, onAdd }: TicketListProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [searchTerm, setSearchTerm] = useState('');

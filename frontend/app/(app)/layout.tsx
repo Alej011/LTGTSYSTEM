@@ -8,13 +8,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { Sidebar } from '@/components/sidebar';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { useAuth } from '@/contexts/auth-context';
+import { useSession } from '@/shared/session/session.client';
 
 const COLLAPSED_KEY = 'ltgt_sidebar_collapsed';
 
 // Layout común de las secciones: el sidebar queda fijo y solo cambia el contenido.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useSession();
+  const isAuthenticated = user !== null;
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);

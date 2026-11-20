@@ -14,7 +14,8 @@ import { z } from 'zod';
 import { API_BASE_URL, API_TIMEOUT } from '@/shared/api/api-config';
 import { getClientIp } from '@/shared/api/client-ip';
 import { type ApiSchemas, matchesContract } from '@/shared/api/contract';
-import { type Role, ROLES } from '@/shared/roles';
+import type { Role } from '@/shared/roles';
+import { EmailSchema, IdSchema, RoleSchema } from '@/shared/schemas';
 
 const ACCESS_COOKIE = 'ltgt_access_token';
 const REFRESH_COOKIE = 'ltgt_refresh_token';
@@ -26,7 +27,7 @@ export type Session = { userId: string; role: Role; email: string; name: string 
 
 const AccessPayloadSchema = z.object({
   sub: z.string(),
-  role: z.enum(ROLES),
+  role: RoleSchema,
   email: z.string(),
   name: z.string(),
   exp: z.number(),
@@ -42,12 +43,23 @@ export const SessionTokensSchema = matchesContract<ApiSchemas['SessionTokensDto'
       id: z.string(),
       email: z.string(),
       name: z.string(),
-      role: z.enum(ROLES),
+      role: RoleSchema,
     }),
   }),
 );
 
 export type SessionTokens = z.infer<typeof SessionTokensSchema>;
+
+/** Usuario de la sesión como lo devuelve el backend en /auth/me */
+export const CurrentUserSchema = matchesContract<ApiSchemas['CurrentUserDto']>()(
+  z.object({
+    id: IdSchema,
+    email: EmailSchema,
+    name: z.string(),
+    role: RoleSchema,
+    createdAt: z.string(),
+  }),
+);
 
 /** Renueva la sesión con el refresh token; null si no se pudo. Los tests pasan su propia implementación. */
 export type RefreshSession = (refreshToken: string, clientIp: string | null) => Promise<SessionTokens | null>;

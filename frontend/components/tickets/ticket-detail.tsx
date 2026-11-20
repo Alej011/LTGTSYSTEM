@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/contexts/auth-context';
 import {
   addComment,
   getCategoryLabel,
@@ -25,6 +24,7 @@ import {
   updateTicket,
 } from '@/lib/features/tickets/tickets.service';
 import { roleLabel } from '@/shared/roles';
+import { useSession } from '@/shared/session/session.client';
 import { useCan } from '@/shared/use-can';
 
 interface TicketDetailProps {
@@ -34,7 +34,7 @@ interface TicketDetailProps {
 }
 
 export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const can = useCan();
   const [comments, setComments] = useState<TicketComment[]>([]);
   const [newComment, setNewComment] = useState('');

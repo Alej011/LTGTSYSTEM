@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useSession } from '@/shared/session/session.client';
 
 import { ArticleList } from './article-list';
 
-vi.mock('@/contexts/auth-context', () => ({ useAuth: vi.fn() }));
+vi.mock('@/shared/session/session.client', () => ({ useSession: vi.fn() }));
 
 function renderAs(role: 'ADMIN' | 'SUPPORT' | undefined) {
-  vi.mocked(useAuth).mockReturnValue({
+  vi.mocked(useSession).mockReturnValue({
     user: role ? { id: 'u1', email: 'user@ltgt.com', name: 'Usuario', role } : null,
-  } as ReturnType<typeof useAuth>);
+  } as ReturnType<typeof useSession>);
   render(<ArticleList onView={() => undefined} onAdd={() => undefined} showManagement />);
 }
 

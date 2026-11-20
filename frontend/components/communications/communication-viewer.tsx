@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/auth-context';
 import {
   type Communication,
   getTypeColor,
@@ -18,6 +17,7 @@ import {
   markAsRead,
 } from '@/lib/features/communications/communications.service';
 import { roleLabel } from '@/shared/roles';
+import { useSession } from '@/shared/session/session.client';
 
 interface CommunicationViewerProps {
   communication: Communication;
@@ -25,7 +25,7 @@ interface CommunicationViewerProps {
 }
 
 export function CommunicationViewer({ communication, onBack }: CommunicationViewerProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
 
   useEffect(() => {
     // Mark as read when viewing

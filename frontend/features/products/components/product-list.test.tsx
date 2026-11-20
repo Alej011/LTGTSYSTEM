@@ -2,14 +2,14 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useSession } from '@/shared/session/session.client';
 import { bffCalls, mockBff } from '@/test/mock-bff';
 import { renderWithQuery } from '@/test/render';
 
 import { page, product } from '../products.fixtures';
 import { ProductList } from './product-list';
 
-vi.mock('@/contexts/auth-context', () => ({ useAuth: vi.fn() }));
+vi.mock('@/shared/session/session.client', () => ({ useSession: vi.fn() }));
 
 const categories = [
   { id: 'c1', name: 'Accesorios' },
@@ -22,9 +22,9 @@ function renderList() {
 
 describe('ProductList', () => {
   beforeEach(() => {
-    vi.mocked(useAuth).mockReturnValue({
+    vi.mocked(useSession).mockReturnValue({
       user: { id: 'u1', email: 'admin@ltgt.com', name: 'Admin', role: 'ADMIN' },
-    } as ReturnType<typeof useAuth>);
+    } as ReturnType<typeof useSession>);
   });
 
   afterEach(() => {
@@ -46,9 +46,9 @@ describe('ProductList', () => {
   });
 
   it('lets support staff only view details', async () => {
-    vi.mocked(useAuth).mockReturnValue({
+    vi.mocked(useSession).mockReturnValue({
       user: { id: 'u2', email: 'soporte@ltgt.com', name: 'Soporte', role: 'SUPPORT' },
-    } as ReturnType<typeof useAuth>);
+    } as ReturnType<typeof useSession>);
     mockBff({
       'GET /api/products': () => ({ status: 200, body: page([product]) }),
       'GET /api/categories': () => ({ status: 200, body: categories }),

@@ -31,10 +31,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/shared/lib/utils';
 import type { Resource } from '@/shared/permissions';
 import { ROLE_LABELS } from '@/shared/roles';
+import { useLogout, useSession } from '@/shared/session/session.client';
 import { useCan } from '@/shared/use-can';
 
 const navigation: { name: string; href: string; icon: typeof Package; resource: Resource }[] = [
@@ -83,7 +83,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
-  const { user, logout } = useAuth();
+  const { user } = useSession();
+  const logout = useLogout();
   const can = useCan();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
@@ -212,7 +213,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
               'hover:bg-destructive/10 hover:text-destructive',
               collapsed ? 'mx-auto flex' : 'w-full justify-start',
             )}
-            onClick={logout}
+            onClick={() => logout.mutate()}
           >
             <LogOut className="h-4 w-4" />
             {!collapsed && 'Cerrar sesión'}
