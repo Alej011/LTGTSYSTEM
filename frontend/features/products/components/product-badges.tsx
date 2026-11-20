@@ -11,7 +11,7 @@ const STATUS_LABELS: Record<ProductStatus, string> = {
 
 const STATUS_TONES: Record<ProductStatus, string> = {
   active: TONE_CLASSES.success,
-  inactive: TONE_CLASSES.neutral,
+  inactive: TONE_CLASSES.inactive,
   discontinued: TONE_CLASSES.danger,
 };
 

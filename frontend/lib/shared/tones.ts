@@ -6,4 +6,5 @@ export const TONE_CLASSES = {
   danger: 'border-destructive/25 bg-destructive/10 text-destructive',
   primary: 'border-primary/25 bg-primary/10 text-primary',
   neutral: 'border-border bg-muted text-muted-foreground',
+  inactive: 'border-orange-500/25 bg-orange-500/10 text-orange-600 dark:text-orange-400',
 } as const;
