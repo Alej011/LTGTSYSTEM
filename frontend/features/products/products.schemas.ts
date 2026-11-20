@@ -1,5 +1,6 @@
 /**
- * Respuestas del backend que valida el BFF; cada una está atada a su tipo del contrato.
+ * Schemas Zod del dominio de productos, cada uno atado a su tipo del contrato:
+ * las respuestas que valida el BFF y el formulario que valida el navegador antes de enviar.
  */
 import { z } from 'zod';
 
@@ -51,6 +52,26 @@ export const PaginatedProductsSchema = matchesContract<ApiSchemas['PaginatedProd
   z.object({
     data: z.array(ProductSchema),
     meta: PaginationMetadataSchema,
+  }),
+);
+
+// Mismas reglas que CreateProductDto, con mensajes para el usuario; el backend no debería rechazar lo que pasa aquí
+export const ProductFormSchema = matchesContract<ApiSchemas['CreateProductDto']>()(
+  z.object({
+    name: z.string().trim().min(1, 'Ingresa el nombre del producto'),
+    description: z.string().optional(),
+    sku: z.string().trim().min(1, 'Ingresa el SKU'),
+    price: z
+      .number('Ingresa el precio')
+      .nonnegative('El precio no puede ser negativo')
+      .refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-6, 'El precio admite hasta 2 decimales'),
+    stock: z
+      .number('Ingresa el stock')
+      .int('El stock debe ser un número entero')
+      .nonnegative('El stock no puede ser negativo'),
+    status: ProductStatusSchema.optional(),
+    brandId: z.string().min(1, 'Selecciona una marca'),
+    categoryIds: z.array(z.string().min(1, 'Selecciona una categoría')).min(1, 'Selecciona una categoría'),
   }),
 );
 

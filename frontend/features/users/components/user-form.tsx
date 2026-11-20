@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 
+import { FieldError, fieldErrorProps, fieldErrorsOf } from '@/components/field-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,10 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type BackendRole, mapFrontendRoleToBackend } from '@/lib/schemas/auth.schema';
-import { PasswordSchema } from '@/lib/schemas/common.schema';
 import { ApiClientError } from '@/lib/shared/api-client';
 
 import { type User, useSaveUser } from '../users.client';
+import { NewUserFormSchema, UserChangesFormSchema } from '../users.schemas';
 
 interface UserFormProps {
   user?: User;
@@ -32,39 +33,39 @@ function initialFormState(user?: User) {
 }
 
 type FormState = ReturnType<typeof initialFormState>;
+type FieldErrors = Partial<Record<keyof FormState, string>>;
 
 // Quien lo usa debe darle un key por usuario para reiniciar el estado al cambiar de usuario
 export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
   const [formData, setFormData] = useState(() => initialFormState(user));
-  const [passwordError, setPasswordError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const saveUser = useSaveUser();
 
-  const saveError = saveUser.isError
+  const error = saveUser.isError
     ? saveUser.error instanceof ApiClientError
       ? saveUser.error.getUserMessage()
       : 'Error al guardar el usuario. Intenta nuevamente.'
     : '';
-  const error = passwordError || saveError;
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { name, email, password, role } = formData;
 
     if (user) {
       // Editar solo cambia nombre y rol
-      saveUser.mutate({ id: user.id, changes: { name, role } }, { onSuccess });
+      const changes = UserChangesFormSchema.safeParse(formData);
+      if (changes.success) saveUser.mutate({ id: user.id, changes: changes.data }, { onSuccess });
+      else setFieldErrors(fieldErrorsOf<keyof FormState>(changes.error.issues));
       return;
     }
 
-    const passwordCheck = PasswordSchema.safeParse(password);
-    setPasswordError(passwordCheck.success ? '' : (passwordCheck.error.issues[0]?.message ?? ''));
-    if (!passwordCheck.success) return;
-
-    saveUser.mutate({ input: { email, name, password, role } }, { onSuccess });
+    const input = NewUserFormSchema.safeParse(formData);
+    if (input.success) saveUser.mutate({ input: input.data }, { onSuccess });
+    else setFieldErrors(fieldErrorsOf<keyof FormState>(input.error.issues));
   };
 
   const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   return (
@@ -76,7 +77,7 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre Completo</Label>
@@ -86,7 +87,9 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Ej: Juan Pérez"
                 required
+                {...fieldErrorProps('name', fieldErrors.name)}
               />
+              <FieldError id="name" message={fieldErrors.name} />
             </div>
 
             <div className="space-y-2">
@@ -99,7 +102,9 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
                 placeholder="usuario@ltgt.local"
                 required
                 disabled={!!user}
+                {...fieldErrorProps('email', fieldErrors.email)}
               />
+              <FieldError id="email" message={fieldErrors.email} />
             </div>
           </div>
 
@@ -114,7 +119,9 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
                 placeholder="Mínimo 6 caracteres"
                 required
                 minLength={6}
+                {...fieldErrorProps('password', fieldErrors.password)}
               />
+              <FieldError id="password" message={fieldErrors.password} />
             </div>
           )}
 

@@ -4,7 +4,7 @@
 import { z } from 'zod';
 
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
-import { EmailSchema, UUIDSchema } from '@/lib/schemas/common.schema';
+import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
 import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
 /** Usuario como lo devuelve el backend en /users */
@@ -47,3 +47,15 @@ export function mapBackendUserListItemToFrontend(backendUser: BackendUserListIte
     role: mapBackendRoleToFrontend(backendUser.role),
   };
 }
+
+// Mismas reglas que CreateUserDto, con mensajes para el usuario; editar solo cambia nombre y rol
+export const NewUserFormSchema = matchesContract<ApiSchemas['CreateUserDto']>()(
+  z.object({
+    email: EmailSchema,
+    name: z.string().trim().min(1, 'Ingresa el nombre'),
+    password: PasswordSchema,
+    role: BackendRoleSchema,
+  }),
+);
+
+export const UserChangesFormSchema = NewUserFormSchema.pick({ name: true, role: true });
