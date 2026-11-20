@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
@@ -8,7 +8,6 @@ import type { Role } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_REUSE_GRACE_MS, REFRESH_TOKEN_TTL_SECONDS } from './auth.constants';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 
 export type AccessTokenPayload = { sub: string; role: Role; email: string; name: string };
 
@@ -34,16 +33,6 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
   ) {}
-
-  async register(dto: RegisterDto) {
-    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new BadRequestException('Email already in use');
-    const password = await bcrypt.hash(dto.password, 10);
-    return this.prisma.user.create({
-      data: { email: dto.email, password, name: dto.name, role: dto.role },
-      select: { ...USER_SELECT, createdAt: true },
-    });
-  }
 
   async login(dto: LoginDto): Promise<SessionTokens> {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });

@@ -1,14 +1,11 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { Roles } from '../common/decorators/roles.decorator';
 import { User } from '../common/decorators/user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { RegisterDto } from './dto/register.dto';
 import { LoginThrottlerGuard } from './guards/login-throttler.guard';
 import type { AuthUser } from './strategies/jwt.strategy';
 
@@ -16,20 +13,6 @@ import type { AuthUser } from './strategies/jwt.strategy';
 @Controller('auth')
 export class AuthController {
   constructor(private auth: AuthService) {}
-
-  @Post('register')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Registrar nuevo usuario (solo ADMIN)' })
-  @ApiBody({ type: RegisterDto })
-  @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
-  @ApiResponse({ status: 400, description: 'Email ya está en uso' })
-  @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'No tiene permisos de ADMIN' })
-  register(@Body() dto: RegisterDto) {
-    return this.auth.register(dto);
-  }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
