@@ -246,9 +246,11 @@ Reglas:
 ### Contrato único entre backend y frontend
 
 1. El backend genera `openapi.json` desde Swagger con un script, sin levantar el servidor. Para describir los DTOs sin repetir decoradores se usa el plugin de `@nestjs/swagger`.
-2. El frontend genera sus tipos con `openapi-typescript` (`shared/api/schema.d.ts`).
-3. Los schemas Zod se tipan contra esos tipos. Si el backend cambia un campo, el frontend deja de compilar.
+2. El frontend genera sus tipos con `openapi-typescript` (`lib/shared/api-schema.d.ts`; pasa a `shared/api/` en C.7).
+3. Los schemas Zod se tipan contra esos tipos con `matchesContract`. Si el backend cambia un campo, el frontend deja de compilar.
 4. El CI regenera ambos archivos y falla si difieren de lo commiteado (`git diff --exit-code`).
+
+El contrato cubre la forma de los datos (campos, tipos, `null` y opcionales), no las reglas de validación: ver RNF-01.
 
 ### API REST consistente
 
@@ -270,6 +272,13 @@ Backend y BFF cambian en el mismo PR, para que la conexión entre ambos no quede
 - Los módulos mock se dejan funcionando, pero aislados en `*.mock.ts` detrás de una interfaz asíncrona. Cuando exista el módulo real en el backend se cambia el adaptador, no los componentes.
 - El backend es la autoridad de validación de entrada. El BFF valida la forma de las respuestas, pero no agrega reglas de entrada propias.
 - Un solo vocabulario de roles en todo el sistema: el del backend (`ADMIN`, `SUPPORT`).
+
+### Requerimientos no funcionales
+
+| ID | Requerimiento | Estado |
+|---|---|---|
+| RNF-01 | Las reglas de los formularios (longitud mínima, mínimos y máximos, decimales, formato de email) coinciden con las de los DTOs del backend, y una diferencia se detecta sin revisión manual. Hoy las reglas se copian a mano en `ProductFormSchema` y `NewUserFormSchema`; si divergen no entra ningún dato inválido (el backend las aplica), pero el usuario ve un mensaje genérico en lugar del mensaje del campo | Pendiente. Fase D: test que compare los límites de `openapi.json` (`minLength`, `minimum`, `maximum`, `format`) con los schemas de formulario. Antes de construir tickets, conocimiento y comunicaciones en el backend (después de H), decidir si los schemas Zod se generan desde `openapi.json` |
+| RNF-02 | El usuario solo ve mensajes de error en español y que pueda entender. Los formularios validan antes de enviar y muestran el error junto al campo; los detalles técnicos del backend (validación de class-validator en inglés, nombres internos de campos) no se muestran | Vigente desde C.6 |
 
 ## 7. Preparación del VPS
 
@@ -303,7 +312,7 @@ Cada fase es un milestone; cada punto, un issue y una rama (`alejo/<tipo>/<tema>
 | **A. GitHub** | Project, labels, milestones, borrado de ramas, tipo de merge, secret scanning, Dependabot | `chore(github)`: Dependabot y plantillas de PR/issue |
 | **B. Calidad** | ESLint + Prettier en ambos proyectos y corrección del código existente; scripts unificados (`lint`, `format:check`, `typecheck`, `test`, `test:e2e`); Vitest en el frontend y la configuración de Jest en el backend, para que la fase C pueda traer sus tests | `chore(backend)`, `chore(frontend)`, `style` (formato masivo en un PR aparte, para no mezclarlo) |
 | **C. Arquitectura del frontend** | Sección 6: bugs, limpieza, API REST, cliente por dominio, permisos únicos, contrato OpenAPI, módulo de sesión, mocks asíncronos | Ver el desglose abajo |
-| **D. Tests base** | Lo que la fase C no cubrió. Backend: auth (login, refresh con rotación y periodo de gracia, logout, throttling), users y health; e2e con Postgres. Frontend: BFF y `proxy.ts` | `test(backend)`, `test(frontend)` |
+| **D. Tests base** | Lo que la fase C no cubrió. Backend: auth (login, refresh con rotación y periodo de gracia, logout, throttling), users y health; e2e con Postgres. Frontend: BFF y `proxy.ts`. Test de RNF-01 (reglas de formularios contra `openapi.json`) | `test(backend)`, `test(frontend)` |
 | **E. CI** | `ci.yml` (incluye la verificación del contrato OpenAPI), CodeQL, chequeo de título del PR; luego el ruleset de `main` exigiendo `ci-ok` | `ci: ...` |
 | **F. VPS** | Preparación de la sección 7, subdominio, Caddy, compose de producción basado en imágenes, primer despliegue manual | `feat(deploy)`: compose de producción y `deploy.sh` |
 | **G. CD** | `deploy.yml` con GHCR, migración, healthcheck, smoke test, rollback automático y manual; respaldos | `ci(deploy)` |
