@@ -4,7 +4,7 @@
 import { z } from 'zod';
 
 import { BackendRoleSchema, FrontendRoleSchema, mapBackendRoleToFrontend } from '@/lib/schemas/auth.schema';
-import { EmailSchema, PasswordSchema, UUIDSchema } from '@/lib/schemas/common.schema';
+import { EmailSchema, UUIDSchema } from '@/lib/schemas/common.schema';
 import { type ApiSchemas, matchesContract } from '@/lib/shared/contract';
 
 /** Usuario como lo devuelve el backend en /users */
@@ -47,25 +47,3 @@ export function mapBackendUserListItemToFrontend(backendUser: BackendUserListIte
     role: mapBackendRoleToFrontend(backendUser.role),
   };
 }
-
-/**
- * Create user request schema
- */
-export const CreateUserRequestSchema = z.object({
-  email: EmailSchema,
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
-  password: PasswordSchema,
-  role: BackendRoleSchema, // ADMIN or SUPPORT
-});
-
-export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
-
-/**
- * Update user request schema (all fields optional)
- */
-export const UpdateUserRequestSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100).optional(),
-  role: BackendRoleSchema.optional(), // ADMIN or SUPPORT
-});
-
-export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;

@@ -1,10 +1,9 @@
 import {
   BackendUserListItemSchema,
-  CreateUserRequestSchema,
   mapBackendUserListItemToFrontend,
   UsersListResponseSchema,
 } from '@/features/users/users.schemas';
-import { parseBody, proxyToBackend } from '@/lib/server/backend';
+import { proxyToBackend, readJsonBody } from '@/lib/server/backend';
 
 export function GET() {
   return proxyToBackend({
@@ -16,7 +15,7 @@ export function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await parseBody(request, CreateUserRequestSchema, 'Datos del usuario inválidos');
+  const body = await readJsonBody(request);
   if (body.response) return body.response;
 
   return proxyToBackend({

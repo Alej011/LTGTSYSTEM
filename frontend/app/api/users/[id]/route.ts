@@ -1,13 +1,9 @@
-import {
-  BackendUserListItemSchema,
-  mapBackendUserListItemToFrontend,
-  UpdateUserRequestSchema,
-} from '@/features/users/users.schemas';
-import { parseBody, proxyToBackend } from '@/lib/server/backend';
+import { BackendUserListItemSchema, mapBackendUserListItemToFrontend } from '@/features/users/users.schemas';
+import { proxyToBackend, readJsonBody } from '@/lib/server/backend';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const body = await parseBody(request, UpdateUserRequestSchema, 'Datos del usuario inválidos', { partial: true });
+  const body = await readJsonBody(request);
   if (body.response) return body.response;
 
   return proxyToBackend({

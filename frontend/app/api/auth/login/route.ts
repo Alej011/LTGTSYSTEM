@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 
-import { LoginRequestSchema, mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
-import { callBackend, parseBody } from '@/lib/server/backend';
+import { mapBackendUserToFrontend } from '@/lib/schemas/auth.schema';
+import { callBackend, readJsonBody } from '@/lib/server/backend';
 import { SessionTokensSchema, setSessionCookies } from '@/lib/server/session';
 
 export async function POST(request: Request) {
-  const body = await parseBody(request, LoginRequestSchema, 'Datos de inicio de sesión inválidos');
+  const body = await readJsonBody(request);
   if (body.response) return body.response;
 
   const result = await callBackend({
