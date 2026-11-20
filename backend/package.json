@@ -21,7 +21,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json --passWithNoTests"
+    "test:e2e": "jest --config ./test/jest-e2e.json --passWithNoTests",
+    "openapi": "nest build -p tsconfig.openapi.json && node dist-openapi/scripts/generate-openapi.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.8",
