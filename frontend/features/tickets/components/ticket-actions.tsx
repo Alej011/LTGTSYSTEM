@@ -85,7 +85,7 @@ export function TicketActions({ ticket }: { ticket: Ticket }) {
           <div className="space-y-2">
             <Label htmlFor="assignee">Asignar a</Label>
             <Select value={assigneeId} onValueChange={setAssigneeId}>
-              <SelectTrigger id="assignee">
+              <SelectTrigger id="assignee" className="w-full">
                 <SelectValue placeholder={assignable.isPending ? 'Cargando...' : 'Seleccionar agente'} />
               </SelectTrigger>
               <SelectContent>
