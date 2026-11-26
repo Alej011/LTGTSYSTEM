@@ -280,6 +280,7 @@ Administrador: puede cerrar un ticket en cualquier estado.
 - `created_by_id` se mantiene y representa al solicitante.
 - Columna `close_reason` (`CONFIRMED`, `AUTO`, `ADMIN`) en `tickets`.
 - `knowledge_articles`: agregar `author_id` e `is_company_wide`, y la tabla `knowledge_article_departments` (`article_id`, `department_id`) para la visibilidad por departamento.
+- `knowledge_articles` también necesita lo que ya usa la interfaz: `summary`, `category` (`HARDWARE`, `SOFTWARE`, `NETWORK`, `ACCESS`, `PROCEDURES`, `FAQ`), `status` (`DRAFT`, `PUBLISHED`, `ARCHIVED`), `views` y `published_at`; y una tabla `knowledge_article_ratings` (`article_id`, `user_id`, `rating`) con una valoración por usuario. Las vistas se cuentan una vez por usuario.
 
 ## 6. Diseño técnico
 
