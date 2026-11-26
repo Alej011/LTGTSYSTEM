@@ -103,7 +103,7 @@ export function TicketDetail({ ticket, onBack, onUpdate }: TicketDetailProps) {
     }
   };
 
-  const canManageTicket = can('tickets', 'edit');
+  const canManageTicket = can('tickets', 'handle');
   const isAssignedToUser = ticket.assignedTo === user?.id;
   const canUpdateStatus = canManageTicket && (isAssignedToUser || !ticket.assignedTo);
 

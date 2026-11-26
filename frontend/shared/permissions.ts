@@ -7,7 +7,17 @@
  */
 import type { Role } from './roles';
 
-export const ACTIONS = ['view', 'view_details', 'create', 'edit', 'delete'] as const;
+export const ACTIONS = [
+  'view',
+  'view_details',
+  'create',
+  'edit',
+  'delete',
+  'comment',
+  'handle',
+  'assign',
+  'close',
+] as const;
 export type Action = (typeof ACTIONS)[number];
 export type Resource = 'dashboard' | 'products' | 'users' | 'tickets' | 'knowledge' | 'communications';
 
@@ -19,7 +29,17 @@ const POLICY: Record<Resource, Partial<Record<Action, readonly Role[]>>> = {
   dashboard: { view: ALL },
   products: { view: ALL, view_details: ALL, create: ADMIN, edit: ADMIN, delete: ADMIN },
   users: { view: ADMIN, view_details: ADMIN, create: ADMIN, edit: ADMIN },
-  tickets: { view: ALL, view_details: ALL, create: ALL, edit: ALL, delete: ADMIN },
+  // handle: atender (tomar, resolver, notas internas); solo quien lo tiene puede ser asignado. close: cerrar sin confirmación
+  tickets: {
+    view: ALL,
+    view_details: ALL,
+    create: ALL,
+    comment: ALL,
+    handle: ALL,
+    assign: ADMIN,
+    close: ADMIN,
+    delete: ADMIN,
+  },
   knowledge: { view: ALL, view_details: ALL, create: ADMIN, edit: ADMIN, delete: ADMIN },
   communications: { view: ALL, view_details: ALL, create: ADMIN, edit: ADMIN, delete: ADMIN },
 };

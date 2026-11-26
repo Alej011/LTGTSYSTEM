@@ -110,7 +110,7 @@ export function TicketList({ onView, onAdd }: TicketListProps) {
 
   const can = useCan();
   const canCreateTickets = can('tickets', 'create');
-  const canManageTickets = can('tickets', 'edit');
+  const canManageTickets = can('tickets', 'handle');
 
   return (
     <div className="space-y-6">
