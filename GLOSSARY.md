@@ -59,9 +59,23 @@ Estado de un ticket con una solución registrada por el agente, pendiente de que
 _Avoid_: Solucionado, terminado
 
 **Cerrado**:
-Estado final de un ticket: el solicitante confirmó la solución o un Administrador lo cerró. No se reabre.
+Estado final de un ticket: el solicitante confirmó la solución, pasaron 3 días corridos sin respuesta o un Administrador lo cerró. No se reabre.
 _Avoid_: Finalizado, archivado
+
+**Cierre automático**:
+Cierre de un ticket Resuelto cuando el solicitante no responde en 3 días corridos.
+_Avoid_: Autocierre, expiración
 
 **Nota interna**:
 Comentario de un ticket visible solo para quienes pueden atender tickets.
 _Avoid_: Comentario privado
+
+## Conocimiento
+
+**Artículo**:
+Solución o procedimiento publicado en la base de conocimientos.
+_Avoid_: Documento, entrada, post
+
+**Visibilidad**:
+Departamentos que pueden leer un artículo, o toda la empresa; la elige su autor.
+_Avoid_: Permisos del artículo, audiencia
