@@ -1,7 +1,7 @@
 /**
- * Modelo de la base de conocimientos. El backend tiene una tabla mínima (knowledge_articles) sin estos campos,
- * así que los tipos se escriben aquí; cuando exista el módulo real pasan a salir de ApiSchemas con matchesContract.
- * Visibilidad: docs/roles-y-permisos.md (sección 2, HU-K01 a HU-K03).
+ * Modelo de artículos definido en docs/roles-y-permisos.md (sección 6). El backend tiene una tabla mínima
+ * (knowledge_articles) sin estos campos, así que los tipos se escriben aquí; cuando exista el módulo real pasan a
+ * salir de ApiSchemas con matchesContract. Visibilidad: sección 2, HU-K01 a HU-K03.
  */
 import { z } from 'zod';
 

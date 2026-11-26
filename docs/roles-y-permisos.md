@@ -2,7 +2,7 @@
 
 Especificación de la fase I del plan de trabajo (`plan-ci-cd-despliegue.md`). Define el modelo de acceso que reemplaza a los roles fijos `ADMIN` y `SUPPORT`, las historias de usuario que lo describen y el modelo de tickets que lo usa. La decisión de fondo está en `adr/0001-roles-dinamicos-con-alcance.md` y los términos en `../GLOSSARY.md`.
 
-Alcance: una sola empresa. No hay sucursales; si llegaran a existir, se agregan como un nivel de alcance más (ver sección 7).
+Alcance: una sola empresa. No hay sucursales; si llegaran a existir, se agregan como un nivel de alcance más (ver sección 9).
 
 ## 1. Situación actual
 
@@ -12,6 +12,17 @@ Faltan además dos conceptos que los módulos de tickets y comunicaciones ya sup
 
 - **Quién reporta:** el sistema no tiene un rol para el empleado que solo abre tickets.
 - **Departamentos:** comunicaciones filtra por departamento, pero los usuarios no tienen uno.
+
+### Reglas provisionales hasta la fase I
+
+La interfaz de tickets y conocimiento ya usa el modelo de este documento (secciones 5 y 6), pero con los dos roles actuales:
+
+| Regla provisional | Regla de la fase I |
+|---|---|
+| `ADMIN` y `SUPPORT` tienen alcance `ALL` en todo lo que pueden hacer | Cada permiso con su alcance según el rol |
+| Solo `ADMIN` crea, edita y borra artículos | El Agente de soporte y el Manager también, dentro de su alcance |
+| Todo artículo es de toda la empresa; el formulario no permite elegir departamentos | El autor elige toda la empresa o departamentos (HU-K01) |
+| Solo `ADMIN` asigna y cierra tickets sin confirmación | Quien tenga `tickets:assign` o `tickets:close` |
 
 ## 2. Modelo
 
@@ -32,6 +43,10 @@ Usuario ── rol ──────────► Rol ── concede ──�
 
 Los recursos que no pertenecen a nadie (catálogo de productos, marcas, categorías) solo usan `ALL`.
 
+En tickets, `DEPARTMENT` incluye los tickets cuyo solicitante **o** asignado pertenece al departamento del usuario. Así Sofía (Manager de Marketing) ve lo que pidió su equipo y Pedro (Manager de Soporte) ve lo que atiende el suyo.
+
+Lo que está fuera del alcance de un usuario responde 404, igual que lo que no existe, para no revelar que existe.
+
 ### Catálogo de permisos
 
 El catálogo es fijo y vive en el código: un recurso nuevo siempre se programa. Lo que es dato es qué rol tiene cada permiso y con qué alcance.
@@ -40,14 +55,20 @@ El catálogo es fijo y vive en el código: un recurso nuevo siempre se programa.
 |---|---|
 | `dashboard` | `view` |
 | `products` | `view`, `view_details`, `create`, `edit`, `delete` |
-| `users` | `view`, `create`, `edit`, `deactivate` |
+| `users` | `view`, `view_details`, `create`, `edit`, `deactivate` |
 | `roles` | `manage` |
 | `departments` | `manage` |
-| `tickets` | `create`, `view`, `comment`, `handle`, `assign`, `close`, `delete` |
-| `knowledge` | `view`, `create`, `edit`, `delete` |
-| `communications` | `view`, `create`, `edit`, `delete` |
+| `tickets` | `create`, `view`, `view_details`, `comment`, `handle`, `assign`, `close`, `delete` |
+| `knowledge` | `view`, `view_details`, `create`, `edit`, `delete` |
+| `communications` | `view`, `view_details`, `create`, `edit`, `delete` |
+
+`view` es ver la lista y `view_details` abrir el detalle. `users:deactivate`, `roles:manage` y `departments:manage` llegan con la fase I; hoy `frontend/shared/permissions.ts` tiene el resto.
 
 `tickets:handle` es "atender tickets": cambiar su estado, registrar la solución, escribir notas internas y tomar un ticket sin asignar. Solo un usuario con este permiso puede ser asignado a un ticket.
+
+`tickets:close` es cerrar un ticket sin la confirmación del solicitante, en cualquier estado (cierre por un Administrador). Confirmar o reabrir un ticket Resuelto no es un permiso: lo hace el solicitante de ese ticket.
+
+`knowledge:edit` incluye ver los borradores y archivados dentro de su alcance.
 
 ### Roles iniciales (seed)
 
@@ -56,7 +77,7 @@ El catálogo es fijo y vive en el código: un recurso nuevo siempre se programa.
 | **Administrador** | Sistema | Todos, alcance `ALL`, de forma implícita |
 | **Agente de soporte** | Normal | Los que hoy tiene `SUPPORT` + `tickets:handle` y `tickets:comment` en `ALL`; `knowledge:create/edit` en `ALL` |
 | **Manager** | Normal | `tickets:view` y `tickets:assign` en `DEPARTMENT`; `communications:create/edit` y `knowledge:create/edit` en `DEPARTMENT`; `users:view` en `DEPARTMENT`; lectura de productos |
-| **Member** | Normal | `tickets:create`, `tickets:view`, `tickets:comment` y `tickets:close` en `OWN`; lectura de productos, conocimiento y comunicaciones |
+| **Member** | Normal | `tickets:create`, `tickets:view` y `tickets:comment` en `OWN`; lectura de productos, conocimiento y comunicaciones. Confirma o reabre sus tickets como solicitante |
 | **Viewer** | Normal | Solo lectura: `dashboard`, `knowledge:view`, `communications:view` |
 
 Los usuarios actuales migran así: `ADMIN` → Administrador, `SUPPORT` → Agente de soporte, con exactamente los permisos que tienen hoy.
@@ -83,6 +104,7 @@ El alta, los cambios y la baja de usuarios son centralizados: solo el Administra
 
 El autor de un artículo decide quién lo ve: **toda la empresa** o **uno o más departamentos**. Así un empleado encuentra la solución a un problema básico (por ejemplo, la conexión de red) sin abrir un ticket, y los procedimientos internos de un área no los ve el resto.
 
+- Un artículo tiene estado: **Borrador**, **Publicado** o **Archivado**. Solo los publicados se leen y se valoran; los borradores y archivados los ven el autor y quien tiene `knowledge:edit` dentro de su alcance.
 - El autor y el Administrador siempre ven el artículo.
 - Los destinos que puede elegir el autor dependen del alcance de su `knowledge:create`: con `ALL` (Agente de soporte, Administrador), cualquier departamento o toda la empresa; con `DEPARTMENT` (Manager), solo su departamento.
 - Cualquier usuario con `knowledge:view` ve los artículos de toda la empresa y los dirigidos a su departamento.
@@ -203,7 +225,7 @@ Como Agente de soporte asignado, quiero marcar el ticket como Resuelto registran
 **HU-T06 — Confirmar o reabrir**
 Como solicitante, quiero confirmar que la solución funcionó o reabrir el ticket, para cerrar el caso solo cuando de verdad está resuelto.
 - Cuando Ana confirma, el ticket pasa a Cerrado y se registra la fecha de cierre.
-- Cuando Ana lo reabre, vuelve a En progreso con el mismo agente.
+- Cuando Ana lo reabre, vuelve a En progreso con el mismo agente y la solución anterior se descarta; al resolver de nuevo se registra otra.
 - Un ticket Cerrado no se reabre; se abre uno nuevo.
 
 **HU-T08 — Cierre automático**
@@ -215,7 +237,7 @@ Como empresa, quiero que un ticket Resuelto se cierre solo si el solicitante no 
 **HU-T07 — Comentar y dejar notas internas**
 Como participante de un ticket, quiero comentar, para conversar con soporte; como Agente, quiero dejar notas internas que el solicitante no ve.
 - Ana no ve las notas internas de Luis.
-- Cualquier usuario que puede ver el ticket y tiene `tickets:comment` puede comentar.
+- Cualquier usuario que puede ver el ticket y tiene `tickets:comment` puede comentar, salvo que esté Cerrado.
 
 ### Base de conocimientos
 
@@ -251,6 +273,7 @@ Se toma como correcto el modelo que hoy usa la interfaz (más completo que el sc
 
 | Campo | Valores / tipo |
 |---|---|
+| `id`, `title`, `description` | Texto; título y descripción obligatorios |
 | `status` | `OPEN` Abierto, `IN_PROGRESS` En progreso, `RESOLVED` Resuelto, `CLOSED` Cerrado |
 | `priority` | `LOW` Baja, `MEDIUM` Media, `HIGH` Alta, `CRITICAL` Crítica |
 | `category` | `HARDWARE` Hardware, `SOFTWARE` Software, `NETWORK` Red/Conectividad, `ACCESS` Acceso/Permisos, `OTHER` Otro |
@@ -272,7 +295,50 @@ Sistema: cierra un ticket RESOLVED tras 3 días corridos sin respuesta del solic
 Administrador: puede cerrar un ticket en cualquier estado.
 ```
 
-### Cambios de schema pendientes (módulo real)
+### Operaciones que usa la interfaz
+
+Son las del adaptador `frontend/features/tickets/tickets.mock.ts`; el módulo real debe responder igual.
+
+| Operación | Respuesta y errores |
+|---|---|
+| Listar con filtros `search`, `status`, `priority` y `assignment` (`mine`: solicitante o asignado; `unassigned`: sin asignar) | Del más reciente al más antiguo, dentro del alcance |
+| Ver un ticket | 404 si no existe o está fuera del alcance |
+| Crear (`title`, `description`, `category`, `priority`) | Queda `OPEN`, sin asignar, con el usuario como solicitante. 403 sin `tickets:create` |
+| Aplicar una acción: `take`, `assign` (`assigneeId`), `resolve` (`solution`), `reopen`, `confirm`, `close` | El ticket actualizado. 409 si la acción no está disponible para ese usuario en ese estado o el asignado no tiene `tickets:handle`; 400 si la solución está vacía |
+| Listar comentarios | En orden cronológico; sin notas internas para quien no tiene `tickets:handle` |
+| Comentar (`content`, `isInternal`) | 409 si el ticket está Cerrado o falta `tickets:comment`; 403 si es nota interna sin `tickets:handle` |
+| Listar posibles asignados | Usuarios activos con `tickets:handle`, por nombre |
+
+Antes de cada lectura o acción se cierran los tickets vencidos; en el backend lo hace la tarea programada (sección 8).
+
+## 6. Modelo de artículos
+
+Igual que en tickets, se toma el modelo de la interfaz (`frontend/features/knowledge/knowledge.schemas.ts`).
+
+| Campo | Valores / tipo |
+|---|---|
+| `id`, `title`, `summary`, `content` | Texto; `content` en Markdown. Título, resumen y contenido obligatorios |
+| `category` | `HARDWARE` Hardware, `SOFTWARE` Software, `NETWORK` Red/Conectividad, `ACCESS` Acceso/Permisos, `PROCEDURES` Procedimientos, `FAQ` Preguntas frecuentes |
+| `status` | `DRAFT` Borrador, `PUBLISHED` Publicado, `ARCHIVED` Archivado |
+| `tags` | Lista de texto, en minúscula y sin repetir |
+| `author` | `{ id, name }` o `null` si el usuario ya no existe |
+| `isCompanyWide`, `departmentIds` | Toda la empresa, o los departamentos de la lista |
+| `views` | Vistas; cada usuario cuenta una vez, al abrir un artículo publicado |
+| `helpful`, `notHelpful` | Cantidad de valoraciones de cada tipo |
+| `myRating` | `HELPFUL`, `NOT_HELPFUL` o `null`: la valoración del usuario actual |
+| `createdAt`, `updatedAt`, `publishedAt` | Fechas ISO; `publishedAt` se registra la primera vez que se publica y es `null` antes |
+
+### Operaciones que usa la interfaz
+
+| Operación | Respuesta y errores |
+|---|---|
+| Listar publicados con `search` (título, resumen, contenido y etiquetas) y `category` | Solo los visibles para el usuario, los más vistos primero |
+| Listar todos los estados (`scope = all`) | Los editados más recientemente primero. 403 sin `knowledge:edit` |
+| Ver un artículo | Cuenta la vista. 404 si no existe o no es visible para el usuario |
+| Crear o editar | El autor es quien lo crea. 403 sin `knowledge:create` o `knowledge:edit` |
+| Valorar (`HELPFUL` o `NOT_HELPFUL`) | Una por usuario; valorar de nuevo reemplaza la anterior. 409 si no está publicado |
+
+## 7. Cambios de schema pendientes (módulo real)
 
 - `TicketStatus`: agregar `RESOLVED`. `TicketPriority`: agregar `CRITICAL`.
 - Nuevo enum `TicketCategory` y columna `category`.
@@ -282,7 +348,7 @@ Administrador: puede cerrar un ticket en cualquier estado.
 - `knowledge_articles`: agregar `author_id` e `is_company_wide`, y la tabla `knowledge_article_departments` (`article_id`, `department_id`) para la visibilidad por departamento.
 - `knowledge_articles` también necesita lo que ya usa la interfaz: `summary`, `category` (`HARDWARE`, `SOFTWARE`, `NETWORK`, `ACCESS`, `PROCEDURES`, `FAQ`), `status` (`DRAFT`, `PUBLISHED`, `ARCHIVED`), `views` y `published_at`; y una tabla `knowledge_article_ratings` (`article_id`, `user_id`, `rating`) con una valoración por usuario. Las vistas se cuentan una vez por usuario.
 
-## 6. Diseño técnico
+## 8. Diseño técnico
 
 ### Datos
 
@@ -325,7 +391,7 @@ Cambia una sola vez: `role` pasa de enum a `{ id, name }`, la sesión (`/auth/me
 - Reglas del Administrador: último administrador, auto-degradación y rol no editable.
 - El test actual que compara `POLICY` con los `@Roles` se reemplaza por uno que compara el seed con el catálogo de permisos.
 
-## 7. Fuera de alcance
+## 9. Fuera de alcance
 
 - **Sucursales.** Si se necesitan, se agrega la tabla de sucursales y el alcance `BRANCH` entre `DEPARTMENT` y `ALL`. El Administrador pasa a ser el superadministrador y se crea un rol normal "Admin de sucursal". El modelo de alcances ya lo permite sin rediseño.
 - **Invitados externos.** No hay usuarios fuera de la empresa.
@@ -333,10 +399,12 @@ Cambia una sola vez: `role` pasa de enum a `{ id, name }`, la sesión (`/auth/me
 - **Solicitudes de alta con aprobación.** Un Manager no puede pedir altas desde el sistema; se resuelve fuera de él hasta que haga falta un flujo de solicitud y aprobación.
 - **Visibilidad por rol dentro del departamento.** Los artículos se dirigen a departamentos, no a roles.
 
-## 8. Decisiones tomadas
+## 10. Decisiones tomadas
 
 | Pregunta | Decisión |
 |---|---|
 | ¿Un ticket Resuelto se cierra solo? | Sí, a los 3 días corridos sin respuesta del solicitante (HU-T08). Pasar a Resuelto exige registrar la solución |
 | ¿Un Manager puede crear usuarios? | No. Solo el Administrador; el Manager ve a los usuarios de su departamento (sección 2, HU-U02 y HU-U05) |
 | ¿Quién ve los artículos de conocimiento? | Toda la empresa o los departamentos que elija el autor, dentro de su alcance (sección 2, HU-K01 a HU-K03) |
+| ¿Qué se hace con conocimiento antes de la fase I? | La visibilidad ya está en el modelo, pero todo es de toda la empresa, y solo el Administrador crea y edita artículos (sección 1) |
+| ¿Quién confirma o reabre un ticket Resuelto? | Solo su solicitante, sin permiso especial. `tickets:close` es el cierre sin confirmación (sección 2) |

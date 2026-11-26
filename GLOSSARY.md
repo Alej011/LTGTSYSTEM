@@ -76,6 +76,14 @@ _Avoid_: Comentario privado
 Solución o procedimiento publicado en la base de conocimientos.
 _Avoid_: Documento, entrada, post
 
+**Borrador**:
+Artículo que todavía no se publica; solo lo ven su autor y quienes gestionan artículos.
+_Avoid_: Pendiente, oculto
+
+**Valoración**:
+Opinión de un usuario sobre si un artículo publicado le fue útil. Cada usuario tiene una por artículo y puede cambiarla.
+_Avoid_: Voto, calificación, like
+
 **Visibilidad**:
 Departamentos que pueden leer un artículo, o toda la empresa; la elige su autor.
 _Avoid_: Permisos del artículo, audiencia
