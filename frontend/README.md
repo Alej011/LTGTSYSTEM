@@ -11,6 +11,7 @@ Componente ──► hook del dominio (features/<dominio>/<dominio>.client.ts, R
            ──► API NestJS (http://backend:4000/api)
 ```
 
+- **Módulos con datos simulados:** tickets todavía no tiene módulo en el backend. Sus hooks usan un adaptador en memoria (`tickets.mock.ts`) con la misma interfaz asíncrona que tendrá el BFF; cuando exista el módulo real, solo cambia el adaptador en `tickets.client.ts`.
 - **BFF (Backend for Frontend):** las rutas de `app/api/` reenvían cada petición al backend, que valida la entrada con sus DTOs. El BFF valida la respuesta con Zod y la reenvía con la forma del backend.
 - **Contrato:** los tipos del backend se generan desde `backend/openapi.json` en `shared/api/schema.d.ts` (`pnpm openapi`); no se escriben a mano. Cada schema Zod de respuesta se declara con `matchesContract<ApiSchemas['XDto']>()` (`shared/api/contract.ts`): si el backend agrega, quita o cambia un campo, el frontend deja de compilar.
 - **Roles:** un solo vocabulario, el del backend (`ADMIN`, `SUPPORT`). En pantalla se muestran con `ROLE_LABELS` o `roleLabel` de `shared/roles.ts`.
@@ -44,18 +45,24 @@ features/                    # Un dominio completo por carpeta
 │   ├── products.client.ts   # Interfaz para los componentes: hooks de React Query y regla de stock bajo
 │   ├── products.schemas.ts  # Zod: respuestas que valida el BFF, atadas al contrato
 │   └── components/          # Vista, lista, formulario, detalle y badges
+├── tickets/
+│   ├── tickets.client.ts    # useTickets, useTicket, useTicketAction, comentarios, asignables y cifras del dashboard
+│   ├── tickets.rules.ts     # Reglas puras: acciones disponibles por estado y permiso, cierre automático (3 días)
+│   ├── tickets.mock.ts      # Adaptador en memoria que imita al BFF (se reemplaza con el módulo real)
+│   ├── tickets.schemas.ts   # Modelo de docs/roles-y-permisos.md y schemas de formularios
+│   └── components/          # Vista, lista, formulario, detalle, acciones, comentarios y badges
 ├── users/
 │   ├── users.client.ts      # useUsers y useSaveUser
 │   ├── users.schemas.ts     # Zod: respuestas que valida el BFF y formularios
 │   └── components/          # Vista, lista y formulario
 └── dashboard/
-    ├── dashboard.data.ts    # Cifras y actividad de los módulos que aún son mock
-    └── components/          # Vista, tarjetas (productos vía useStockSummary), actividad y accesos
+    ├── dashboard.data.ts    # Cifras y actividad de conocimiento y comunicaciones (aún mock síncrono)
+    └── components/          # Vista, tarjetas (productos y tickets con sus hooks), actividad y accesos
 components/
 ├── <módulo>/                # Componentes de los módulos que aún no pasan a features/
 ├── ui/                      # Componentes base de shadcn/ui
 └── sidebar.tsx, login-form.tsx, error-fallback.tsx
-lib/features/<módulo>/       # Servicios mock de tickets, conocimiento y comunicaciones (pasan a features/ en C.8)
+lib/features/<módulo>/       # Servicios mock de conocimiento y comunicaciones (pasan a features/ en C.8)
 shared/                      # Lo que usan varias features; una feature no importa de otra
 ├── api/
 │   ├── api-client.ts        # Cliente HTTP hacia el BFF (timeout, errores tipados, 401 → login)
