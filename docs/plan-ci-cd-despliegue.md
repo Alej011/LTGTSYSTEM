@@ -319,6 +319,7 @@ Cada fase es un milestone; cada punto, un issue y una rama (`alejo/<tipo>/<tema>
 | **F. VPS** | Preparación de la sección 7, subdominio, Caddy, compose de producción basado en imágenes, primer despliegue manual | `feat(deploy)`: compose de producción y `deploy.sh` |
 | **G. CD** | `deploy.yml` con GHCR, migración, healthcheck, smoke test, rollback automático y manual; respaldos | `ci(deploy)` |
 | **H. Verificación** | Desplegar un cambio real, forzar un fallo (healthcheck roto) y comprobar el rollback; documentar en el README | `docs` |
+| **I. Roles, permisos y departamentos** | Roles dinámicos con alcance (`OWN`, `DEPARTMENT`, `ALL`), departamentos, Administrador de sistema protegido y migración sin cortes desde `ADMIN`/`SUPPORT`. Especificación e historias de usuario en `roles-y-permisos.md`; decisión en `adr/0001-roles-dinamicos-con-alcance.md` | `feat(db)`, `feat(auth)`, `feat(users)`, `feat(frontend)`, `refactor`: retirar el enum `Role` |
 
 Desglose de la fase C, ordenado por importancia (un PR por punto; cada uno se verifica contra el backend antes del merge). Los números entre paréntesis remiten a la tabla de problemas de diseño de la sección 6:
 
@@ -331,12 +332,12 @@ Desglose de la fase C, ordenado por importancia (un PR por punto; cada uno se ve
 | C.5 | `refactor(frontend)`: política de permisos (2) | Una función pura en `shared/permissions.ts`; se eliminan el `hasPermission` de `auth.service.ts`, los envoltorios heredados y los `role ===` sueltos. Tests de tabla y test en el backend que compara con `@Roles` | Lógica pequeña y pura; se puede hacer en paralelo con C.4 |
 | C.6 | `feat(api)`: contrato OpenAPI (3) | `openapi.json` en el backend, tipos generados en el frontend, schemas Zod tipados contra ellos, sin interfaces escritas a mano; un solo camino de alta de usuarios en el backend | Corrige en el origen la familia de bugs de C.1 |
 | C.7 | `refactor(frontend)`: módulo de sesión (4) | `shared/session/` en el servidor (verificar, refrescar, cookies) con adaptador de refresh; `proxy.ts`, layouts y `backend.ts` lo usan. En el cliente, un hook de sesión que reemplaza `auth.service`, `auth.queries` y `auth-context`. Un solo vocabulario de roles | Es el de mayor beneficio para los tests de `lib/server` y `proxy.ts`, pero toca más archivos |
-| C.8 | `refactor(frontend)`: mocks asíncronos (5) | `tickets`, `knowledge` y `communications` con la interfaz de C.4 y el mock como adaptador en `*.mock.ts`; colores y etiquetas a un helper de presentación; las reglas de negocio del mock se anotan como requisitos del backend | Debe estar antes de construir esos módulos en el backend |
+| C.8 | `refactor(frontend)`: mocks asíncronos (5) | `tickets`, `knowledge` y `communications` con la interfaz de C.4 y el mock como adaptador en `*.mock.ts`; colores y etiquetas a un helper de presentación; las reglas de negocio del mock se anotan como requisitos del backend. Tickets usa el modelo de `roles-y-permisos.md` (sección 5) y los componentes solo preguntan permisos (`tickets:handle`, `tickets:assign`), nunca el nombre del rol | Debe estar antes de construir esos módulos en el backend |
 | C.9 | `refactor(frontend)`: reenviador del BFF (6, segunda parte, opcional) | Un reenviador genérico guiado por una tabla por recurso; login y logout quedan aparte | Solo si después de C.3 los handlers siguen siendo copias |
 
-Después de la fase H se retoma el trabajo funcional (tickets, comentarios, conocimiento, comunicaciones), ya con CI y CD protegiendo cada cambio. Gracias a la fase C, cada módulo real solo reemplaza su adaptador `*.mock.ts` por el del BFF.
+Después de la fase H va la fase I (roles), porque los módulos reales de tickets y comunicaciones dependen de quién puede ser asignado y de los departamentos. Luego se retoma el trabajo funcional (tickets, comentarios, conocimiento, comunicaciones), ya con CI y CD protegiendo cada cambio. Gracias a la fase C, cada módulo real solo reemplaza su adaptador `*.mock.ts` por el del BFF.
 
-Orden y dependencias: A → B → C → D → E (los tests se escriben sobre la estructura final; el ruleset necesita que el check exista). F puede avanzar en paralelo con B–E. G necesita E y F.
+Orden y dependencias: A → B → C → D → E (los tests se escriben sobre la estructura final; el ruleset necesita que el check exista). F puede avanzar en paralelo con B–E. G necesita E y F. I va después de H y antes de los módulos reales del backend.
 
 ## 9. Riesgos y decisiones
 
