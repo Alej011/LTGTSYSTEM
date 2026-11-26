@@ -54,8 +54,8 @@ El catálogo es fijo y vive en el código: un recurso nuevo siempre se programa.
 | Rol | Tipo | Permisos y alcance |
 |---|---|---|
 | **Administrador** | Sistema | Todos, alcance `ALL`, de forma implícita |
-| **Agente de soporte** | Normal | Los que hoy tiene `SUPPORT` + `tickets:handle` y `tickets:comment` en `ALL` |
-| **Manager** | Normal | `tickets:view` y `tickets:assign` en `DEPARTMENT`; `communications:create/edit` en `DEPARTMENT`; lectura de productos y conocimiento |
+| **Agente de soporte** | Normal | Los que hoy tiene `SUPPORT` + `tickets:handle` y `tickets:comment` en `ALL`; `knowledge:create/edit` en `ALL` |
+| **Manager** | Normal | `tickets:view` y `tickets:assign` en `DEPARTMENT`; `communications:create/edit` y `knowledge:create/edit` en `DEPARTMENT`; `users:view` en `DEPARTMENT`; lectura de productos |
 | **Member** | Normal | `tickets:create`, `tickets:view`, `tickets:comment` y `tickets:close` en `OWN`; lectura de productos, conocimiento y comunicaciones |
 | **Viewer** | Normal | Solo lectura: `dashboard`, `knowledge:view`, `communications:view` |
 
@@ -70,6 +70,23 @@ Los usuarios actuales migran así: `ADMIN` → Administrador, `SUPPORT` → Agen
 | Siempre existe al menos un usuario activo con este rol | No se puede degradar ni desactivar al último |
 | Un administrador no puede cambiar su propio rol ni desactivarse | Evita quedarse fuera por error |
 | Puede pertenecer a un departamento, pero ese departamento no le limita nada | Es solo un dato organizativo |
+
+### Alta de usuarios
+
+El alta, los cambios y la baja de usuarios son centralizados: solo el Administrador tiene `users:create`, `users:edit` y `users:deactivate`. Es el estándar de gestión del ciclo de vida de identidades: un jefe de área no puede verificar que una persona trabaje en la empresa ni pertenezca a su departamento, y las cuentas creadas por cada jefe tienden a quedar activas cuando la persona se va.
+
+- El Manager solo ve a los miembros de su departamento (`users:view` en `DEPARTMENT`).
+- Si RRHH asume las altas, se le crea un rol con `users:create` en alcance `ALL`. Ningún rol con alcance `DEPARTMENT` o `OWN` recibe `users:create`, `users:edit` ni `users:deactivate`.
+- Nadie puede registrarse por su cuenta.
+
+### Visibilidad de artículos de conocimiento
+
+El autor de un artículo decide quién lo ve: **toda la empresa** o **uno o más departamentos**. Así un empleado encuentra la solución a un problema básico (por ejemplo, la conexión de red) sin abrir un ticket, y los procedimientos internos de un área no los ve el resto.
+
+- El autor y el Administrador siempre ven el artículo.
+- Los destinos que puede elegir el autor dependen del alcance de su `knowledge:create`: con `ALL` (Agente de soporte, Administrador), cualquier departamento o toda la empresa; con `DEPARTMENT` (Manager), solo su departamento.
+- Cualquier usuario con `knowledge:view` ve los artículos de toda la empresa y los dirigidos a su departamento.
+- La visibilidad es por departamento, no por rol dentro del departamento.
 
 ## 3. Escenarios de referencia
 
@@ -97,6 +114,12 @@ Estos usuarios sirven para entender las historias y como datos del seed de los t
 | Ana ve los tickets de otra persona de Marketing | Denegado; Sofía sí puede |
 | Ana es asignada a un ticket | Imposible: no tiene `tickets:handle` |
 | Diego abre un ticket | Denegado: Viewer es solo lectura |
+| Sofía crea una cuenta para una persona nueva de Marketing | Denegado: solo el Administrador crea usuarios |
+| Sofía ve la lista de usuarios de Marketing | Permitido (`users:view` en `DEPARTMENT`) |
+| Luis publica "Cómo reiniciar el router" para toda la empresa | Permitido; Ana y Diego lo ven |
+| Luis publica "Procedimiento de escalamiento" solo para Soporte | Permitido; Ana no lo ve |
+| Sofía publica un artículo para Ventas | Denegado: solo puede publicar para Marketing |
+| Ana deja un ticket Resuelto sin responder durante 3 días | El ticket se cierra solo, como cierre automático |
 
 ## 4. Historias de usuario
 
@@ -133,8 +156,14 @@ Como Administrador, quiero crear, renombrar y desactivar departamentos, para ref
 
 **HU-U02 — Asignar rol y departamento a un usuario**
 Como Administrador, quiero elegir el rol y el departamento al crear o editar un usuario, para definir qué puede hacer y sobre qué datos.
+- Solo el Administrador ve el botón "Nuevo usuario"; a cualquier otro rol la API le responde 403 al intentar crear, editar o desactivar.
 - Cuando Laura crea a Ana como Member de Marketing, entonces Ana solo ve sus propios tickets.
 - Un usuario con un rol de alcance `DEPARTMENT` debe tener departamento; el formulario lo exige.
+
+**HU-U05 — Ver a mi equipo**
+Como Manager, quiero ver a los usuarios de mi departamento, para saber quién forma parte de mi equipo.
+- Sofía ve a los usuarios de Marketing, sin botones para crear, editar ni desactivar.
+- Sofía no ve a los usuarios de otros departamentos.
 
 **HU-U03 — Proteger al último administrador**
 Como empresa, quiero que siempre exista un administrador activo, para no perder el control del sistema.
@@ -168,8 +197,8 @@ Como Administrador o Manager de Soporte, quiero asignar o reasignar un ticket a 
 
 **HU-T05 — Resolver un ticket**
 Como Agente de soporte asignado, quiero marcar el ticket como Resuelto registrando la solución, para que el solicitante sepa qué se hizo.
-- No se puede pasar a Resuelto sin escribir la solución.
-- Al resolver se registra la fecha de resolución.
+- No se puede pasar a Resuelto sin escribir la solución: es la validación de que el problema se resolvió.
+- Al resolver se registra la fecha de resolución y el solicitante tiene 3 días corridos para confirmar o reabrir.
 
 **HU-T06 — Confirmar o reabrir**
 Como solicitante, quiero confirmar que la solución funcionó o reabrir el ticket, para cerrar el caso solo cuando de verdad está resuelto.
@@ -177,10 +206,33 @@ Como solicitante, quiero confirmar que la solución funcionó o reabrir el ticke
 - Cuando Ana lo reabre, vuelve a En progreso con el mismo agente.
 - Un ticket Cerrado no se reabre; se abre uno nuevo.
 
+**HU-T08 — Cierre automático**
+Como empresa, quiero que un ticket Resuelto se cierre solo si el solicitante no responde, para que la cola no se llene de tickets resueltos sin confirmar.
+- Dado un ticket Resuelto hace más de 3 días corridos sin respuesta del solicitante, entonces el sistema lo pasa a Cerrado y registra que el cierre fue automático.
+- Si el solicitante lo reabrió dentro de los 3 días, el plazo deja de correr; vuelve a empezar cuando el agente lo resuelva de nuevo.
+- En el detalle del ticket se distingue "Cerrado por el solicitante", "Cerrado automáticamente" y "Cerrado por un Administrador".
+
 **HU-T07 — Comentar y dejar notas internas**
 Como participante de un ticket, quiero comentar, para conversar con soporte; como Agente, quiero dejar notas internas que el solicitante no ve.
 - Ana no ve las notas internas de Luis.
 - Cualquier usuario que puede ver el ticket y tiene `tickets:comment` puede comentar.
+
+### Base de conocimientos
+
+**HU-K01 — Publicar un artículo con visibilidad**
+Como Agente de soporte, quiero publicar un artículo y elegir qué departamentos lo ven, para que los empleados resuelvan problemas básicos sin abrir tickets.
+- Luis elige "Toda la empresa" o uno o más departamentos; sin elegir ninguno no puede publicar.
+- Sofía (Manager de Marketing) solo puede elegir Marketing.
+- Diego (Viewer) no ve el botón "Nuevo artículo".
+
+**HU-K02 — Leer los artículos que me corresponden**
+Como Member, quiero ver los artículos de toda la empresa y los de mi departamento, para encontrar soluciones sin ruido de otras áreas.
+- Ana ve "Cómo reiniciar el router" (toda la empresa) y no ve "Procedimiento de escalamiento" (solo Soporte).
+- La búsqueda solo devuelve artículos visibles para el usuario.
+
+**HU-K03 — Cambiar la visibilidad**
+Como autor de un artículo, quiero cambiar los departamentos que lo ven, para ampliar o restringir su alcance.
+- Al quitar un departamento, sus usuarios dejan de ver el artículo de inmediato.
 
 ### Comunicaciones
 
@@ -206,6 +258,7 @@ Se toma como correcto el modelo que hoy usa la interfaz (más completo que el sc
 | `assignee` | `{ id, name }` o `null` |
 | `solution` | Texto o `null`; obligatoria para pasar a `RESOLVED` |
 | `createdAt`, `updatedAt`, `resolvedAt`, `closedAt` | Fechas ISO; las dos últimas pueden ser `null` |
+| `closeReason` | `CONFIRMED` (solicitante), `AUTO` (3 días sin respuesta), `ADMIN`, o `null` si no está cerrado |
 
 Comentario: `id`, `ticketId`, `author` (`{ id, name }` o `null` si el usuario fue eliminado), `content`, `isInternal`, `createdAt`.
 
@@ -215,6 +268,7 @@ Comentario: `id`, `ticketId`, `author` (`{ id, name }` o `null` si el usuario fu
 OPEN ──tomar/asignar──► IN_PROGRESS ──resolver (con solución)──► RESOLVED ──confirmar──► CLOSED
                               ▲                                     │
                               └────────────reabrir──────────────────┘
+Sistema: cierra un ticket RESOLVED tras 3 días corridos sin respuesta del solicitante.
 Administrador: puede cerrar un ticket en cualquier estado.
 ```
 
@@ -224,6 +278,8 @@ Administrador: puede cerrar un ticket en cualquier estado.
 - Nuevo enum `TicketCategory` y columna `category`.
 - Columnas `solution` y `resolved_at` en `tickets`; `is_internal` en `comments`.
 - `created_by_id` se mantiene y representa al solicitante.
+- Columna `close_reason` (`CONFIRMED`, `AUTO`, `ADMIN`) en `tickets`.
+- `knowledge_articles`: agregar `author_id` e `is_company_wide`, y la tabla `knowledge_article_departments` (`article_id`, `department_id`) para la visibilidad por departamento.
 
 ## 6. Diseño técnico
 
@@ -242,6 +298,8 @@ users             + role_id (FK roles), + department_id (FK departments, opciona
 - Los servicios aplican el alcance en la consulta (`where`): `OWN` filtra por creador o asignado, `DEPARTMENT` por el departamento del usuario. La autorización no se resuelve solo en el guard.
 - El access token lleva `sub`, `roleId` y la lista compacta de permisos (`tickets:view:OWN`). Un cambio de permisos se aplica al renovarse la sesión (máximo 15 minutos).
 - Las reglas del rol Administrador (sección 2) se validan en el servicio de usuarios y en el de roles, con tests propios.
+- Cierre automático: una tarea programada (`@nestjs/schedule`, cada hora) pasa a `CLOSED` con `close_reason = AUTO` los tickets `RESOLVED` con `resolved_at` anterior a 3 días corridos.
+- Visibilidad de artículos: el servicio de conocimiento filtra por `is_company_wide` o por los departamentos del artículo; la búsqueda usa el mismo filtro.
 
 ### Frontend
 
@@ -271,9 +329,13 @@ Cambia una sola vez: `role` pasa de enum a `{ id, name }`, la sesión (`/auth/me
 - **Sucursales.** Si se necesitan, se agrega la tabla de sucursales y el alcance `BRANCH` entre `DEPARTMENT` y `ALL`. El Administrador pasa a ser el superadministrador y se crea un rol normal "Admin de sucursal". El modelo de alcances ya lo permite sin rediseño.
 - **Invitados externos.** No hay usuarios fuera de la empresa.
 - **Permisos por usuario.** Los permisos siempre vienen del rol; no hay excepciones individuales.
+- **Solicitudes de alta con aprobación.** Un Manager no puede pedir altas desde el sistema; se resuelve fuera de él hasta que haga falta un flujo de solicitud y aprobación.
+- **Visibilidad por rol dentro del departamento.** Los artículos se dirigen a departamentos, no a roles.
 
-## 8. Preguntas abiertas
+## 8. Decisiones tomadas
 
-- ¿Un ticket Resuelto se cierra solo si el solicitante no responde en N días? ¿Cuántos?
-- ¿Un Manager puede crear usuarios de su departamento, o solo el Administrador?
-- ¿Los artículos de conocimiento pueden ser de un departamento o siempre son públicos para toda la empresa?
+| Pregunta | Decisión |
+|---|---|
+| ¿Un ticket Resuelto se cierra solo? | Sí, a los 3 días corridos sin respuesta del solicitante (HU-T08). Pasar a Resuelto exige registrar la solución |
+| ¿Un Manager puede crear usuarios? | No. Solo el Administrador; el Manager ve a los usuarios de su departamento (sección 2, HU-U02 y HU-U05) |
+| ¿Quién ve los artículos de conocimiento? | Toda la empresa o los departamentos que elija el autor, dentro de su alcance (sección 2, HU-K01 a HU-K03) |
