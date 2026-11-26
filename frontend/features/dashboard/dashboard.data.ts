@@ -1,18 +1,17 @@
 /**
- * Cifras y actividad del dashboard que vienen de módulos con datos simulados síncronos
- * (conocimiento y comunicaciones). Productos y tickets cargan sus propios datos con sus hooks.
- * Cuando esos dos módulos pasen a hooks asíncronos (C.8) estas funciones se reemplazan.
+ * Cifras y actividad del dashboard que vienen de comunicaciones, el único módulo con datos simulados síncronos.
+ * Productos, tickets y conocimiento cargan sus propios datos con sus hooks.
+ * Cuando comunicaciones pase a hooks asíncronos (C.8) estas funciones se reemplazan.
  */
+import type { Article } from '@/features/knowledge/knowledge.schemas';
 import type { Ticket, TicketStatus } from '@/features/tickets/tickets.schemas';
 import { getCommunications, getUnreadCount } from '@/lib/features/communications/communications.service';
-import { getArticles } from '@/lib/features/knowledge/knowledge.service';
 import type { SessionUser } from '@/shared/session/session.client';
 
 // El backend no tiene departamentos de usuario; con un departamento vacío el mock no filtra por él
 const NO_DEPARTMENT = '';
 
 export interface DashboardStats {
-  knowledgeArticles: number;
   unreadCommunications: number;
 }
 
@@ -27,17 +26,15 @@ export interface RecentActivity {
 }
 
 export function getDashboardStats(user: SessionUser): DashboardStats {
-  const articles = getArticles('published');
-  const unreadComms = getUnreadCount(user.id, user.role, NO_DEPARTMENT);
-
-  return {
-    knowledgeArticles: articles.length,
-    unreadCommunications: unreadComms,
-  };
+  return { unreadCommunications: getUnreadCount(user.id, user.role, NO_DEPARTMENT) };
 }
 
-/** recentTickets llega de useRecentTickets; mientras carga puede ser una lista vacía. */
-export function getRecentActivity(user: SessionUser, recentTickets: Ticket[]): RecentActivity[] {
+/** Tickets y artículos llegan de sus hooks; mientras cargan pueden ser listas vacías. */
+export function getRecentActivity(
+  user: SessionUser,
+  recentTickets: Ticket[],
+  recentArticles: Article[],
+): RecentActivity[] {
   const activities: RecentActivity[] = recentTickets.map((ticket) => ({
     id: ticket.id,
     type: 'ticket',
@@ -60,15 +57,13 @@ export function getRecentActivity(user: SessionUser, recentTickets: Ticket[]): R
     });
   });
 
-  // Recent knowledge articles
-  const articles = getArticles('published').slice(0, 2);
-  articles.forEach((article) => {
+  recentArticles.forEach((article) => {
     activities.push({
       id: article.id,
       type: 'knowledge',
       title: article.title,
-      description: `${article.authorName} - ${article.category}`,
-      time: article.updatedAt,
+      description: article.author?.name ?? 'Base de conocimientos',
+      time: new Date(article.updatedAt),
     });
   });
 

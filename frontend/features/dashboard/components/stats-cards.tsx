@@ -12,6 +12,7 @@ import {
 import type { ReactNode } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { usePublishedArticleCount } from '@/features/knowledge/knowledge.client';
 import { useStockSummary } from '@/features/products/products.client';
 import { useTicketSummary } from '@/features/tickets/tickets.client';
 
@@ -89,17 +90,19 @@ function TicketsCard() {
   );
 }
 
+function KnowledgeCard() {
+  const count = usePublishedArticleCount();
+  const value = count.isPending ? '...' : count.isError ? '-' : count.data.toString();
+  const detail = count.isPending ? 'Cargando' : count.isError ? 'No disponible' : 'Soluciones disponibles';
+  return <StatCard title="Artículos KB" value={value} detail={detail} icon={BookOpen} />;
+}
+
 export function StatsCards({ stats }: { stats: DashboardStats }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <ProductsCard />
       <TicketsCard />
-      <StatCard
-        title="Artículos KB"
-        value={stats.knowledgeArticles.toString()}
-        detail="Soluciones disponibles"
-        icon={BookOpen}
-      />
+      <KnowledgeCard />
       <StatCard
         title="Comunicaciones"
         value={stats.unreadCommunications.toString()}

@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { resetKnowledgeMock } from '@/features/knowledge/knowledge.mock';
 import { page } from '@/features/products/products.fixtures';
 import { agent } from '@/features/tickets/tickets.fixtures';
 import { resetTicketsMock } from '@/features/tickets/tickets.mock';
@@ -12,11 +13,12 @@ import { StatsCards } from './stats-cards';
 
 vi.mock('@/shared/session/session.client', () => ({ useSession: vi.fn() }));
 
-const stats = { knowledgeArticles: 7, unreadCommunications: 0 };
+const stats = { unreadCommunications: 0 };
 
 describe('StatsCards', () => {
   beforeEach(() => {
     resetTicketsMock();
+    resetKnowledgeMock();
     vi.mocked(useSession).mockReturnValue({ user: { ...agent, email: 'luis@ltgt.com' }, isLoading: false });
   });
 
@@ -42,7 +44,7 @@ describe('StatsCards', () => {
     renderWithQuery(<StatsCards stats={stats} />);
 
     expect(await screen.findByText('No disponible')).toBeInTheDocument();
-    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(await screen.findByText('Soluciones disponibles')).toBeInTheDocument();
     expect(await screen.findByText('Sin tickets asignados')).toBeInTheDocument();
   });
 
@@ -53,5 +55,14 @@ describe('StatsCards', () => {
 
     const card = (await screen.findByText('Tickets Activos')).closest('[data-slot="card"]') as HTMLElement;
     expect(await within(card).findByText('2')).toBeInTheDocument();
+  });
+
+  it('counts the published articles the user can see', async () => {
+    mockBff({ 'GET /api/products': () => ({ status: 200, body: page([]) }) });
+
+    renderWithQuery(<StatsCards stats={stats} />);
+
+    const card = (await screen.findByText('Artículos KB')).closest('[data-slot="card"]') as HTMLElement;
+    expect(await within(card).findByText('3')).toBeInTheDocument();
   });
 });

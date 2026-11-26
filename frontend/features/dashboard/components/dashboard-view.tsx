@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { Building2, Calendar } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { useRecentArticles } from '@/features/knowledge/knowledge.client';
 import { useRecentTickets } from '@/features/tickets/tickets.client';
 import { TONE_CLASSES } from '@/shared/lib/tones';
 import { type Role, ROLE_LABELS } from '@/shared/roles';
@@ -20,6 +21,7 @@ const ROLE_TONES: Record<Role, string> = { ADMIN: TONE_CLASSES.primary, SUPPORT:
 export function DashboardView() {
   const { user } = useSession();
   const recentTickets = useRecentTickets(3);
+  const recentArticles = useRecentArticles(2);
   if (!user) return null;
 
   return (
@@ -48,7 +50,9 @@ export function DashboardView() {
       <StatsCards stats={getDashboardStats(user)} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentActivityComponent activities={getRecentActivity(user, recentTickets.data ?? [])} />
+        <RecentActivityComponent
+          activities={getRecentActivity(user, recentTickets.data ?? [], recentArticles.data ?? [])}
+        />
         <QuickActions />
       </div>
 
