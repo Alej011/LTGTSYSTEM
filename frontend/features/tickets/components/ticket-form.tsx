@@ -4,6 +4,7 @@ import { Headphones, Loader2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 
+import { FieldError, fieldErrorProps, fieldErrorsOf } from '@/components/field-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,57 +12,49 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createTicket,
-  getCategoryLabel,
-  type TicketCategory,
-  type TicketPriority,
-} from '@/lib/features/tickets/tickets.service';
+import { ApiClientError } from '@/shared/api/api-client';
 import { useSession } from '@/shared/session/session.client';
 
+import { useCreateTicket } from '../tickets.client';
+import { TICKET_CATEGORIES, TICKET_PRIORITIES, TicketFormSchema } from '../tickets.schemas';
+import { ticketCategoryLabel, ticketPriorityLabel } from './ticket-badges';
+
 interface TicketFormProps {
-  onSuccess: () => void;
+  onSuccess: (ticketId: string) => void;
   onCancel: () => void;
 }
 
+const INITIAL = { title: '', description: '', category: '', priority: 'MEDIUM' };
+
+type FormState = typeof INITIAL;
+type FieldErrors = Partial<Record<keyof FormState, string>>;
+
 export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
   const { user } = useSession();
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '' as TicketCategory,
-    priority: 'media' as TicketPriority,
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState<FormState>(INITIAL);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const createTicket = useCreateTicket();
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const error = createTicket.isError
+    ? createTicket.error instanceof ApiClientError
+      ? createTicket.error.getUserMessage()
+      : 'Error al crear el ticket. Intente nuevamente.'
+    : '';
+
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!user) return;
-
-    setError('');
-    setIsLoading(true);
-
-    try {
-      await createTicket({
-        ...formData,
-        createdBy: user.id,
-        createdByName: user.name,
-      });
-      onSuccess();
-    } catch {
-      setError('Error al crear el ticket. Intente nuevamente.');
-    } finally {
-      setIsLoading(false);
+    const input = TicketFormSchema.safeParse(formData);
+    if (!input.success) {
+      setFieldErrors(fieldErrorsOf<keyof FormState>(input.error.issues));
+      return;
     }
+    createTicket.mutate(input.data, { onSuccess: (ticket) => onSuccess(ticket.id) });
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleChange = (field: keyof FormState, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
   };
-
-  const categories: TicketCategory[] = ['hardware', 'software', 'red', 'acceso', 'otro'];
-  const priorities: TicketPriority[] = ['baja', 'media', 'alta', 'critica'];
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -75,16 +68,17 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Título del Problema</Label>
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
+              onChange={(e) => handleChange('title', e.target.value)}
               placeholder="Ej: No puedo acceder al sistema de correo"
-              required
+              {...fieldErrorProps('title', fieldErrors.title)}
             />
+            <FieldError id="title" message={fieldErrors.title} />
           </div>
 
           <div className="space-y-2">
@@ -92,43 +86,46 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Describe el problema con el mayor detalle posible. Incluye pasos para reproducir el error, mensajes de error, etc."
+              onChange={(e) => handleChange('description', e.target.value)}
+              placeholder="Describe el problema con el mayor detalle posible: pasos para reproducirlo, mensajes de error, etc."
               rows={4}
-              required
+              {...fieldErrorProps('description', fieldErrors.description)}
             />
+            <FieldError id="description" message={fieldErrors.description} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category">Categoría</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                <SelectTrigger>
+              <Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
+                <SelectTrigger id="category" {...fieldErrorProps('category', fieldErrors.category)}>
                   <SelectValue placeholder="Seleccionar categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
+                  {TICKET_CATEGORIES.map((category) => (
                     <SelectItem key={category} value={category}>
-                      {getCategoryLabel(category)}
+                      {ticketCategoryLabel(category)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <FieldError id="category" message={fieldErrors.category} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="priority">Prioridad</Label>
-              <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
-                <SelectTrigger>
+              <Select value={formData.priority} onValueChange={(value) => handleChange('priority', value)}>
+                <SelectTrigger id="priority" {...fieldErrorProps('priority', fieldErrors.priority)}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {priorities.map((priority) => (
+                  {TICKET_PRIORITIES.map((priority) => (
                     <SelectItem key={priority} value={priority}>
-                      <span className="capitalize">{priority}</span>
+                      {ticketPriorityLabel(priority)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <FieldError id="priority" message={fieldErrors.priority} />
             </div>
           </div>
 
@@ -154,8 +151,8 @@ export function TicketForm({ onSuccess, onCancel }: TicketFormProps) {
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading || !formData.category}>
-              {isLoading ? (
+            <Button type="submit" disabled={createTicket.isPending}>
+              {createTicket.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creando Ticket...

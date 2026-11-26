@@ -13,6 +13,7 @@ import type { ReactNode } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useStockSummary } from '@/features/products/products.client';
+import { useTicketSummary } from '@/features/tickets/tickets.client';
 
 import type { DashboardStats } from '../dashboard.data';
 
@@ -67,16 +68,32 @@ function ProductsCard() {
   );
 }
 
+function TicketsCard() {
+  const summary = useTicketSummary();
+
+  if (summary.isPending) {
+    return <StatCard title="Tickets Activos" value="..." detail="Cargando" icon={Headphones} />;
+  }
+  if (summary.isError) {
+    return <StatCard title="Tickets Activos" value="-" detail="No disponible" icon={Headphones} />;
+  }
+
+  const { active, assignedToMe } = summary.data;
+  return (
+    <StatCard
+      title="Tickets Activos"
+      value={active.toString()}
+      detail={assignedToMe > 0 ? `${assignedToMe} asignados a ti` : 'Sin tickets asignados'}
+      icon={Headphones}
+    />
+  );
+}
+
 export function StatsCards({ stats }: { stats: DashboardStats }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <ProductsCard />
-      <StatCard
-        title="Tickets Abiertos"
-        value={stats.openTickets.toString()}
-        detail={stats.myTickets > 0 ? `${stats.myTickets} asignados a ti` : 'Sin tickets asignados'}
-        icon={Headphones}
-      />
+      <TicketsCard />
       <StatCard
         title="Artículos KB"
         value={stats.knowledgeArticles.toString()}

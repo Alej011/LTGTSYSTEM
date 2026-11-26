@@ -6,6 +6,7 @@ import { BookOpen, Clock, Headphones, MessageSquare, Package } from 'lucide-reac
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { TicketStatusBadge } from '@/features/tickets/components/ticket-badges';
 import { TONE_CLASSES } from '@/shared/lib/tones';
 
 import type { RecentActivity } from '../dashboard.data';
@@ -31,39 +32,7 @@ export function RecentActivityComponent({ activities }: RecentActivityProps) {
   };
 
   const getStatusBadge = (activity: RecentActivity) => {
-    if (activity.type === 'ticket' && activity.status) {
-      const statusColors = {
-        abierto: TONE_CLASSES.info,
-        en_progreso: TONE_CLASSES.warning,
-        resuelto: TONE_CLASSES.success,
-        cerrado: TONE_CLASSES.neutral,
-      };
-      const statusLabels = {
-        abierto: 'Abierto',
-        en_progreso: 'En Progreso',
-        resuelto: 'Resuelto',
-        cerrado: 'Cerrado',
-      };
-      return (
-        <Badge variant="outline" className={statusColors[activity.status as keyof typeof statusColors]}>
-          {statusLabels[activity.status as keyof typeof statusLabels]}
-        </Badge>
-      );
-    }
-
-    if (activity.type === 'ticket' && activity.priority) {
-      const priorityColors = {
-        baja: TONE_CLASSES.neutral,
-        media: TONE_CLASSES.info,
-        alta: TONE_CLASSES.warning,
-        critica: TONE_CLASSES.danger,
-      };
-      return (
-        <Badge variant="outline" className={priorityColors[activity.priority as keyof typeof priorityColors]}>
-          <span className="capitalize">{activity.priority}</span>
-        </Badge>
-      );
-    }
+    if (activity.ticketStatus) return <TicketStatusBadge status={activity.ticketStatus} />;
 
     if (activity.type === 'communication' && activity.status) {
       const typeColors = {

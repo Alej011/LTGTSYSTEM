@@ -10,6 +10,7 @@ describe('can', () => {
   it('denies actions the policy does not define for a resource', () => {
     expect(can('ADMIN', 'dashboard', 'delete')).toBe(false);
     expect(can('ADMIN', 'users', 'delete')).toBe(false);
+    expect(can('ADMIN', 'tickets', 'edit')).toBe(false);
   });
 
   it.each([
@@ -20,7 +21,10 @@ describe('can', () => {
     ['users', 'view', true, false],
     ['users', 'edit', true, false],
     ['tickets', 'create', true, true],
-    ['tickets', 'edit', true, true],
+    ['tickets', 'comment', true, true],
+    ['tickets', 'handle', true, true],
+    ['tickets', 'assign', true, false],
+    ['tickets', 'close', true, false],
     ['tickets', 'delete', true, false],
     ['knowledge', 'view', true, true],
     ['knowledge', 'create', true, false],

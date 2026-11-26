@@ -78,7 +78,7 @@ export function QuickActions() {
       description: 'Resolver incidencias',
       href: '/tickets',
       icon: 'AlertCircle',
-      requires: ['tickets', 'edit'] as const,
+      requires: ['tickets', 'handle'] as const,
       action: 'manage',
     },
   ];
